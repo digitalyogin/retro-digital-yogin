@@ -13,32 +13,32 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
   const [showSkip, setShowSkip] = useState(false);
 
   const bootMessages = [
-    'SYSTEM_INIT.EXE',
-    'WEYLAND-YUTANI DIGITAL SYSTEMS v2.4.1',
-    'LOADING CORE MODULES...',
-    'INITIALIZING NEURAL NETWORK...',
-    'ESTABLISHING SECURE CONNECTION...',
+    'SISTEMA_INIT.EXE',
+    'SISTEMI DIGITALI WEYLAND-YUTANI v2.4.1',
+    'CARICAMENTO MODULI PRINCIPALI...',
+    'INIZIALIZZAZIONE RETE NEURALE...',
+    'STABILIMENTO CONNESSIONE SICURA...',
   ];
 
   const loadingMessages = [
-    'VERIFYING CREDENTIALS...',
-    'LOADING DATABASE_PROTOCOL...',
-    'SYNCING QUANTUM_PROCESSORS...',
-    'CALIBRATING NEURAL_INTERFACE...',
+    'VERIFICA CREDENZIALI...',
+    'CARICAMENTO PROTOCOLLO_DATABASE...',
+    'SINCRONIZZAZIONE PROCESSORI_QUANTICI...',
+    'CALIBRAZIONE INTERFACCIA_NEURALE...',
   ];
 
   const breachMessages = [
-    '>>> UNAUTHORIZED_ACCESS_DETECTED <<<',
-    'WARNING: FIREWALL_COMPROMISED',
-    'ALERT: INTRUSION_IN_PROGRESS',
-    'SYSTEM_INTEGRITY: CRITICAL',
+    '>>> ACCESSO_NON_AUTORIZZATO_RILEVATO <<<',
+    'AVVISO: FIREWALL_COMPROMESSO',
+    'ALLARME: INTRUSIONE_IN_CORSO',
+    'INTEGRITÀ_SISTEMA: CRITICA',
   ];
 
   const recoveryMessages = [
-    'DEPLOYING_COUNTERMEASURES...',
-    'ISOLATING_THREAT_VECTOR...',
-    'RESTORING_SECURE_PROTOCOLS...',
-    'SYSTEM_STABILIZING...',
+    'ATTIVAZIONE_CONTROMISURE...',
+    'ISOLAMENTO_VETTORE_MINACCIA...',
+    'RIPRISTINO_PROTOCOLLI_SICURI...',
+    'STABILIZZAZIONE_SISTEMA...',
   ];
 
   useEffect(() => {
@@ -145,7 +145,7 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
         {phase === 'loading' && (
           <div className="space-y-6">
             <div className="text-primary text-2xl text-glow border-glow border-2 border-primary p-6">
-              SYSTEM INITIALIZATION
+              INIZIALIZZAZIONE SISTEMA
             </div>
             
             {loadingMessages.map((msg, index) => (
@@ -161,7 +161,7 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
             ))}
 
             <div className="text-primary text-xl font-mono text-center mt-8">
-              LOADING... {progress}%
+              CARICAMENTO... {progress}%
             </div>
           </div>
         )}
@@ -170,7 +170,7 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
         {phase === 'breach' && (
           <div className="space-y-4 animate-pulse">
             <div className="text-destructive text-3xl text-center font-mono border-4 border-destructive p-8 warning-flash glitch">
-              ⚠ SECURITY BREACH DETECTED ⚠
+              ⚠ VIOLAZIONE SICUREZZA RILEVATA ⚠
             </div>
             
             {breachMessages.map((msg, index) => (
@@ -191,7 +191,7 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
         {phase === 'recovery' && (
           <div className="space-y-4">
             <div className="text-accent text-2xl text-center font-mono border-2 border-accent p-6">
-              DEPLOYING COUNTERMEASURES
+              ATTIVAZIONE CONTROMISURE
             </div>
             
             {recoveryMessages.map((msg, index) => (
@@ -214,13 +214,13 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
         {phase === 'granted' && (
           <div className="text-center space-y-6 animate-scale-in">
             <div className="text-primary text-4xl font-mono text-glow border-glow border-4 border-primary p-12">
-              ACCESS GRANTED
+              ACCESSO CONSENTITO
             </div>
             <div className="text-primary text-lg font-mono">
-              WELCOME TO DIGITAL YOGIN SYSTEMS
+              BENVENUTO NEI SISTEMI DIGITAL YOGIN
             </div>
             <div className="text-muted-foreground text-sm font-mono">
-              SECURE CONNECTION ESTABLISHED
+              CONNESSIONE SICURA STABILITA
             </div>
           </div>
         )}
@@ -232,7 +232,7 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
           onClick={handleSkip}
           className="fixed bottom-8 right-8 text-muted-foreground hover:text-primary font-mono text-sm border border-border hover:border-primary px-4 py-2 transition-colors"
         >
-          [ESC] SKIP INTRO
+          [ESC] SALTA INTRO
         </button>
       )}
     </div>
