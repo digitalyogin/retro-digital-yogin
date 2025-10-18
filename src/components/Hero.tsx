@@ -2,60 +2,79 @@ import { useEffect, useState } from "react";
 
 export const Hero = () => {
   const [displayText, setDisplayText] = useState("");
+  const [loading, setLoading] = useState(true);
   const fullText = "DIGITAL YOGIN";
-  
+
   useEffect(() => {
-    let index = 0;
-    const timer = setInterval(() => {
-      if (index <= fullText.length) {
-        setDisplayText(fullText.slice(0, index));
-        index++;
+    let currentIndex = 0;
+    const interval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setDisplayText(fullText.slice(0, currentIndex));
+        currentIndex++;
       } else {
-        clearInterval(timer);
+        clearInterval(interval);
+        setLoading(false);
       }
     }, 150);
-    
-    return () => clearInterval(timer);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative z-10 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="mb-8 text-sm md:text-base text-secondary">
-          <span className="animate-pulse">▓</span> SYSTEM_BOOT.EXE
+    <section className="min-h-screen flex items-center justify-center px-4 relative">
+      <div className="max-w-4xl w-full space-y-8 relative z-10">
+        {/* System Header */}
+        <div className="border-2 border-primary bg-card p-4 mb-8">
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span className="text-primary">SYSTEM_INIT.EXE</span>
+            <span className="text-muted-foreground">v2.1.4</span>
+          </div>
+          <div className="h-2 bg-muted relative overflow-hidden">
+            <div className="absolute inset-0 bg-primary animate-pulse" style={{ width: loading ? '60%' : '100%' }} />
+          </div>
         </div>
-        
-        <h1 className="text-4xl md:text-7xl lg:text-8xl font-bold mb-6 text-glow">
-          {displayText}
-          <span className="animate-pulse">_</span>
-        </h1>
-        
-        <div className="border-2 border-primary p-6 md:p-8 border-glow mb-8 bg-card">
-          <p className="text-xl md:text-3xl mb-4 text-primary">
-            {'>'} L'<span className="text-accent">immaginazione</span> è più importante della <span className="text-secondary">conoscenza</span>
-          </p>
-          <p className="text-lg md:text-2xl text-muted-foreground">
-            // il tuo team per il digitale
-          </p>
+
+        {/* Main Title */}
+        <div className="text-center space-y-4">
+          <div className="text-6xl md:text-8xl font-bold text-primary text-glow font-terminal mb-4">
+            {displayText}
+            <span className="animate-pulse">_</span>
+          </div>
+          
+          <div className="border-l-4 border-primary pl-6 text-left max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-foreground mb-4">
+              "La via di mezzo tra l'antico e il moderno"
+            </p>
+            <p className="text-lg text-muted-foreground">
+              AGENZIA_DIGITALE :: SITI_WEB + APPLICAZIONI_MOBILI
+            </p>
+          </div>
         </div>
-        
-        <div className="space-y-4 text-base md:text-xl text-left max-w-2xl mx-auto border border-primary/30 p-6 bg-muted/30">
-          <p className="flex items-start gap-2">
-            <span className="text-accent flex-shrink-0">{'>'}</span>
-            <span>Sviluppo app, web e strategie di marketing uniche e innovative per il tuo business</span>
-          </p>
-          <p className="flex items-start gap-2">
-            <span className="text-secondary flex-shrink-0">{'>'}</span>
-            <span>Siamo un team multidisciplinare di nerd specializzati in sviluppo web e app e in tutte le sfaccettature del mondo digitale e del marketing.</span>
-          </p>
-          <p className="flex items-start gap-2">
-            <span className="text-primary flex-shrink-0">{'>'}</span>
-            <span>La nostra sede è a Padova, ma i nostri collaboratori si trovano in tutto il mondo.</span>
-          </p>
+
+        {/* Services Grid */}
+        <div className="grid md:grid-cols-2 gap-4 mt-12">
+          <div className="border border-primary p-6 bg-card/50">
+            <div className="text-primary text-sm mb-2">{'>'} SERVIZIO_01</div>
+            <h3 className="text-2xl font-bold mb-2">SVILUPPO_WEB</h3>
+            <p className="text-muted-foreground">
+              Realizzazione di siti web moderni, responsive e ottimizzati per ogni dispositivo
+            </p>
+          </div>
+
+          <div className="border border-primary p-6 bg-card/50">
+            <div className="text-primary text-sm mb-2">{'>'} SERVIZIO_02</div>
+            <h3 className="text-2xl font-bold mb-2">APP_MOBILI</h3>
+            <p className="text-muted-foreground">
+              Sviluppo di applicazioni mobile native e ibride per iOS e Android
+            </p>
+          </div>
         </div>
-        
-        <div className="mt-8 text-sm text-muted-foreground animate-pulse">
-          <span>▼ SCROLL_DOWN</span>
+
+        {/* Scroll Indicator */}
+        <div className="text-center mt-12">
+          <div className="inline-block border border-primary px-6 py-2 animate-pulse">
+            <span className="text-primary text-sm">SCROLL_DOWN :: ↓</span>
+          </div>
         </div>
       </div>
     </section>

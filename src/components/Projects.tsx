@@ -2,87 +2,129 @@ import { ExternalLink } from "lucide-react";
 
 const projects = [
   {
-    title: "HOYA_VISION",
-    description: "Creazione app in Flutter per entrambi le piattaforme iOS e Android con database integrato e gestionale lato azienda.",
-    client: "HOYA Vision Care Europe",
-    color: "primary"
+    id: "PRJ_001",
+    title: "E-COMMERCE_PLATFORM",
+    description: "Piattaforma di vendita online completa con gestione prodotti, carrello e pagamenti integrati",
+    client: "RETAIL_CLIENT_A",
+    status: "DEPLOYED",
+    tech: ["React", "Node.js", "PostgreSQL"]
   },
   {
-    title: "MIGRANT",
-    description: "Creazione app ibrida multilingua e relativo gestionale per il servizio del ricollocamento dei migranti per la Regione Marche.",
-    client: "Regione Marche",
-    color: "secondary"
+    id: "PRJ_002",
+    title: "MOBILE_APP_FITNESS",
+    description: "Applicazione mobile per tracking allenamenti e nutrizione con integrazione wearables",
+    client: "HEALTH_CORP_B",
+    status: "IN_PRODUCTION",
+    tech: ["React Native", "Firebase", "GraphQL"]
   },
   {
-    title: "BUONAPPE",
-    description: "Sviluppo app nativa iOS e Android per il mondo della ristorazione e tutto quello che concerne il mondo del take away & delivery.",
-    client: "Buonappe",
-    color: "accent"
+    id: "PRJ_003",
+    title: "CORPORATE_WEBSITE",
+    description: "Sito web aziendale multilingua con CMS personalizzato e sistema di prenotazioni",
+    client: "ENTERPRISE_C",
+    status: "DEPLOYED",
+    tech: ["Next.js", "Strapi", "AWS"]
   },
   {
-    title: "WE-BOLD",
-    description: "Progetto per la gestione di società e collaboratori sportivi tramite gestionale webapp creato ad hoc con React e Firebase.",
-    client: "WeBold srl",
-    color: "primary"
+    id: "PRJ_004",
+    title: "BOOKING_SYSTEM",
+    description: "Sistema di prenotazione online per strutture ricettive con gestione disponibilità real-time",
+    client: "HOSPITALITY_D",
+    status: "IN_DEVELOPMENT",
+    tech: ["Vue.js", "Laravel", "MySQL"]
   },
   {
-    title: "FTO-REMOTEFLY",
-    description: "Progetto di rebranding e creazione del sito web responsive con animazioni in CSS e Javascript.",
-    client: "FTO REMOTEFLY SRL",
-    color: "secondary"
+    id: "PRJ_005",
+    title: "ANALYTICS_DASHBOARD",
+    description: "Dashboard interattiva per analisi dati e visualizzazione KPI aziendali in tempo reale",
+    client: "FINTECH_E",
+    status: "DEPLOYED",
+    tech: ["React", "D3.js", "Python"]
   },
   {
-    title: "FUROR_DI_VINO",
-    description: "Progetto di branding completo e sviluppo ecommerce in Shopify con app di terze parti per vendita e logistica.",
-    client: "Furor di Vino",
-    color: "accent"
+    id: "PRJ_006",
+    title: "SOCIAL_PLATFORM",
+    description: "Piattaforma social di nicchia con sistema di messaggistica e content sharing",
+    client: "STARTUP_F",
+    status: "BETA",
+    tech: ["React", "Socket.io", "MongoDB"]
   }
 ];
 
 export const Projects = () => {
   return (
-    <section className="py-20 px-4 relative z-10">
+    <section className="py-20 px-4 border-t-2 border-primary relative z-10">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6 text-glow">
-            {'<'} PROGETTI {'>'}
-          </h2>
-          <div className="text-sm text-muted-foreground">
-            <span className="animate-pulse">▓</span> LOADING_PORTFOLIO.DAT
+        {/* Section Header */}
+        <div className="mb-12 border-b-2 border-primary pb-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-4xl md:text-6xl font-bold text-primary text-glow">
+              PROGETTI_COMPLETATI
+            </h2>
+            <span className="text-muted-foreground text-sm">DATABASE_ARCHIVE</span>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project, idx) => (
-            <div
-              key={idx}
-              className={`border-2 border-${project.color} p-6 bg-card hover:bg-muted/50 transition-all group relative overflow-hidden`}
-              style={{
-                borderColor: `hsl(var(--${project.color}))`
-              }}
+        {/* Projects Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {projects.map((project) => (
+            <div 
+              key={project.id}
+              className="border border-primary bg-card p-6 hover:border-2 transition-all group"
             >
-              <div className="absolute top-2 right-2 text-xs opacity-50">
-                [{String(idx + 1).padStart(2, '0')}]
+              {/* Project Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="text-primary text-xs mb-1">{project.id}</div>
+                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                    {project.title}
+                  </h3>
+                </div>
+                <div className={`text-xs px-2 py-1 border ${
+                  project.status === 'DEPLOYED' ? 'border-primary text-primary' :
+                  project.status === 'IN_PRODUCTION' ? 'border-accent text-accent' :
+                  project.status === 'BETA' ? 'border-secondary text-secondary' :
+                  'border-muted-foreground text-muted-foreground'
+                }`}>
+                  {project.status}
+                </div>
               </div>
-              
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-glow">
-                {project.title}
-              </h3>
-              
-              <p className="text-sm md:text-base mb-4 text-muted-foreground">
+
+              {/* Description */}
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                 {project.description}
               </p>
-              
-              <div className={`text-xs md:text-sm border border-${project.color}/30 px-3 py-2 inline-block mb-4`}>
-                CLIENT: <span className={`text-${project.color}`}>{project.client}</span>
+
+              {/* Tech Stack */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {project.tech.map((tech, idx) => (
+                  <span 
+                    key={idx}
+                    className="text-xs border border-primary/50 px-2 py-1 text-primary/80"
+                  >
+                    {tech}
+                  </span>
+                ))}
               </div>
-              
-              <div className="flex items-center gap-2 text-sm group-hover:text-primary transition-colors cursor-pointer">
-                <ExternalLink className="w-4 h-4" />
-                <span>VIEW_PROJECT</span>
+
+              {/* Client */}
+              <div className="pt-4 border-t border-primary/30 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  CLIENT: {project.client}
+                </span>
+                <span className="text-primary text-xs group-hover:translate-x-1 transition-transform">
+                  {'>'} VIEW_DETAILS
+                </span>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Archive Footer */}
+        <div className="mt-12 border-t border-primary pt-6 text-center">
+          <p className="text-muted-foreground text-sm">
+            TOTAL_PROJECTS: {projects.length} :: LAST_UPDATE: {new Date().toLocaleDateString('it-IT')}
+          </p>
         </div>
       </div>
     </section>
