@@ -68,25 +68,49 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-20px)" },
+        },
+        "tilt-3d": {
+          "0%, 100%": { transform: "perspective(1000px) rotateY(0deg) rotateX(0deg)" },
+          "25%": { transform: "perspective(1000px) rotateY(5deg) rotateX(2deg)" },
+          "75%": { transform: "perspective(1000px) rotateY(-5deg) rotateX(-2deg)" },
+        },
+        "holo-scan": {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(100%)" },
+        },
+        "rgb-split": {
+          "0%, 100%": { textShadow: "0 0 0 rgba(255,0,0,0)" },
+          "33%": { textShadow: "2px 0 0 rgba(255,0,0,0.8), -2px 0 0 rgba(0,255,255,0.8)" },
+          "66%": { textShadow: "-2px 0 0 rgba(255,0,0,0.8), 2px 0 0 rgba(0,255,255,0.8)" },
+        },
+        "em-pulse": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(0,255,170,0.7)" },
+          "50%": { boxShadow: "0 0 20px 10px rgba(0,255,170,0)" },
+        },
+        "scale-in": {
+          "0%": { transform: "scale(0.9)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "float": "float 6s ease-in-out infinite",
+        "tilt-3d": "tilt-3d 10s ease-in-out infinite",
+        "holo-scan": "holo-scan 2s linear infinite",
+        "rgb-split": "rgb-split 0.3s ease-in-out",
+        "em-pulse": "em-pulse 2s ease-in-out infinite",
+        "scale-in": "scale-in 0.3s ease-out",
       },
     },
   },

@@ -54,6 +54,11 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-terminal;
     position: relative;
+    cursor: none;
+  }
+
+  * {
+    cursor: none !important;
   }
 
   /* Subtle CRT Scanline Effect - modernized */
@@ -200,10 +205,81 @@ All colors MUST be HSL.
 }
 
 @keyframes text-corrupt {
-  0%, 100% { transform: skew(0deg); }
-  25% { transform: skew(2deg); }
-  50% { transform: skew(-2deg); }
-  75% { transform: skew(1deg); }
+  0%, 100% { 
+    clip-path: inset(0 0 0 0);
+  }
+  10% { 
+    clip-path: inset(20% 0 30% 0);
+  }
+  20% { 
+    clip-path: inset(50% 0 10% 0);
+  }
+  30% { 
+    clip-path: inset(10% 0 60% 0);
+  }
+  40% { 
+    clip-path: inset(40% 0 20% 0);
+  }
+}
+
+.animate-text-corrupt {
+  animation: text-corrupt 0.4s linear;
+}
+
+/* 3D Card Tilt Effect */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+.card-3d:hover {
+  transform: perspective(1000px) rotateY(var(--rotate-y, 0deg)) rotateX(var(--rotate-x, 0deg));
+}
+
+/* Holographic Border */
+.holo-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, 
+    transparent 25%,
+    hsl(var(--primary)) 25%,
+    hsl(var(--primary)) 50%,
+    hsl(var(--accent)) 50%,
+    hsl(var(--accent)) 75%,
+    transparent 75%);
+  background-size: 4px 4px;
+  animation: holo-scan 2s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.holo-border:hover::before {
+  opacity: 0.3;
+}
+
+/* Data Stream Animation */
+@keyframes data-stream {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.data-stream {
+  animation: data-stream 3s ease-in-out infinite;
 }
 
 .terminal-cursor {

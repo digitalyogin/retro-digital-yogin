@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useMousePosition } from "@/hooks/useMousePosition";
 
 export const Hero = () => {
   const [displayText, setDisplayText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [glitchActive, setGlitchActive] = useState(false);
   const fullText = "DIGITAL YOGIN";
+  const { x, y } = useMousePosition();
+  const cardRef1 = useRef<HTMLDivElement>(null);
+  const cardRef2 = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -19,6 +24,36 @@ export const Hero = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Random glitch effect
+  useEffect(() => {
+    const glitchInterval = setInterval(() => {
+      if (Math.random() > 0.95) {
+        setGlitchActive(true);
+        setTimeout(() => setGlitchActive(false), 300);
+      }
+    }, 3000);
+
+    return () => clearInterval(glitchInterval);
+  }, []);
+
+  // 3D tilt effect for cards
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, ref: React.RefObject<HTMLDivElement>) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const rotateX = ((e.clientY - centerY) / rect.height) * 10;
+    const rotateY = ((e.clientX - centerX) / rect.width) * 10;
+    ref.current.style.setProperty('--rotate-x', `${-rotateX}deg`);
+    ref.current.style.setProperty('--rotate-y', `${rotateY}deg`);
+  };
+
+  const handleMouseLeave = (ref: React.RefObject<HTMLDivElement>) => {
+    if (!ref.current) return;
+    ref.current.style.setProperty('--rotate-x', '0deg');
+    ref.current.style.setProperty('--rotate-y', '0deg');
+  };
 
   return (
     <section className="min-h-screen flex items-center justify-center px-4 relative">
@@ -36,7 +71,7 @@ export const Hero = () => {
 
         {/* Main Title */}
         <div className="text-center space-y-4">
-          <div className="text-6xl md:text-8xl font-bold text-primary text-glow font-terminal mb-4">
+          <div className={`text-6xl md:text-8xl font-bold text-primary text-glow font-terminal mb-4 ${glitchActive ? 'animate-rgb-split' : ''}`}>
             {displayText}
             <span className="animate-pulse">_</span>
           </div>
@@ -53,7 +88,12 @@ export const Hero = () => {
 
         {/* Services Grid */}
         <div className="grid md:grid-cols-2 gap-4 mt-12">
-          <div className="border border-primary p-6 bg-card/50">
+          <div 
+            ref={cardRef1}
+            className="border border-primary p-6 bg-card/50 card-3d holo-border cursor-pointer"
+            onMouseMove={(e) => handleMouseMove(e, cardRef1)}
+            onMouseLeave={() => handleMouseLeave(cardRef1)}
+          >
             <div className="text-primary text-sm mb-2">{'>'} SERVIZIO_01</div>
             <h3 className="text-2xl font-bold mb-2">SVILUPPO_WEB</h3>
             <p className="text-muted-foreground">
@@ -61,7 +101,12 @@ export const Hero = () => {
             </p>
           </div>
 
-          <div className="border border-primary p-6 bg-card/50">
+          <div 
+            ref={cardRef2}
+            className="border border-primary p-6 bg-card/50 card-3d holo-border cursor-pointer"
+            onMouseMove={(e) => handleMouseMove(e, cardRef2)}
+            onMouseLeave={() => handleMouseLeave(cardRef2)}
+          >
             <div className="text-primary text-sm mb-2">{'>'} SERVIZIO_02</div>
             <h3 className="text-2xl font-bold mb-2">APP_MOBILI</h3>
             <p className="text-muted-foreground">
