@@ -15,8 +15,8 @@ export const BackgroundParticles = () => {
 
     // Codice filosofico di Schopenhauer: "Il mondo come volontà e rappresentazione"
     const characters = 'ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽108अआइईउऊऋएऐओऔVOLONTÀRAPPRESENTAZIONEMAYAVELOILLUSIONEREALTÀ';
-    const fontSize = 16;
-    const columns = Math.floor(canvas.width / fontSize);
+    const fontSize = 18;
+    const columns = Math.floor(window.innerWidth / fontSize);
     const drops: number[] = [];
 
     for (let i = 0; i < columns; i++) {
@@ -26,10 +26,10 @@ export const BackgroundParticles = () => {
     let animationId: number;
 
     const draw = () => {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-      ctx.font = `${fontSize}px monospace`;
+      ctx.font = `600 ${fontSize}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
         const text = characters[Math.floor(Math.random() * characters.length)];
@@ -37,8 +37,8 @@ export const BackgroundParticles = () => {
         const y = drops[i] * fontSize;
 
         // Matrix-style glow effect
-        const brightness = Math.max(0.3, 1 - (drops[i] / (canvas.height / fontSize)) * 0.7);
-        const glowIntensity = brightness * 8;
+        const brightness = Math.max(0.5, 1 - (drops[i] / (canvas.height / fontSize)) * 0.7);
+        const glowIntensity = brightness * 10;
         
         // Variazione di colore (verde Matrix classico con tocchi cyan/giallo)
         const colorVariation = Math.random();
@@ -56,7 +56,7 @@ export const BackgroundParticles = () => {
         ctx.shadowBlur = glowIntensity;
         ctx.fillText(text, x, y);
 
-        if (y > canvas.height && Math.random() > 0.975) {
+        if (y > window.innerHeight && Math.random() > 0.975) {
           drops[i] = 0;
         }
 
@@ -84,7 +84,7 @@ export const BackgroundParticles = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 opacity-60"
+      className="fixed inset-0 pointer-events-none z-0 opacity-100"
     />
   );
 };
