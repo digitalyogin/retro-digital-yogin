@@ -15,7 +15,7 @@ export const BackgroundParticles = () => {
 
     // Codice filosofico di Schopenhauer: "Il mondo come volontà e rappresentazione"
     const characters = 'ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽108अआइईउऊऋएऐओऔVOLONTÀRAPPRESENTAZIONEMAYAVELOILLUSIONEREALTÀ';
-    const fontSize = 14;
+    const fontSize = 16;
     const columns = Math.floor(canvas.width / fontSize);
     const drops: number[] = [];
 
@@ -26,7 +26,7 @@ export const BackgroundParticles = () => {
     let animationId: number;
 
     const draw = () => {
-      ctx.fillStyle = 'rgba(10, 15, 20, 0.05)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.font = `${fontSize}px monospace`;
@@ -38,34 +38,29 @@ export const BackgroundParticles = () => {
 
         // Matrix-style glow effect
         const brightness = Math.max(0.3, 1 - (drops[i] / (canvas.height / fontSize)) * 0.7);
-        const glowIntensity = brightness * 15;
+        const glowIntensity = brightness * 8;
         
-        // Variazione di colore (verde principale con tocchi cyan/giallo)
+        // Variazione di colore (verde Matrix classico con tocchi cyan/giallo)
         const colorVariation = Math.random();
         if (colorVariation > 0.9) {
-          ctx.fillStyle = `rgba(0, 255, 255, ${brightness * 0.9})`; // cyan
-          ctx.shadowColor = 'rgba(0, 255, 255, 0.8)';
+          ctx.fillStyle = `rgba(0, 255, 255, ${brightness})`; // cyan
+          ctx.shadowColor = 'rgba(0, 255, 255, 0.6)';
         } else if (colorVariation > 0.8) {
-          ctx.fillStyle = `rgba(170, 255, 0, ${brightness * 0.8})`; // giallo-verde
-          ctx.shadowColor = 'rgba(170, 255, 0, 0.7)';
+          ctx.fillStyle = `rgba(170, 255, 0, ${brightness})`; // giallo-verde
+          ctx.shadowColor = 'rgba(170, 255, 0, 0.6)';
         } else {
-          ctx.fillStyle = `rgba(0, 255, 170, ${brightness * 0.8})`; // verde principale
-          ctx.shadowColor = 'rgba(0, 255, 170, 0.9)';
+          ctx.fillStyle = `rgba(0, 220, 130, ${brightness})`; // verde Matrix classico
+          ctx.shadowColor = 'rgba(0, 220, 130, 0.6)';
         }
         
         ctx.shadowBlur = glowIntensity;
-        ctx.fillText(text, x, y);
-
-        // Secondo layer per profondità (più scuro)
-        ctx.shadowBlur = glowIntensity * 0.5;
-        ctx.fillStyle = `rgba(0, 255, 170, ${brightness * 0.4})`;
         ctx.fillText(text, x, y);
 
         if (y > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
         }
 
-        drops[i] += 0.3; // Rallentato del 70%
+        drops[i] += 0.08; // Molto rallentato per effetto Matrix autentico
       }
 
       animationId = requestAnimationFrame(draw);
@@ -89,7 +84,7 @@ export const BackgroundParticles = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 opacity-30"
+      className="fixed inset-0 pointer-events-none z-0 opacity-60"
     />
   );
 };
