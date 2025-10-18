@@ -86,7 +86,6 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
     if (phase === 'granted') {
       setTimeout(() => {
         setPhase('complete');
-        localStorage.setItem('intro-shown', 'true');
         onComplete();
       }, 1500);
     }
@@ -97,7 +96,6 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
   // Handle skip
   const handleSkip = () => {
     setPhase('complete');
-    localStorage.setItem('intro-shown', 'true');
     onComplete();
   };
 

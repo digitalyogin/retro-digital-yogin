@@ -11,16 +11,7 @@ import IntroLoader from "./components/IntroLoader";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showIntro, setShowIntro] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const hasSeenIntro = localStorage.getItem('intro-shown');
-    setShowIntro(!hasSeenIntro);
-    setIsLoading(false);
-  }, []);
-
-  if (isLoading) return null;
+  const [showIntro, setShowIntro] = useState(true);
 
   return (
     <QueryClientProvider client={queryClient}>
