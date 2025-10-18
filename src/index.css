@@ -170,3 +170,64 @@ All colors MUST be HSL.
     opacity: 0;
   }
 }
+
+/* Intro Loader Animations */
+@keyframes scroll-grid {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(80px) translateX(40px);
+  }
+}
+
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2px, 1px); }
+  20% { transform: translate(2px, -1px); }
+  30% { transform: translate(-1px, 2px); }
+  40% { transform: translate(1px, -2px); }
+  50% { transform: translate(-2px, 1px); }
+  60% { transform: translate(2px, -1px); }
+  70% { transform: translate(-1px, 2px); }
+  80% { transform: translate(1px, -2px); }
+  90% { transform: translate(-2px, 1px); }
+}
+
+@keyframes warning-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes text-corrupt {
+  0%, 100% { transform: skew(0deg); }
+  25% { transform: skew(2deg); }
+  50% { transform: skew(-2deg); }
+  75% { transform: skew(1deg); }
+}
+
+.terminal-cursor {
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+.warning-flash {
+  animation: warning-flash 0.3s infinite;
+}
+
+.animate-screen-shake {
+  animation: screen-shake 0.5s infinite;
+}
+
+.animate-scroll-grid {
+  animation: scroll-grid 20s linear infinite;
+}
+
+.grid-background {
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 80px 80px;
+  width: 200%;
+  height: 200%;
+}
