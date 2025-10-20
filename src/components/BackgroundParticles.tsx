@@ -10,14 +10,19 @@ export const BackgroundParticles = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // HiDPI support for crisp text
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.style.height = `${window.innerHeight}px`;
+    ctx.scale(dpr, dpr);
 
     // Codice filosofico di Schopenhauer: "Il mondo come volontà e rappresentazione"
     const characters = 'ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽108अआइईउऊऋएऐओऔVOLONTÀRAPPRESENTAZIONEMAYAVELOILLUSIONEREALTÀ';
     const fontSize = 18;
-    const columns = Math.floor(window.innerWidth / fontSize);
-    const drops: number[] = [];
+    let columns = Math.floor(window.innerWidth / fontSize);
+    let drops: number[] = [];
 
     for (let i = 0; i < columns; i++) {
       drops[i] = Math.random() * -100;
@@ -26,30 +31,32 @@ export const BackgroundParticles = () => {
     let animationId: number;
 
     const draw = () => {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+      // Dark fade for black background with slow trails
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       ctx.font = `600 ${fontSize}px monospace`;
+      ctx.textBaseline = 'top';
 
       for (let i = 0; i < drops.length; i++) {
         const text = characters[Math.floor(Math.random() * characters.length)];
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // Matrix-style glow effect
-        const brightness = Math.max(0.5, 1 - (drops[i] / (canvas.height / fontSize)) * 0.7);
-        const glowIntensity = brightness * 10;
+        // Matrix-style brightness with brighter head
+        const brightness = Math.max(0.6, 1 - (drops[i] / (window.innerHeight / fontSize)) * 0.7);
+        const glowIntensity = brightness * 6;
         
-        // Variazione di colore (verde Matrix classico con tocchi cyan/giallo)
+        // Classic Matrix green (90% probability) with occasional cyan/yellow accent
         const colorVariation = Math.random();
-        if (colorVariation > 0.9) {
-          ctx.fillStyle = `rgba(0, 255, 255, ${brightness})`; // cyan
+        if (colorVariation > 0.95) {
+          ctx.fillStyle = `rgba(0, 255, 255, ${brightness})`; // cyan accent
           ctx.shadowColor = 'rgba(0, 255, 255, 0.6)';
-        } else if (colorVariation > 0.8) {
-          ctx.fillStyle = `rgba(170, 255, 0, ${brightness})`; // giallo-verde
+        } else if (colorVariation > 0.90) {
+          ctx.fillStyle = `rgba(170, 255, 0, ${brightness})`; // yellow-green accent
           ctx.shadowColor = 'rgba(170, 255, 0, 0.6)';
         } else {
-          ctx.fillStyle = `rgba(0, 220, 130, ${brightness})`; // verde Matrix classico
+          ctx.fillStyle = `rgba(0, 220, 130, ${brightness})`; // classic Matrix green
           ctx.shadowColor = 'rgba(0, 220, 130, 0.6)';
         }
         
@@ -60,7 +67,7 @@ export const BackgroundParticles = () => {
           drops[i] = 0;
         }
 
-        drops[i] += 0.08; // Molto rallentato per effetto Matrix autentico
+        drops[i] += 0.3; // Slow falling speed as requested
       }
 
       animationId = requestAnimationFrame(draw);
@@ -69,8 +76,20 @@ export const BackgroundParticles = () => {
     draw();
 
     const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.scale(dpr, dpr);
+      ctx.textBaseline = 'top';
+      
+      // Recalculate columns and reinitialize drops
+      columns = Math.floor(window.innerWidth / fontSize);
+      drops = [];
+      for (let i = 0; i < columns; i++) {
+        drops[i] = Math.random() * -100;
+      }
     };
 
     window.addEventListener('resize', handleResize);
