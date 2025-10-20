@@ -20,7 +20,7 @@ export const BackgroundParticles = () => {
 
     // Codice filosofico di Schopenhauer: "Il mondo come volontà e rappresentazione"
     const characters = 'ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽108अआइईउऊऋएऐओऔVOLONTÀRAPPRESENTAZIONEMAYAVELOILLUSIONEREALTÀ';
-    const fontSize = 18;
+    const fontSize = 12;
     let columns = Math.floor(window.innerWidth / fontSize);
     let drops: number[] = [];
 
@@ -31,8 +31,8 @@ export const BackgroundParticles = () => {
     let animationId: number;
 
     const draw = () => {
-      // Dark fade for black background with slow trails
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+      // Deep black background with minimal fade for authentic Matrix look
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       ctx.font = `600 ${fontSize}px monospace`;
@@ -43,23 +43,13 @@ export const BackgroundParticles = () => {
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // Matrix-style brightness with brighter head
-        const brightness = Math.max(0.6, 1 - (drops[i] / (window.innerHeight / fontSize)) * 0.7);
-        const glowIntensity = brightness * 6;
+        // Matrix-style brightness with brighter head and longer trails
+        const brightness = Math.max(0.3, 1 - (drops[i] / (window.innerHeight / fontSize)) * 0.8);
+        const glowIntensity = brightness * 3;
         
-        // Classic Matrix green (90% probability) with occasional cyan/yellow accent
-        const colorVariation = Math.random();
-        if (colorVariation > 0.95) {
-          ctx.fillStyle = `rgba(0, 255, 255, ${brightness})`; // cyan accent
-          ctx.shadowColor = 'rgba(0, 255, 255, 0.6)';
-        } else if (colorVariation > 0.90) {
-          ctx.fillStyle = `rgba(170, 255, 0, ${brightness})`; // yellow-green accent
-          ctx.shadowColor = 'rgba(170, 255, 0, 0.6)';
-        } else {
-          ctx.fillStyle = `rgba(0, 220, 130, ${brightness})`; // classic Matrix green
-          ctx.shadowColor = 'rgba(0, 220, 130, 0.6)';
-        }
-        
+        // Authentic Matrix dark green - muted and crisp
+        ctx.fillStyle = `rgba(0, 180, 120, ${brightness})`;
+        ctx.shadowColor = 'rgba(0, 180, 120, 0.4)';
         ctx.shadowBlur = glowIntensity;
         ctx.fillText(text, x, y);
 
@@ -67,7 +57,7 @@ export const BackgroundParticles = () => {
           drops[i] = 0;
         }
 
-        drops[i] += 0.3; // Slow falling speed as requested
+        drops[i] += 0.25; // Optimal Matrix speed - smooth and relaxed
       }
 
       animationId = requestAnimationFrame(draw);
