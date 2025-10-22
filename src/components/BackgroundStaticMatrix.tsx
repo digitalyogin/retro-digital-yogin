@@ -5,11 +5,40 @@ const SYMBOLS = 'ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽108OM AUM10�
 export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?: boolean }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [glowingCells, setGlowingCells] = useState<Set<string>>(new Set());
+  const [staticGrid, setStaticGrid] = useState<string[][]>([]);
 
+  // Generare griglia statica una volta sola
+  useEffect(() => {
+    const initGrid = () => {
+      const columns = Math.floor(window.innerWidth / 12);
+      const rows = Math.floor(window.innerHeight / 14.4);
+      const grid: string[][] = [];
+      
+      for (let i = 0; i < columns; i++) {
+        grid[i] = [];
+        for (let r = 0; r < rows; r++) {
+          if (Math.random() < 0.5) {
+            grid[i][r] = ''; // Cella vuota
+          } else {
+            grid[i][r] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+          }
+        }
+      }
+      
+      setStaticGrid(grid);
+    };
+    
+    initGrid();
+    const onResize = () => initGrid();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Ridisegnare canvas usando griglia statica
   useEffect(() => {
     const drawStatic = () => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas || staticGrid.length === 0) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
@@ -31,19 +60,14 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
       ctx.font = `600 ${fontSize}px monospace`;
       ctx.textBaseline = 'top';
 
-      // Colonne
-      const columns = Math.floor(window.innerWidth / fontSize);
-      const rows = Math.floor(window.innerHeight / stepY);
-
-      for (let i = 0; i < columns; i++) {
+      // Renderizzare da griglia statica
+      for (let i = 0; i < staticGrid.length; i++) {
         const x = Math.floor(i * fontSize);
-        for (let r = 0; r < rows; r++) {
-          // Densità ridotta: 50% occupato (più discreto)
-          if (Math.random() < 0.5) continue;
-          const y = Math.floor(r * stepY);
-          const ch = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+        for (let r = 0; r < (staticGrid[i]?.length || 0); r++) {
+          const ch = staticGrid[i][r];
+          if (!ch) continue; // Salta celle vuote
           
-          // Controlla se questa cella è "glowing"
+          const y = Math.floor(r * stepY);
           const isGlowing = glowingCells.has(`${i}-${r}`);
           
           if (isGlowing) {
@@ -64,19 +88,18 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
     };
 
     drawStatic();
-    const onResize = () => drawStatic();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [glowingCells]);
+  }, [glowingCells, staticGrid]);
 
   // Animazione simboli rivelatori
   useEffect(() => {
+    if (staticGrid.length === 0) return;
+    
     const interval = setInterval(() => {
       const newGlowing = new Set<string>();
       const count = Math.floor(Math.random() * 3) + 3; // 3-5 simboli
       
-      const columns = Math.floor(window.innerWidth / 12);
-      const rows = Math.floor(window.innerHeight / 14.4);
+      const columns = staticGrid.length;
+      const rows = staticGrid[0]?.length || 0;
       
       for (let i = 0; i < count; i++) {
         const col = Math.floor(Math.random() * columns);
@@ -88,35 +111,55 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
     }, 2500); // Ogni 2.5 secondi
     
     return () => clearInterval(interval);
-  }, []);
+  }, [staticGrid]);
 
   return (
     <>
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
-      {/* Geometrie centrali mistiche con animazioni combinate */}
+      {/* Logo Digital Yogin con animazioni mistiche */}
       {showGeometry && (
         <div 
           className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
-          style={{ filter: 'drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.2))' }}
         >
           <svg 
-            width="60vmin" 
-            height="60vmin" 
-            viewBox="0 0 100 100" 
+            width="50vmin" 
+            height="50vmin" 
+            viewBox="0 0 200 200" 
             aria-hidden="true"
             className="animate-sacred-pulse"
-            style={{ 
-              animation: 'sacred-pulse 8s ease-in-out infinite, spin 120s linear infinite' 
-            }}
           >
-            <g fill="none" stroke="hsl(45 100% 50%)" strokeOpacity="0.4" strokeWidth="0.6">
-              <circle cx="50" cy="50" r="46" />
-              <circle cx="50" cy="50" r="35" />
-              <circle cx="50" cy="50" r="24" />
-              <path d="M50 10 L90 90 L10 90 Z" />
-              <path d="M50 90 L85 25 L15 25 Z" />
-              <circle cx="50" cy="50" r="2" />
+            {/* Plettro VIOLA (sinistra) */}
+            <g className="animate-glow-purple">
+              <path
+                d="M 40 100 Q 40 40, 100 20 Q 80 50, 80 100 Q 80 150, 100 180 Q 40 160, 40 100 Z"
+                fill="none"
+                stroke="hsl(250, 80%, 60%)"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </g>
+            
+            {/* Plettro ORO (destra) */}
+            <g className="animate-glow-gold">
+              <path
+                d="M 160 100 Q 160 40, 100 20 Q 120 50, 120 100 Q 120 150, 100 180 Q 160 160, 160 100 Z"
+                fill="none"
+                stroke="hsl(40, 95%, 60%)"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+            
+            {/* Rombo centrale (sottile) */}
+            <path
+              d="M 100 40 L 140 100 L 100 160 L 60 100 Z"
+              fill="none"
+              stroke="hsl(200, 40%, 50%)"
+              strokeWidth="1"
+              strokeOpacity="0.3"
+            />
           </svg>
         </div>
       )}

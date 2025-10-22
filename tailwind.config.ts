@@ -111,6 +111,26 @@ export default {
             transform: "scale(1.03) rotate(0.5deg)"
           }
         },
+        "glow-purple": {
+          "0%, 100%": { 
+            opacity: "0.6",
+            filter: "drop-shadow(0 0 10px hsla(250, 80%, 60%, 0.5))"
+          },
+          "50%": { 
+            opacity: "1",
+            filter: "drop-shadow(0 0 25px hsla(250, 80%, 60%, 0.9))"
+          }
+        },
+        "glow-gold": {
+          "0%, 100%": { 
+            opacity: "0.6",
+            filter: "drop-shadow(0 0 10px hsla(40, 95%, 60%, 0.5))"
+          },
+          "50%": { 
+            opacity: "1",
+            filter: "drop-shadow(0 0 25px hsla(40, 95%, 60%, 0.9))"
+          }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -122,6 +142,8 @@ export default {
         "em-pulse": "em-pulse 2s ease-in-out infinite",
         "scale-in": "scale-in 0.3s ease-out",
         "sacred-pulse": "sacred-pulse 8s ease-in-out infinite",
+        "glow-purple": "glow-purple 3s ease-in-out infinite",
+        "glow-gold": "glow-gold 3s ease-in-out infinite 1.5s",
       },
     },
   },
