@@ -14,7 +14,7 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
   const [glowingCells, setGlowingCells] = useState<Set<string>>(new Set());
   const [staticGrid, setStaticGrid] = useState<string[][]>([]);
   const [wordPositions, setWordPositions] = useState<WordPosition[]>([]);
-
+  const wordIndexRef = useRef(0);
   // Helper per trovare parole chiave nella griglia
   const findWordsInGrid = (grid: string[][]): WordPosition[] => {
     const found: WordPosition[] = [];
@@ -181,38 +181,41 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
     
     const interval = setInterval(() => {
       const newGlowing = new Set<string>();
-      const count = Math.floor(Math.random() * 5) + 5; // 5-10 simboli o parole
-      
       const columns = staticGrid.length;
       const rows = staticGrid[0]?.length || 0;
-      
-      for (let i = 0; i < count; i++) {
-        const col = Math.floor(Math.random() * columns);
-        const row = Math.floor(Math.random() * rows);
-        const cellKey = `${col}-${row}`;
-        const char = staticGrid[col]?.[row];
-        
-        // PRIORITÀ 1: Simbolo sacro → illumina sempre individualmente
-        if (char && SACRED_SYMBOLS.includes(char)) {
-          newGlowing.add(cellKey);
-          continue;
-        }
-        
-        // PRIORITÀ 2: Parte di una parola chiave → illumina tutta la parola
-        const wordMatch = wordPositions.find(wp => wp.cells.includes(cellKey));
-        if (wordMatch) {
-          wordMatch.cells.forEach(cell => newGlowing.add(cell));
-          continue;
-        }
-        
-        // PRIORITÀ 3: Carattere normale → illumina solo questo
-        if (char) {
-          newGlowing.add(cellKey);
+
+      // 1) Rivela sempre almeno una parola chiave (ciclo sequenziale)
+      if (wordPositions.length > 0) {
+        const wordsToShow = Math.min(1 + Math.floor(Math.random() * 2), wordPositions.length); // 1-2 parole
+        for (let k = 0; k < wordsToShow; k++) {
+          const idx = wordIndexRef.current % wordPositions.length;
+          wordIndexRef.current++;
+          wordPositions[idx].cells.forEach(cell => newGlowing.add(cell));
         }
       }
-      
+
+      // 2) Evidenzia diversi simboli sacri intenzionalmente
+      let sacredAdded = 0;
+      for (let t = 0; t < 200 && sacredAdded < 6; t++) {
+        const col = Math.floor(Math.random() * columns);
+        const row = Math.floor(Math.random() * rows);
+        const char = staticGrid[col]?.[row];
+        if (char && SACRED_SYMBOLS.includes(char)) {
+          newGlowing.add(`${col}-${row}`);
+          sacredAdded++;
+        }
+      }
+
+      // 3) Aggiungi alcuni caratteri singoli casuali
+      const singles = 3 + Math.floor(Math.random() * 3); // 3-5
+      for (let i = 0; i < singles; i++) {
+        const col = Math.floor(Math.random() * columns);
+        const row = Math.floor(Math.random() * rows);
+        if (staticGrid[col]?.[row]) newGlowing.add(`${col}-${row}`);
+      }
+
       setGlowingCells(newGlowing);
-    }, 1800); // Ogni 1.8 secondi (più frequente)
+    }, 1500); // più frequente
     
     return () => clearInterval(interval);
   }, [staticGrid, wordPositions]);
