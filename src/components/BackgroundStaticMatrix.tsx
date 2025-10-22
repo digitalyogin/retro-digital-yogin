@@ -199,7 +199,7 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
   return (
     <>
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
-      {/* Geometria Sacra: Due triangoli + cerchio centrale */}
+      {/* Mandala con Om Centrale */}
       {showGeometry && (
         <div 
           className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
@@ -210,37 +210,69 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
             viewBox="0 0 200 200"
             className="animate-sacred-pulse"
             style={{
-              filter: 'drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.2))'
+              filter: 'drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.3))'
             }}
           >
-            {/* Triangolo superiore (dorato) */}
-            <path 
-              d="M 100 40 L 140 100 L 60 100 Z" 
-              fill="none" 
-              stroke="hsl(45 100% 50%)" 
-              strokeWidth="0.6" 
-              strokeOpacity="0.4"
-            />
-            
-            {/* Triangolo inferiore invertito (viola) */}
-            <path 
-              d="M 100 160 L 140 100 L 60 100 Z" 
-              fill="none" 
-              stroke="hsl(280 80% 60%)" 
-              strokeWidth="0.6" 
-              strokeOpacity="0.4"
-            />
-            
-            {/* Cerchio centrale (ciano) */}
+            {/* Cerchio esterno */}
             <circle 
               cx="100" 
               cy="100" 
-              r="15" 
+              r="80" 
+              fill="none" 
+              stroke="hsl(45 100% 50%)" 
+              strokeWidth="0.6" 
+              strokeOpacity="0.4" 
+            />
+            
+            {/* Cerchio medio */}
+            <circle 
+              cx="100" 
+              cy="100" 
+              r="55" 
+              fill="none" 
+              stroke="hsl(280 80% 60%)" 
+              strokeWidth="0.5" 
+              strokeOpacity="0.35" 
+            />
+            
+            {/* Cerchio interno */}
+            <circle 
+              cx="100" 
+              cy="100" 
+              r="30" 
               fill="none" 
               stroke="hsl(180 70% 50%)" 
-              strokeWidth="0.5" 
-              strokeOpacity="0.35"
+              strokeWidth="0.4" 
+              strokeOpacity="0.3" 
             />
+            
+            {/* Linee radianti (8 direzioni) */}
+            {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
+              <line
+                key={angle}
+                x1="100"
+                y1="100"
+                x2={100 + 80 * Math.cos((angle * Math.PI) / 180)}
+                y2={100 + 80 * Math.sin((angle * Math.PI) / 180)}
+                stroke="hsl(45 100% 50%)"
+                strokeWidth="0.3"
+                strokeOpacity="0.25"
+              />
+            ))}
+            
+            {/* Simbolo Om centrale */}
+            <text 
+              x="100" 
+              y="115" 
+              textAnchor="middle" 
+              fontSize="40" 
+              fill="hsl(45 100% 50%)" 
+              fillOpacity="0.5"
+              fontFamily="serif"
+              className="animate-glow-gold"
+            >
+              ॐ
+            </text>
           </svg>
         </div>
       )}
