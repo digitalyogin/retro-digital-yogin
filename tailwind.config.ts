@@ -101,6 +101,16 @@ export default {
           "0%": { transform: "scale(0.9)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "sacred-pulse": {
+          "0%, 100%": { 
+            opacity: "0.3",
+            transform: "scale(1) rotate(0deg)"
+          },
+          "50%": { 
+            opacity: "0.5",
+            transform: "scale(1.03) rotate(0.5deg)"
+          }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -111,6 +121,7 @@ export default {
         "rgb-split": "rgb-split 0.3s ease-in-out",
         "em-pulse": "em-pulse 2s ease-in-out infinite",
         "scale-in": "scale-in 0.3s ease-out",
+        "sacred-pulse": "sacred-pulse 8s ease-in-out infinite",
       },
     },
   },
