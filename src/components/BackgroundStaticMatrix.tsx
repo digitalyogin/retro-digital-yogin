@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const SYMBOLS = 'ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽108OM AUM10अआइईउऊऋएऐओऔVOLONTÀRAPPRESENTAZIONEMAYAVELOILLUSIONEREALTÀ';
 const KEYWORDS = ['VOLONTÀ', 'RAPPRESENTAZIONE', 'MAYA', 'VELO', 'ILLUSIONE', 'REALTÀ'];
+const SACRED_SYMBOLS = 'ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽अआइईउऊऋएऐओऔ'.split('');
 
 type WordPosition = {
   word: string;
@@ -168,15 +169,23 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
         const col = Math.floor(Math.random() * columns);
         const row = Math.floor(Math.random() * rows);
         const cellKey = `${col}-${row}`;
+        const char = staticGrid[col]?.[row];
         
-        // Controlla se questa cella fa parte di una parola chiave
+        // PRIORITÀ 1: Simbolo sacro → illumina sempre individualmente
+        if (char && SACRED_SYMBOLS.includes(char)) {
+          newGlowing.add(cellKey);
+          continue;
+        }
+        
+        // PRIORITÀ 2: Parte di una parola chiave → illumina tutta la parola
         const wordMatch = wordPositions.find(wp => wp.cells.includes(cellKey));
-        
         if (wordMatch) {
-          // Illumina TUTTE le lettere della parola
           wordMatch.cells.forEach(cell => newGlowing.add(cell));
-        } else {
-          // Illumina solo questa cella
+          continue;
+        }
+        
+        // PRIORITÀ 3: Carattere normale → illumina solo questo
+        if (char) {
           newGlowing.add(cellKey);
         }
       }
@@ -190,49 +199,47 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
   return (
     <>
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
-      {/* Logo Digital Yogin con animazioni mistiche */}
+      {/* Geometria Sacra: Due triangoli + cerchio centrale */}
       {showGeometry && (
         <div 
           className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
         >
           <svg 
-            width="50vmin" 
-            height="50vmin" 
-            viewBox="0 0 200 200" 
-            aria-hidden="true"
+            width="60vmin" 
+            height="60vmin" 
+            viewBox="0 0 200 200"
             className="animate-sacred-pulse"
+            style={{
+              filter: 'drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.2))'
+            }}
           >
-            {/* Plettro VIOLA (sinistra) */}
-            <g className="animate-glow-purple">
-              <path
-                d="M 40 100 Q 40 40, 100 20 Q 80 50, 80 100 Q 80 150, 100 180 Q 40 160, 40 100 Z"
-                fill="none"
-                stroke="hsl(250, 80%, 60%)"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </g>
+            {/* Triangolo superiore (dorato) */}
+            <path 
+              d="M 100 40 L 140 100 L 60 100 Z" 
+              fill="none" 
+              stroke="hsl(45 100% 50%)" 
+              strokeWidth="0.6" 
+              strokeOpacity="0.4"
+            />
             
-            {/* Plettro ORO (destra) */}
-            <g className="animate-glow-gold">
-              <path
-                d="M 160 100 Q 160 40, 100 20 Q 120 50, 120 100 Q 120 150, 100 180 Q 160 160, 160 100 Z"
-                fill="none"
-                stroke="hsl(40, 95%, 60%)"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </g>
+            {/* Triangolo inferiore invertito (viola) */}
+            <path 
+              d="M 100 160 L 140 100 L 60 100 Z" 
+              fill="none" 
+              stroke="hsl(280 80% 60%)" 
+              strokeWidth="0.6" 
+              strokeOpacity="0.4"
+            />
             
-            {/* Rombo centrale (sottile) */}
-            <path
-              d="M 100 40 L 140 100 L 100 160 L 60 100 Z"
-              fill="none"
-              stroke="hsl(200, 40%, 50%)"
-              strokeWidth="1"
-              strokeOpacity="0.3"
+            {/* Cerchio centrale (ciano) */}
+            <circle 
+              cx="100" 
+              cy="100" 
+              r="15" 
+              fill="none" 
+              stroke="hsl(180 70% 50%)" 
+              strokeWidth="0.5" 
+              strokeOpacity="0.35"
             />
           </svg>
         </div>
