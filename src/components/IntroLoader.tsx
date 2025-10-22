@@ -42,52 +42,52 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
   ];
 
   useEffect(() => {
-    // Show skip button after 1 second
-    const skipTimer = setTimeout(() => setShowSkip(true), 1000);
+    // Show skip button after 2 seconds
+    const skipTimer = setTimeout(() => setShowSkip(true), 2000);
 
-    // Boot phase (ridotto)
+    // Boot phase
     if (phase === 'boot') {
       bootMessages.forEach((msg, index) => {
         setTimeout(() => {
           setBootText(prev => [...prev, msg]);
-        }, index * 200);
+        }, index * 500);
       });
 
-      setTimeout(() => setPhase('loading'), 1200);
+      setTimeout(() => setPhase('loading'), 3000);
     }
 
-    // Loading phase (più veloce)
+    // Loading phase
     if (phase === 'loading') {
       const progressInterval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
             clearInterval(progressInterval);
-            setTimeout(() => setPhase('breach'), 300);
+            setTimeout(() => setPhase('breach'), 400);
             return 100;
           }
-          return prev + 5;
+          return prev + 3;
         });
-      }, 30);
+      }, 50);
 
       return () => clearInterval(progressInterval);
     }
 
-    // Breach phase (ridotto)
+    // Breach phase
     if (phase === 'breach') {
-      setTimeout(() => setPhase('recovery'), 1000);
+      setTimeout(() => setPhase('recovery'), 1500);
     }
 
-    // Recovery phase (ridotto)
+    // Recovery phase
     if (phase === 'recovery') {
-      setTimeout(() => setPhase('granted'), 800);
+      setTimeout(() => setPhase('granted'), 1200);
     }
 
-    // Access granted phase (ridotto)
+    // Access granted phase
     if (phase === 'granted') {
       setTimeout(() => {
         setPhase('complete');
         onComplete();
-      }, 1000);
+      }, 1500);
     }
 
     return () => clearTimeout(skipTimer);

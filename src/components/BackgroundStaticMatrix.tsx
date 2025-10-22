@@ -74,22 +74,43 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
       const rows = Math.floor(window.innerHeight / 14.4);
       const grid: string[][] = [];
       
+      // Inizializza griglia con simboli casuali
       for (let i = 0; i < columns; i++) {
         grid[i] = [];
         for (let r = 0; r < rows; r++) {
-          if (Math.random() < 0.5) {
+          const rand = Math.random();
+          if (rand < 0.3) {
             grid[i][r] = ''; // Cella vuota
+          } else if (rand < 0.5) {
+            // Aumenta probabilità simboli sacri
+            grid[i][r] = SACRED_SYMBOLS[Math.floor(Math.random() * SACRED_SYMBOLS.length)];
           } else {
             grid[i][r] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
           }
         }
       }
       
+      // Inserisci forzatamente le parole chiave in posizioni casuali
+      KEYWORDS.forEach(keyword => {
+        const attempts = Math.floor(Math.random() * 2) + 1; // 1-2 occorrenze per parola
+        for (let attempt = 0; attempt < attempts; attempt++) {
+          const startCol = Math.floor(Math.random() * (columns - keyword.length));
+          const row = Math.floor(Math.random() * rows);
+          
+          // Inserisci la parola orizzontalmente
+          for (let i = 0; i < keyword.length; i++) {
+            grid[startCol + i][row] = keyword[i];
+          }
+        }
+      });
+      
       setStaticGrid(grid);
       
       // Trova le parole chiave nella griglia
       const words = findWordsInGrid(grid);
       setWordPositions(words);
+      
+      console.log('Parole trovate nella griglia:', words);
     };
     
     initGrid();
@@ -160,7 +181,7 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
     
     const interval = setInterval(() => {
       const newGlowing = new Set<string>();
-      const count = Math.floor(Math.random() * 3) + 3; // 3-5 simboli o parole
+      const count = Math.floor(Math.random() * 5) + 5; // 5-10 simboli o parole
       
       const columns = staticGrid.length;
       const rows = staticGrid[0]?.length || 0;
@@ -191,7 +212,7 @@ export const BackgroundStaticMatrix = ({ showGeometry = true }: { showGeometry?:
       }
       
       setGlowingCells(newGlowing);
-    }, 2500); // Ogni 2.5 secondi
+    }, 1800); // Ogni 1.8 secondi (più frequente)
     
     return () => clearInterval(interval);
   }, [staticGrid, wordPositions]);
