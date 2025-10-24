@@ -10,7 +10,7 @@ interface AsciiChar {
 }
 
 // Caratteri ASCII ordinati per densità (da più scuro a più chiaro)
-const ASCII_CHARS = " .:-=+*#%@█";
+const ASCII_CHARS = " .':-=+*#%@█MW";
 const GLITCH_CHARS = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`";
 
 export const AsciiSkullBackground = () => {
@@ -56,7 +56,7 @@ export const AsciiSkullBackground = () => {
       console.log("Converting image to ASCII...");
       
       // Dimensioni dei caratteri ASCII - più grandi per migliori performance
-      const fontSize = 12;
+      const fontSize = 16;
       const charWidth = fontSize * 0.6;
       const charHeight = fontSize;
 
@@ -126,7 +126,7 @@ export const AsciiSkullBackground = () => {
         return;
       }
 
-      const fontSize = 12;
+      const fontSize = 16;
       const charWidth = fontSize * 0.6;
       const charHeight = fontSize;
 
@@ -162,14 +162,14 @@ export const AsciiSkullBackground = () => {
           }
 
           // Applica luminosità e pulse con opacità aumentata
-          const alpha = Math.min(1, (asciiChar.brightness * pulse * 1.6) + 0.25);
+          const alpha = Math.min(1, (asciiChar.brightness * pulse * 2.2) + 0.5);
 
           ctx.save();
           ctx.globalAlpha = alpha;
           
           // Aggiungi glow solo ai caratteri più luminosi
           if (asciiChar.brightness > 0.6) {
-            ctx.shadowBlur = 4 * pulse;
+            ctx.shadowBlur = 2 * pulse;
             ctx.shadowColor = asciiChar.color;
           }
 
