@@ -214,6 +214,9 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
         className="fixed inset-0 w-full h-full -z-10"
         style={{ background: "transparent" }}
       />
+
+      {/* Logo ASCII Binario */}
+      <AnimatedMandala />
     </>
   );
 };
