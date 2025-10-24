@@ -111,25 +111,33 @@ export const SystemStats = () => {
         ) : (
           <>
             {/* Header */}
-            <div 
-              className="border-b border-primary p-2 flex items-center justify-between hover:bg-primary/10"
-            >
-              <span className="text-xs text-primary">SYSTEM_MONITOR</span>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="text-xs text-muted-foreground hover:text-primary"
-                >
-                  {isMinimized ? '[+]' : '[-]'}
-                </button>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="text-xs text-red-500 hover:text-red-400"
-                >
-                  [X]
-                </button>
+            {!isMinimized ? (
+              <div className="border-b border-primary p-2 flex items-center justify-between hover:bg-primary/10">
+                <span className="text-xs text-primary">SYSTEM_MONITOR</span>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setIsMinimized(true)}
+                    className="text-xs text-muted-foreground hover:text-primary"
+                  >
+                    [-]
+                  </button>
+                  <button 
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs text-red-500 hover:text-red-400"
+                  >
+                    [X]
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <button 
+                onClick={() => setIsMinimized(false)}
+                className="w-12 h-12 flex items-center justify-center text-xs text-primary hover:bg-primary/10"
+                aria-label="Ripristina System Monitor"
+              >
+                [+]
+              </button>
+            )}
 
             {/* Content */}
             {!isMinimized && (
