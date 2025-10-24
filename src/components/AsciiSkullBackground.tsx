@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import asciiSkull from "@/assets/ascii-skull.png";
+import asciiSkull from "@/assets/ascii-skull-om.png";
 
 interface AsciiChar {
   char: string;
