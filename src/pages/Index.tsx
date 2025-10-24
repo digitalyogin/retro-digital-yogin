@@ -3,7 +3,7 @@ import { Services } from "@/components/Services";
 import { Projects } from "@/components/Projects";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
-import { MatrixRainfall } from "@/components/MatrixRainfall";
+import { AsciiSkullBackground } from "@/components/AsciiSkullBackground";
 import { CustomCursor } from "@/components/CustomCursor";
 import { SystemStats } from "@/components/SystemStats";
 import { TerminalConsole } from "@/components/TerminalConsole";
@@ -15,7 +15,7 @@ const Index = () => {
   return (
     <div className="min-h-screen relative">
       {/* Background Effects */}
-      <MatrixRainfall showGeometry />
+      <AsciiSkullBackground />
       
       {/* Interactive Elements */}
       <CustomCursor />
