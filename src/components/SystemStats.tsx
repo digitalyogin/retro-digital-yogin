@@ -95,23 +95,21 @@ export const SystemStats = () => {
   }, [isOpen]);
 
   return (
-    <>
-      {/* Pulsante per aprire */}
-      {!isOpen && (
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="fixed top-4 right-4 z-50 px-3 py-2 border-2 border-primary bg-card/95 backdrop-blur-sm hover:bg-primary/10 transition-all font-mono text-xs text-primary"
-        >
-          [SYSTEM_MONITOR]
-        </button>
-      )}
-
-      {/* Finestra System Monitor */}
-      {isOpen && (
-        <div className="fixed top-4 right-4 z-50 font-mono">
-          <div className={`border-2 border-primary bg-card/95 backdrop-blur-sm transition-all duration-300 ${
-            isMinimized ? 'w-12 h-12' : 'w-80'
-          }`}>
+    <div className="fixed top-4 right-4 z-50 font-mono">
+      {/* Contenitore unico per evitare offset */}
+      <div className={`border-2 border-primary bg-card/95 backdrop-blur-sm transition-all duration-300 ${
+        !isOpen ? 'w-auto' : isMinimized ? 'w-12 h-12' : 'w-80'
+      }`}>
+        {/* Pulsante per aprire (quando chiuso) */}
+        {!isOpen ? (
+          <button 
+            onClick={() => setIsOpen(true)}
+            className="px-3 py-2 hover:bg-primary/10 transition-all text-xs text-primary w-full h-full text-left"
+          >
+            [SYSTEM_MONITOR]
+          </button>
+        ) : (
+          <>
             {/* Header */}
             <div 
               className="border-b border-primary p-2 flex items-center justify-between hover:bg-primary/10"
@@ -218,9 +216,9 @@ export const SystemStats = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-    </>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
