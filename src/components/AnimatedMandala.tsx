@@ -1,4 +1,4 @@
-import mandalaSymbol from "@/assets/mandala-symbol.png";
+import mandalaSymbol from "@/assets/mandala-ascii.png";
 
 export const AnimatedMandala = () => {
   return (
