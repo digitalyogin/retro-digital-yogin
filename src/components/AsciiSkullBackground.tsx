@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import asciiSkull from "@/assets/ascii-skull.png";
 
 interface AsciiChar {
@@ -18,6 +18,7 @@ export const AsciiSkullBackground = () => {
   const asciiGridRef = useRef<AsciiChar[][]>([]);
   const animationRef = useRef<number>();
   const imageLoadedRef = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -52,13 +53,17 @@ export const AsciiSkullBackground = () => {
     };
 
     const convertImageToAscii = (img: HTMLImageElement) => {
-      // Dimensioni dei caratteri ASCII
-      const fontSize = 8;
+      console.log("Converting image to ASCII...");
+      
+      // Dimensioni dei caratteri ASCII - più grandi per migliori performance
+      const fontSize = 12;
       const charWidth = fontSize * 0.6;
       const charHeight = fontSize;
 
       const cols = Math.floor(window.innerWidth / charWidth);
       const rows = Math.floor(window.innerHeight / charHeight);
+      
+      console.log(`Grid size: ${cols}x${rows} (${cols * rows} characters)`);
 
       // Crea un canvas temporaneo per leggere i pixel dell'immagine
       const tempCanvas = document.createElement("canvas");
@@ -109,6 +114,10 @@ export const AsciiSkullBackground = () => {
       }
 
       console.log(`ASCII grid created: ${cols}x${rows}`);
+      setIsLoading(false);
+      
+      // Avvia l'animazione
+      animationRef.current = requestAnimationFrame(animate);
     };
 
     const animate = (currentTime: number) => {
@@ -117,7 +126,7 @@ export const AsciiSkullBackground = () => {
         return;
       }
 
-      const fontSize = 8;
+      const fontSize = 12;
       const charWidth = fontSize * 0.6;
       const charHeight = fontSize;
 
@@ -197,10 +206,19 @@ export const AsciiSkullBackground = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: -1, background: "#000000" }}
-    />
+    <div className="fixed inset-0 w-full h-full pointer-events-none" style={{ zIndex: -1 }}>
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black">
+          <div className="text-primary text-sm font-mono animate-pulse">
+            [LOADING ASCII ART...]
+          </div>
+        </div>
+      )}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ background: "#000000", opacity: isLoading ? 0 : 1 }}
+      />
+    </div>
   );
 };
