@@ -364,17 +364,7 @@ All colors MUST be HSL.
   }
 }
 
-@keyframes mandala-rotate {
-  0% { 
-    transform: perspective(1000px) rotateY(0deg) rotateX(10deg); 
-  }
-  50% { 
-    transform: perspective(1000px) rotateY(180deg) rotateX(10deg); 
-  }
-  100% { 
-    transform: perspective(1000px) rotateY(360deg) rotateX(10deg); 
-  }
-}
+/* Mandala rotation removed - mandala is now static */
 
 @keyframes node-pulse {
   0%, 100% {
@@ -410,9 +400,6 @@ All colors MUST be HSL.
   animation: draw-path 2s ease-in-out forwards;
 }
 
-.animate-mandala-rotate {
-  animation: mandala-rotate 20s linear infinite;
-}
 
 .animate-node-pulse {
   animation: node-pulse 2s ease-in-out infinite;

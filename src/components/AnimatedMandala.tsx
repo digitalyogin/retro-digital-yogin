@@ -5,7 +5,6 @@ export const AnimatedMandala = () => {
         width="500"
         height="500"
         viewBox="0 0 500 500"
-        className="animate-mandala-rotate"
       >
         <defs>
           {/* Glow filter intenso */}

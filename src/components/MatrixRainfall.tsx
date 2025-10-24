@@ -20,6 +20,9 @@ interface RevealedWord {
   currentLetters: number;
   glitchChars: string[];
   isComplete: boolean;
+  windowWidth: number;
+  windowHeight: number;
+  hexLines: string[];
 }
 
 interface EnergyParticle {
@@ -228,7 +231,14 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
             spawnTime: Date.now(),
             currentLetters: 0,
             glitchChars: Array(word.length).fill('').map(() => getRandomChar()),
-            isComplete: false
+            isComplete: false,
+            windowWidth: 300,
+            windowHeight: 140,
+            hexLines: [
+              `0x${Math.random().toString(16).substring(2, 8).toUpperCase()}: Loading kernel...`,
+              `0x${Math.random().toString(16).substring(2, 8).toUpperCase()}: Injecting payload...`,
+              `0x${Math.random().toString(16).substring(2, 8).toUpperCase()}: Executing breach...`
+            ]
           },
         ]);
         lastWordSpawn = Date.now();
@@ -255,7 +265,7 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
         return false;
       });
 
-      // Render parole rivelate con cyber hack effect
+      // Render parole rivelate con terminal window effect
       setRevealedWords((prev) => {
         const now = Date.now();
         return prev.filter((w) => {
@@ -263,79 +273,177 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
           if (age > 6) return false; // Rimuovi dopo 6s
 
           ctx.save();
-          ctx.textAlign = "center";
+          
+          const winX = w.x - w.windowWidth / 2;
+          const winY = w.y - w.windowHeight / 2;
 
-          // Fase 1: Glitch injection (0-0.8s)
-          if (age < 0.8) {
-            const progress = age / 0.8;
-            w.currentLetters = Math.floor(progress * w.word.length);
+          // Fase 1: Apertura finestra + typing (0-2s)
+          if (age < 2) {
+            const windowAlpha = Math.min(1, age / 0.3); // Fade in finestra rapido
+            const typingProgress = Math.max(0, (age - 0.3) / 1.7);
+            w.currentLetters = Math.floor(typingProgress * w.word.length);
             
-            // Costruisci testo con glitch
-            let displayText = '';
-            for (let i = 0; i < w.word.length; i++) {
-              if (i < w.currentLetters) {
-                displayText += w.word[i];
-              } else {
-                displayText += getRandomChar();
-              }
+            // Background finestra con blur glass effect
+            ctx.globalAlpha = windowAlpha * 0.92;
+            ctx.fillStyle = 'rgba(0, 20, 30, 0.95)';
+            ctx.strokeStyle = 'rgba(0, 255, 200, 0.7)';
+            ctx.lineWidth = 2;
+            
+            // Finestra principale
+            ctx.fillRect(winX, winY, w.windowWidth, w.windowHeight);
+            ctx.strokeRect(winX, winY, w.windowWidth, w.windowHeight);
+            
+            // Header bar
+            ctx.fillStyle = 'rgba(0, 60, 80, 0.95)';
+            ctx.fillRect(winX, winY, w.windowWidth, 28);
+            ctx.strokeRect(winX, winY, w.windowWidth, 28);
+            
+            // Titolo header con pallini OS-style
+            ctx.font = 'bold 11px "Courier New", monospace';
+            ctx.fillStyle = '#ff5f56';
+            ctx.beginPath();
+            ctx.arc(winX + 12, winY + 14, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffbd2e';
+            ctx.beginPath();
+            ctx.arc(winX + 28, winY + 14, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#27c93f';
+            ctx.beginPath();
+            ctx.arc(winX + 44, winY + 14, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#00ffff';
+            ctx.textAlign = 'left';
+            ctx.fillText('SYSTEM_BREACH.exe', winX + 60, winY + 18);
+            
+            // Codice hex sullo sfondo (3 righe)
+            ctx.font = '10px "Courier New", monospace';
+            ctx.fillStyle = 'rgba(0, 255, 100, 0.35)';
+            w.hexLines.forEach((line, i) => {
+              ctx.fillText(line, winX + 12, winY + 45 + i * 14);
+            });
+            
+            // Parola che viene scritta
+            const typedWord = w.word.substring(0, w.currentLetters);
+            ctx.font = 'bold 20px "Courier New", monospace';
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = 'rgba(0, 255, 200, 0.8)';
+            ctx.fillText(`>>> ${typedWord}`, winX + 12, winY + 100);
+            
+            // Cursor lampeggiante
+            if (Math.floor(age * 4) % 2 === 0) {
+              ctx.fillStyle = '#0ff';
+              ctx.shadowBlur = 8;
+              ctx.shadowColor = '#0ff';
+              const cursorX = ctx.measureText(`>>> ${typedWord}`).width;
+              ctx.fillRect(winX + 12 + cursorX + 3, winY + 86, 10, 18);
             }
             
-            // RGB Chromatic aberration
-            ctx.font = "bold 32px 'Courier New', monospace";
-            
-            ctx.fillStyle = 'red';
-            ctx.globalAlpha = 0.5;
-            ctx.fillText(displayText, w.x - 2, w.y);
-            
-            ctx.fillStyle = 'cyan';
-            ctx.fillText(displayText, w.x + 2, w.y);
-            
-            ctx.fillStyle = 'white';
-            ctx.globalAlpha = 1;
-            ctx.fillText(displayText, w.x, w.y);
-            
-            // Scanline effect
-            const scanlineY = w.y - 10 + Math.sin(age * 30) * 5;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fillRect(w.x - w.word.length * 10, scanlineY, w.word.length * 20, 2);
+            // Scanlines CRT
+            for (let i = 0; i < w.windowHeight; i += 4) {
+              ctx.fillStyle = 'rgba(0, 255, 200, 0.04)';
+              ctx.fillRect(winX, winY + i, w.windowWidth, 2);
+            }
             
           } 
-          // Fase 2: Parola completa con glow (0.8-3.5s)
-          else if (age < 3.5) {
+          // Fase 2: Parola completa con status (2-4.5s)
+          else if (age < 4.5) {
             if (!w.isComplete) {
               w.isComplete = true;
               createEnergyPulse(w.x, w.y);
             }
             
-            ctx.font = "bold 36px 'Courier New', monospace";
-            ctx.fillStyle = 'hsl(45, 100%, 70%)';
-            ctx.shadowBlur = 35;
-            ctx.shadowColor = 'hsl(45, 100%, 50%)';
-            ctx.fillText(w.word, w.x, w.y);
+            // Background finestra
+            ctx.globalAlpha = 0.92;
+            ctx.fillStyle = 'rgba(0, 20, 30, 0.95)';
+            ctx.strokeStyle = 'rgba(0, 255, 200, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.fillRect(winX, winY, w.windowWidth, w.windowHeight);
+            ctx.strokeRect(winX, winY, w.windowWidth, w.windowHeight);
             
-            // "BREACH DETECTED" label
-            ctx.font = "bold 11px 'Courier New', monospace";
-            ctx.fillStyle = 'rgba(255, 50, 50, 0.9)';
+            // Header bar
+            ctx.fillStyle = 'rgba(0, 60, 80, 0.95)';
+            ctx.fillRect(winX, winY, w.windowWidth, 28);
+            ctx.strokeRect(winX, winY, w.windowWidth, 28);
+            
+            // Pallini OS-style
+            ctx.fillStyle = '#ff5f56';
+            ctx.beginPath();
+            ctx.arc(winX + 12, winY + 14, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffbd2e';
+            ctx.beginPath();
+            ctx.arc(winX + 28, winY + 14, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#27c93f';
+            ctx.beginPath();
+            ctx.arc(winX + 44, winY + 14, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.font = 'bold 11px "Courier New", monospace';
+            ctx.fillStyle = '#00ffff';
+            ctx.textAlign = 'left';
+            ctx.fillText('SYSTEM_BREACH.exe', winX + 60, winY + 18);
+            
+            // Codice hex
+            ctx.font = '10px "Courier New", monospace';
+            ctx.fillStyle = 'rgba(0, 255, 100, 0.35)';
+            w.hexLines.forEach((line, i) => {
+              ctx.fillText(line, winX + 12, winY + 45 + i * 14);
+            });
+            
+            // Parola completa che pulsa
+            const pulseScale = 1 + Math.sin(age * 3) * 0.05;
+            ctx.font = 'bold 20px "Courier New", monospace';
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = 'rgba(0, 255, 200, 0.8)';
+            ctx.save();
+            ctx.translate(winX + 12, winY + 100);
+            ctx.scale(pulseScale, pulseScale);
+            ctx.fillText(`>>> ${w.word}`, 0, 0);
+            ctx.restore();
+            
+            // Status "[ACCESS_GRANTED]"
+            ctx.font = "bold 10px 'Courier New', monospace";
+            ctx.fillStyle = '#27c93f';
             ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-            const breachText = '[INJECTION DETECTED]';
-            ctx.fillText(breachText, w.x, w.y + 25);
+            ctx.shadowColor = 'rgba(39, 201, 63, 0.8)';
+            ctx.fillText('[ACCESS_GRANTED]', winX + 12, winY + 122);
             
-            // Box intorno al breach
-            const breachWidth = ctx.measureText(breachText).width;
-            ctx.strokeStyle = 'rgba(255, 50, 50, 0.6)';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(w.x - breachWidth / 2 - 5, w.y + 10, breachWidth + 10, 20);
+            // Scanlines
+            for (let i = 0; i < w.windowHeight; i += 4) {
+              ctx.fillStyle = 'rgba(0, 255, 200, 0.04)';
+              ctx.fillRect(winX, winY + i, w.windowWidth, 2);
+            }
           }
-          // Fase 3: Fade out (3.5-6s)
+          // Fase 3: Fade out (4.5-6s)
           else {
-            const fadeAlpha = 1 - easeInOutCubic((age - 3.5) / 2.5);
-            ctx.globalAlpha = fadeAlpha;
-            ctx.font = "bold 36px 'Courier New', monospace";
-            ctx.fillStyle = 'hsl(45, 100%, 70%)';
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = 'hsl(45, 100%, 50%)';
-            ctx.fillText(w.word, w.x, w.y);
+            const fadeAlpha = 1 - easeInOutCubic((age - 4.5) / 1.5);
+            ctx.globalAlpha = fadeAlpha * 0.92;
+            
+            // Background finestra
+            ctx.fillStyle = 'rgba(0, 20, 30, 0.95)';
+            ctx.strokeStyle = 'rgba(0, 255, 200, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.fillRect(winX, winY, w.windowWidth, w.windowHeight);
+            ctx.strokeRect(winX, winY, w.windowWidth, w.windowHeight);
+            
+            // Header bar minimo
+            ctx.fillStyle = 'rgba(0, 60, 80, 0.95)';
+            ctx.fillRect(winX, winY, w.windowWidth, 28);
+            
+            // Parola in fade
+            ctx.font = 'bold 20px "Courier New", monospace';
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = 'rgba(0, 255, 200, 0.8)';
+            ctx.textAlign = 'left';
+            ctx.fillText(`>>> ${w.word}`, winX + 12, winY + 100);
           }
           
           ctx.restore();
