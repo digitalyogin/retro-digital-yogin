@@ -161,8 +161,8 @@ export const AsciiSkullBackground = () => {
             displayChar = GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
           }
 
-          // Applica luminosità e pulse con maggiore opacità
-          const alpha = Math.min(1, (asciiChar.brightness * pulse * 1.3) + 0.15);
+          // Applica luminosità e pulse con opacità aumentata
+          const alpha = Math.min(1, (asciiChar.brightness * pulse * 1.6) + 0.25);
 
           ctx.save();
           ctx.globalAlpha = alpha;
