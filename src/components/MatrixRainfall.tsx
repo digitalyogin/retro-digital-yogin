@@ -96,7 +96,7 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
       }
 
       // Clear canvas
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; // Trail effect con fade lento
+      ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; // Trail effect con fade più veloce per non coprire il mandala
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       ctx.font = "bold 16px 'Courier New', monospace";
@@ -212,7 +212,7 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
       <canvas
         ref={canvasRef}
         className="fixed inset-0 w-full h-full -z-10"
-        style={{ background: "#000" }}
+        style={{ background: "transparent" }}
       />
 
       {/* Geometria Sacra Mandala Animato */}
