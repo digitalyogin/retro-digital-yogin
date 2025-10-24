@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { AnimatedMandala } from "./AnimatedMandala";
+import asciiSkull from "@/assets/ascii-skull.png";
 
 interface Column {
   x: number;
@@ -65,10 +65,10 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
       canvas.style.height = `${window.innerHeight}px`;
       ctx.scale(dpr, dpr);
 
-      // Inizializza colonne
+      // Inizializza colonne - ridotte per rendere la pioggia più leggera
       const fontSize = 16;
       const columnWidth = fontSize;
-      const numColumns = Math.min(80, Math.floor(window.innerWidth / columnWidth));
+      const numColumns = Math.min(40, Math.floor(window.innerWidth / columnWidth / 2));
       
       columnsRef.current = Array.from({ length: numColumns }, (_, i) => ({
         x: i * columnWidth,
@@ -95,8 +95,8 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
         return;
       }
 
-      // Clear canvas
-      ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; // Trail effect con fade più veloce per non coprire il mandala
+      // Clear canvas - più trasparente per vedere il teschio
+      ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       ctx.font = "bold 16px 'Courier New', monospace";
@@ -208,12 +208,25 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
   }, []);
 
   return (
-    <>
+    <div className="fixed inset-0 w-full h-full pointer-events-none" style={{ zIndex: -1 }}>
+      {/* ASCII Skull Background Layer */}
+      <div 
+        className="absolute inset-0 bg-black"
+        style={{
+          backgroundImage: `url(${asciiSkull})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.7
+        }}
+      />
+      
+      {/* Matrix Rain Canvas Layer */}
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 w-full h-full -z-10"
+        className="absolute inset-0 w-full h-full"
         style={{ background: "transparent" }}
       />
-    </>
+    </div>
   );
 };
