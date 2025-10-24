@@ -23,6 +23,8 @@ interface RevealedWord {
   windowWidth: number;
   windowHeight: number;
   hexLines: string[];
+  scriptPhase: 'prompt' | 'confirm' | 'executing' | 'complete';
+  userChoice: 'Y' | 'N' | null;
 }
 
 interface EnergyParticle {
@@ -37,10 +39,14 @@ interface BackgroundMatrixRainfallProps {
   showGeometry?: boolean;
 }
 
-const SACRED_SYMBOLS = "ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽अआइईउऊऋएऐओऔ";
+const SACRED_SYMBOLS = "ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽अआइईउऊऋएऐओऔ".split('');
 const KEYWORDS = [
-  "MAYA", "ILLUSIONE", "VOLONTÀ", "BRAHMAN", "ATMAN", 
-  "DHARMA", "KARMA", "MOKSHA", "YOGA", "VEDANTA"
+  'VOLONTÀ',
+  'RAPPRESENTAZIONE', 
+  'MAYA',
+  'VELO',
+  'ILLUSIONE',
+  'REALTÀ'
 ];
 
 // Estrai lettere dalle parole chiave
@@ -219,26 +225,32 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
         ctx.restore();
       });
 
-      // Spawn parole rivelate casuali
+      // Spawn parole rivelate casuali con sacred symbols
       if (Date.now() - lastWordSpawn > 3000 && Math.random() < 0.015) {
-        const word = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
+        const selectedWord = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
+        
+        // Mix parola con sacred symbols (30% chance)
+        let mixedWord = selectedWord;
+        if (Math.random() < 0.3) {
+          const symbol = SACRED_SYMBOLS[Math.floor(Math.random() * SACRED_SYMBOLS.length)];
+          mixedWord = symbol + ' ' + selectedWord + ' ' + symbol;
+        }
+        
         setRevealedWords((prev) => [
           ...prev,
           {
-            word,
+            word: mixedWord,
             x: 100 + Math.random() * (window.innerWidth - 200),
             y: 100 + Math.random() * (window.innerHeight * 0.6),
             spawnTime: Date.now(),
             currentLetters: 0,
-            glitchChars: Array(word.length).fill('').map(() => getRandomChar()),
+            glitchChars: Array(mixedWord.length).fill('').map(() => getRandomChar()),
             isComplete: false,
-            windowWidth: 300,
-            windowHeight: 140,
-            hexLines: [
-              `0x${Math.random().toString(16).substring(2, 8).toUpperCase()}: Loading kernel...`,
-              `0x${Math.random().toString(16).substring(2, 8).toUpperCase()}: Injecting payload...`,
-              `0x${Math.random().toString(16).substring(2, 8).toUpperCase()}: Executing breach...`
-            ]
+            windowWidth: 320,
+            windowHeight: 180,
+            hexLines: [],
+            scriptPhase: 'prompt',
+            userChoice: null
           },
         ]);
         lastWordSpawn = Date.now();
@@ -265,185 +277,163 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
         return false;
       });
 
-      // Render parole rivelate con terminal window effect
+      // Render parole rivelate con bash script effect
       setRevealedWords((prev) => {
         const now = Date.now();
         return prev.filter((w) => {
           const age = (now - w.spawnTime) / 1000;
-          if (age > 6) return false; // Rimuovi dopo 6s
+          if (age > 7) return false; // Rimuovi dopo 7s
 
           ctx.save();
           
           const winX = w.x - w.windowWidth / 2;
           const winY = w.y - w.windowHeight / 2;
 
-          // Fase 1: Apertura finestra + typing (0-2s)
-          if (age < 2) {
-            const windowAlpha = Math.min(1, age / 0.3); // Fade in finestra rapido
-            const typingProgress = Math.max(0, (age - 0.3) / 1.7);
-            w.currentLetters = Math.floor(typingProgress * w.word.length);
+          // Base finestra
+          ctx.fillStyle = 'rgba(0, 20, 30, 0.95)';
+          ctx.strokeStyle = 'rgba(0, 255, 200, 0.6)';
+          ctx.lineWidth = 2;
+          ctx.fillRect(winX, winY, w.windowWidth, w.windowHeight);
+          ctx.strokeRect(winX, winY, w.windowWidth, w.windowHeight);
+          
+          // Header
+          ctx.fillStyle = 'rgba(0, 60, 80, 0.95)';
+          ctx.fillRect(winX, winY, w.windowWidth, 25);
+          ctx.font = 'bold 11px "Courier New"';
+          ctx.fillStyle = '#0ff';
+          ctx.textAlign = 'left';
+          ctx.fillText('● ○ ○  bash - sacred_inject.sh', winX + 10, winY + 16);
+
+          // Fase 1: Prompt script (0-1s)
+          if (age < 1) {
+            ctx.font = '12px "Courier New"';
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('$ ./sacred_inject.sh', winX + 10, winY + 45);
             
-            // Background finestra con blur glass effect
-            ctx.globalAlpha = windowAlpha * 0.92;
-            ctx.fillStyle = 'rgba(0, 20, 30, 0.95)';
-            ctx.strokeStyle = 'rgba(0, 255, 200, 0.7)';
-            ctx.lineWidth = 2;
+            // Typing effect sul prompt
+            const promptText = 'Execute script? [Y/n]: ';
+            const typingProgress = Math.max(0, (age - 0.3) / 0.7);
+            const typedPrompt = promptText.substring(0, Math.floor(typingProgress * promptText.length));
+            ctx.fillText(typedPrompt, winX + 10, winY + 65);
             
-            // Finestra principale
-            ctx.fillRect(winX, winY, w.windowWidth, w.windowHeight);
-            ctx.strokeRect(winX, winY, w.windowWidth, w.windowHeight);
+            // Cursor lampeggiante
+            if (Math.floor(age * 4) % 2 === 0 && age > 0.3) {
+              ctx.fillStyle = '#0ff';
+              const cursorX = ctx.measureText(typedPrompt).width;
+              ctx.fillRect(winX + 10 + cursorX, winY + 53, 8, 14);
+            }
             
-            // Header bar
-            ctx.fillStyle = 'rgba(0, 60, 80, 0.95)';
-            ctx.fillRect(winX, winY, w.windowWidth, 28);
-            ctx.strokeRect(winX, winY, w.windowWidth, 28);
+            w.scriptPhase = 'prompt';
+          }
+          // Fase 2: Conferma Y (1-1.5s)
+          else if (age < 1.5) {
+            ctx.font = '12px "Courier New"';
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('$ ./sacred_inject.sh', winX + 10, winY + 45);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Execute script? [Y/n]: Y', winX + 10, winY + 65);
             
-            // Titolo header con pallini OS-style
-            ctx.font = 'bold 11px "Courier New", monospace';
-            ctx.fillStyle = '#ff5f56';
-            ctx.beginPath();
-            ctx.arc(winX + 12, winY + 14, 5, 0, Math.PI * 2);
-            ctx.fill();
+            w.scriptPhase = 'confirm';
+            w.userChoice = 'Y';
+          }
+          // Fase 3: Esecuzione script (1.5-3.5s)
+          else if (age < 3.5) {
+            const execProgress = (age - 1.5) / 2;
+            w.currentLetters = Math.floor(execProgress * w.word.length);
             
-            ctx.fillStyle = '#ffbd2e';
-            ctx.beginPath();
-            ctx.arc(winX + 28, winY + 14, 5, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.font = '12px "Courier New"';
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('$ ./sacred_inject.sh', winX + 10, winY + 45);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Execute script? [Y/n]: Y', winX + 10, winY + 65);
             
-            ctx.fillStyle = '#27c93f';
-            ctx.beginPath();
-            ctx.arc(winX + 44, winY + 14, 5, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillStyle = '#ff0';
+            ctx.fillText(`> Injecting ${w.word.substring(0, w.currentLetters)}...`, winX + 10, winY + 90);
             
-            ctx.fillStyle = '#00ffff';
-            ctx.textAlign = 'left';
-            ctx.fillText('SYSTEM_BREACH.exe', winX + 60, winY + 18);
+            // Progress bar
+            const barWidth = 200;
+            ctx.strokeStyle = '#0f0';
+            ctx.strokeRect(winX + 10, winY + 105, barWidth, 8);
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(winX + 10, winY + 105, barWidth * execProgress, 8);
             
-            // Codice hex sullo sfondo (3 righe)
-            ctx.font = '10px "Courier New", monospace';
-            ctx.fillStyle = 'rgba(0, 255, 100, 0.35)';
-            w.hexLines.forEach((line, i) => {
-              ctx.fillText(line, winX + 12, winY + 45 + i * 14);
-            });
-            
-            // Parola che viene scritta
-            const typedWord = w.word.substring(0, w.currentLetters);
-            ctx.font = 'bold 20px "Courier New", monospace';
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = 'rgba(0, 255, 200, 0.8)';
-            ctx.fillText(`>>> ${typedWord}`, winX + 12, winY + 100);
+            // Percentuale
+            ctx.font = '10px "Courier New"';
+            ctx.fillStyle = '#0f0';
+            ctx.fillText(`${Math.floor(execProgress * 100)}%`, winX + 220, winY + 112);
             
             // Cursor lampeggiante
             if (Math.floor(age * 4) % 2 === 0) {
               ctx.fillStyle = '#0ff';
-              ctx.shadowBlur = 8;
-              ctx.shadowColor = '#0ff';
-              const cursorX = ctx.measureText(`>>> ${typedWord}`).width;
-              ctx.fillRect(winX + 12 + cursorX + 3, winY + 86, 10, 18);
+              const cursorX = ctx.measureText(`> Injecting ${w.word.substring(0, w.currentLetters)}...`).width;
+              ctx.fillRect(winX + 10 + cursorX + 2, winY + 78, 8, 14);
             }
             
-            // Scanlines CRT
-            for (let i = 0; i < w.windowHeight; i += 4) {
-              ctx.fillStyle = 'rgba(0, 255, 200, 0.04)';
-              ctx.fillRect(winX, winY + i, w.windowWidth, 2);
-            }
-            
-          } 
-          // Fase 2: Parola completa con status (2-4.5s)
-          else if (age < 4.5) {
+            w.scriptPhase = 'executing';
+          }
+          // Fase 4: Completamento (3.5-5.5s)
+          else if (age < 5.5) {
             if (!w.isComplete) {
               w.isComplete = true;
               createEnergyPulse(w.x, w.y);
             }
             
-            // Background finestra
-            ctx.globalAlpha = 0.92;
-            ctx.fillStyle = 'rgba(0, 20, 30, 0.95)';
-            ctx.strokeStyle = 'rgba(0, 255, 200, 0.7)';
-            ctx.lineWidth = 2;
-            ctx.fillRect(winX, winY, w.windowWidth, w.windowHeight);
-            ctx.strokeRect(winX, winY, w.windowWidth, w.windowHeight);
+            ctx.font = '12px "Courier New"';
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('$ ./sacred_inject.sh', winX + 10, winY + 45);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Execute script? [Y/n]: Y', winX + 10, winY + 65);
+            ctx.fillStyle = '#ff0';
+            ctx.fillText(`> Injecting ${w.word}...`, winX + 10, winY + 90);
             
-            // Header bar
-            ctx.fillStyle = 'rgba(0, 60, 80, 0.95)';
-            ctx.fillRect(winX, winY, w.windowWidth, 28);
-            ctx.strokeRect(winX, winY, w.windowWidth, 28);
+            // Progress bar completa
+            ctx.strokeStyle = '#0f0';
+            ctx.strokeRect(winX + 10, winY + 105, 200, 8);
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(winX + 10, winY + 105, 200, 8);
+            ctx.font = '10px "Courier New"';
+            ctx.fillText('100%', winX + 220, winY + 112);
             
-            // Pallini OS-style
-            ctx.fillStyle = '#ff5f56';
-            ctx.beginPath();
-            ctx.arc(winX + 12, winY + 14, 5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ffbd2e';
-            ctx.beginPath();
-            ctx.arc(winX + 28, winY + 14, 5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#27c93f';
-            ctx.beginPath();
-            ctx.arc(winX + 44, winY + 14, 5, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.font = '12px "Courier New"';
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('[✓] Injection complete', winX + 10, winY + 125);
             
-            ctx.font = 'bold 11px "Courier New", monospace';
-            ctx.fillStyle = '#00ffff';
-            ctx.textAlign = 'left';
-            ctx.fillText('SYSTEM_BREACH.exe', winX + 60, winY + 18);
+            // Parola che pulsa
+            const pulseScale = 1 + Math.sin((age - 3.5) * 4) * 0.08;
+            ctx.font = `bold ${16 * pulseScale}px "Courier New"`;
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#0ff';
+            ctx.fillText(`>>> ${w.word}`, winX + 10, winY + 150);
             
-            // Codice hex
-            ctx.font = '10px "Courier New", monospace';
-            ctx.fillStyle = 'rgba(0, 255, 100, 0.35)';
-            w.hexLines.forEach((line, i) => {
-              ctx.fillText(line, winX + 12, winY + 45 + i * 14);
-            });
-            
-            // Parola completa che pulsa
-            const pulseScale = 1 + Math.sin(age * 3) * 0.05;
-            ctx.font = 'bold 20px "Courier New", monospace';
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = 'rgba(0, 255, 200, 0.8)';
-            ctx.save();
-            ctx.translate(winX + 12, winY + 100);
-            ctx.scale(pulseScale, pulseScale);
-            ctx.fillText(`>>> ${w.word}`, 0, 0);
-            ctx.restore();
-            
-            // Status "[ACCESS_GRANTED]"
-            ctx.font = "bold 10px 'Courier New', monospace";
-            ctx.fillStyle = '#27c93f';
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(39, 201, 63, 0.8)';
-            ctx.fillText('[ACCESS_GRANTED]', winX + 12, winY + 122);
-            
-            // Scanlines
-            for (let i = 0; i < w.windowHeight; i += 4) {
-              ctx.fillStyle = 'rgba(0, 255, 200, 0.04)';
-              ctx.fillRect(winX, winY + i, w.windowWidth, 2);
-            }
+            w.scriptPhase = 'complete';
           }
-          // Fase 3: Fade out (4.5-6s)
+          // Fase 5: Fade out (5.5-7s)
           else {
-            const fadeAlpha = 1 - easeInOutCubic((age - 4.5) / 1.5);
-            ctx.globalAlpha = fadeAlpha * 0.92;
+            const fadeAlpha = 1 - easeInOutCubic((age - 5.5) / 1.5);
+            ctx.globalAlpha = fadeAlpha;
             
-            // Background finestra
-            ctx.fillStyle = 'rgba(0, 20, 30, 0.95)';
-            ctx.strokeStyle = 'rgba(0, 255, 200, 0.7)';
-            ctx.lineWidth = 2;
-            ctx.fillRect(winX, winY, w.windowWidth, w.windowHeight);
-            ctx.strokeRect(winX, winY, w.windowWidth, w.windowHeight);
+            ctx.font = '12px "Courier New"';
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('$ ./sacred_inject.sh', winX + 10, winY + 45);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Execute script? [Y/n]: Y', winX + 10, winY + 65);
+            ctx.fillStyle = '#ff0';
+            ctx.fillText(`> Injecting ${w.word}...`, winX + 10, winY + 90);
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('[✓] Injection complete', winX + 10, winY + 125);
             
-            // Header bar minimo
-            ctx.fillStyle = 'rgba(0, 60, 80, 0.95)';
-            ctx.fillRect(winX, winY, w.windowWidth, 28);
-            
-            // Parola in fade
-            ctx.font = 'bold 20px "Courier New", monospace';
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = 'rgba(0, 255, 200, 0.8)';
-            ctx.textAlign = 'left';
-            ctx.fillText(`>>> ${w.word}`, winX + 12, winY + 100);
+            ctx.font = 'bold 16px "Courier New"';
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#0ff';
+            ctx.fillText(`>>> ${w.word}`, winX + 10, winY + 150);
+          }
+
+          // Scanlines CRT effect
+          for (let i = 0; i < w.windowHeight; i += 4) {
+            ctx.fillStyle = 'rgba(0, 255, 200, 0.03)';
+            ctx.fillRect(winX, winY + i, w.windowWidth, 1);
           }
           
           ctx.restore();
