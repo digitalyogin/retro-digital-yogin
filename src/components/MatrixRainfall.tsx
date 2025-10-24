@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AnimatedMandala } from "./AnimatedMandala";
 
 interface Column {
   x: number;
@@ -16,6 +17,17 @@ interface RevealedWord {
   x: number;
   y: number;
   spawnTime: number;
+  currentLetters: number;
+  glitchChars: string[];
+  isComplete: boolean;
+}
+
+interface EnergyParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
 }
 
 interface BackgroundMatrixRainfallProps {
@@ -56,7 +68,20 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
   const animationRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
   const [revealedWords, setRevealedWords] = useState<RevealedWord[]>([]);
+  const energyParticlesRef = useRef<EnergyParticle[]>([]);
   const isMobileRef = useRef(false);
+
+  const createEnergyPulse = (x: number, y: number) => {
+    for (let i = 0; i < 20; i++) {
+      const angle = (Math.PI * 2 / 20) * i;
+      energyParticlesRef.current.push({
+        x, y,
+        vx: Math.cos(angle) * 3,
+        vy: Math.sin(angle) * 3,
+        life: 1
+      });
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -112,7 +137,7 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; // Trail effect con fade lento
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-      ctx.font = "16px monospace";
+      ctx.font = "bold 16px 'Courier New', monospace";
       ctx.textAlign = "center";
 
       // Update e render colonne
@@ -159,9 +184,9 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
 
           ctx.save();
           ctx.globalAlpha = trailAlpha;
-          ctx.fillStyle = `hsl(180, 70%, ${40 + trailAlpha * 30}%)`;
-          ctx.shadowBlur = 8 * trailAlpha;
-          ctx.shadowColor = "rgba(0, 220, 180, 0.5)";
+          ctx.fillStyle = `hsl(180, 100%, ${60 + trailAlpha * 20}%)`;
+          ctx.shadowBlur = 6 * trailAlpha;
+          ctx.shadowColor = "rgba(0, 255, 200, 0.6)";
           ctx.fillText(col.char, col.x, trailY);
           ctx.restore();
         }
@@ -169,24 +194,30 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
         // Carattere principale
         ctx.save();
         if (col.isHead) {
-          // Head luminosa
+          // Head luminosa - più grande e nitida
+          ctx.font = "bold 18px 'Courier New', monospace";
           ctx.globalAlpha = col.brightness;
           ctx.fillStyle = "#ffffff";
-          ctx.shadowBlur = 25;
-          ctx.shadowColor = "rgba(255, 255, 255, 0.9)";
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = "rgba(255, 255, 255, 1)";
+          ctx.strokeStyle = "rgba(0, 255, 200, 0.3)";
+          ctx.lineWidth = 0.5;
+          ctx.strokeText(col.char, col.x, col.y);
+          ctx.fillText(col.char, col.x, col.y);
+          ctx.font = "bold 16px 'Courier New', monospace"; // Reset
         } else {
-          // Carattere normale
-          ctx.globalAlpha = col.brightness * 0.8;
-          ctx.fillStyle = `hsl(180, 70%, ${50 + col.brightness * 30}%)`;
-          ctx.shadowBlur = 15 * col.brightness;
-          ctx.shadowColor = "rgba(0, 220, 180, 0.8)";
+          // Carattere normale - più nitido
+          ctx.globalAlpha = col.brightness * 0.85;
+          ctx.fillStyle = `hsl(180, 100%, ${60 + col.brightness * 20}%)`;
+          ctx.shadowBlur = 8 * col.brightness;
+          ctx.shadowColor = "rgba(0, 255, 200, 0.9)";
+          ctx.fillText(col.char, col.x, col.y);
         }
-        ctx.fillText(col.char, col.x, col.y);
         ctx.restore();
       });
 
       // Spawn parole rivelate casuali
-      if (Date.now() - lastWordSpawn > 2000 && Math.random() < 0.02) {
+      if (Date.now() - lastWordSpawn > 3000 && Math.random() < 0.015) {
         const word = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
         setRevealedWords((prev) => [
           ...prev,
@@ -195,39 +226,119 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
             x: 100 + Math.random() * (window.innerWidth - 200),
             y: 100 + Math.random() * (window.innerHeight * 0.6),
             spawnTime: Date.now(),
+            currentLetters: 0,
+            glitchChars: Array(word.length).fill('').map(() => getRandomChar()),
+            isComplete: false
           },
         ]);
         lastWordSpawn = Date.now();
       }
 
-      // Render parole rivelate con fade in/out
+      // Update e render energy particles
+      energyParticlesRef.current = energyParticlesRef.current.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= deltaTime * 2;
+        
+        if (p.life > 0) {
+          ctx.save();
+          ctx.globalAlpha = p.life * 0.8;
+          ctx.fillStyle = `hsl(45, 100%, ${50 + p.life * 30}%)`;
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = 'hsl(45, 100%, 50%)';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          return true;
+        }
+        return false;
+      });
+
+      // Render parole rivelate con cyber hack effect
       setRevealedWords((prev) => {
         const now = Date.now();
         return prev.filter((w) => {
           const age = (now - w.spawnTime) / 1000;
-          if (age > 5) return false; // Rimuovi dopo 5s
+          if (age > 6) return false; // Rimuovi dopo 6s
 
-          let alpha: number;
-          if (age < 1) {
-            alpha = easeInOutCubic(age); // Fade in 1s
-          } else if (age < 3) {
-            alpha = 1; // Hold 2s
-          } else {
-            alpha = 1 - easeInOutCubic((age - 3) / 2); // Fade out 2s
-          }
+          ctx.save();
+          ctx.textAlign = "center";
 
-          if (alpha > 0) {
-            ctx.save();
-            ctx.globalAlpha = alpha * 0.7;
-            ctx.font = "bold 28px monospace";
-            ctx.fillStyle = "hsl(45, 100%, 65%)";
-            ctx.shadowBlur = 25;
-            ctx.shadowColor = "hsl(45, 100%, 50%)";
-            ctx.textAlign = "center";
+          // Fase 1: Glitch injection (0-0.8s)
+          if (age < 0.8) {
+            const progress = age / 0.8;
+            w.currentLetters = Math.floor(progress * w.word.length);
+            
+            // Costruisci testo con glitch
+            let displayText = '';
+            for (let i = 0; i < w.word.length; i++) {
+              if (i < w.currentLetters) {
+                displayText += w.word[i];
+              } else {
+                displayText += getRandomChar();
+              }
+            }
+            
+            // RGB Chromatic aberration
+            ctx.font = "bold 32px 'Courier New', monospace";
+            
+            ctx.fillStyle = 'red';
+            ctx.globalAlpha = 0.5;
+            ctx.fillText(displayText, w.x - 2, w.y);
+            
+            ctx.fillStyle = 'cyan';
+            ctx.fillText(displayText, w.x + 2, w.y);
+            
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = 1;
+            ctx.fillText(displayText, w.x, w.y);
+            
+            // Scanline effect
+            const scanlineY = w.y - 10 + Math.sin(age * 30) * 5;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillRect(w.x - w.word.length * 10, scanlineY, w.word.length * 20, 2);
+            
+          } 
+          // Fase 2: Parola completa con glow (0.8-3.5s)
+          else if (age < 3.5) {
+            if (!w.isComplete) {
+              w.isComplete = true;
+              createEnergyPulse(w.x, w.y);
+            }
+            
+            ctx.font = "bold 36px 'Courier New', monospace";
+            ctx.fillStyle = 'hsl(45, 100%, 70%)';
+            ctx.shadowBlur = 35;
+            ctx.shadowColor = 'hsl(45, 100%, 50%)';
             ctx.fillText(w.word, w.x, w.y);
-            ctx.restore();
+            
+            // "BREACH DETECTED" label
+            ctx.font = "bold 11px 'Courier New', monospace";
+            ctx.fillStyle = 'rgba(255, 50, 50, 0.9)';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+            const breachText = '[INJECTION DETECTED]';
+            ctx.fillText(breachText, w.x, w.y + 25);
+            
+            // Box intorno al breach
+            const breachWidth = ctx.measureText(breachText).width;
+            ctx.strokeStyle = 'rgba(255, 50, 50, 0.6)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(w.x - breachWidth / 2 - 5, w.y + 10, breachWidth + 10, 20);
           }
-
+          // Fase 3: Fade out (3.5-6s)
+          else {
+            const fadeAlpha = 1 - easeInOutCubic((age - 3.5) / 2.5);
+            ctx.globalAlpha = fadeAlpha;
+            ctx.font = "bold 36px 'Courier New', monospace";
+            ctx.fillStyle = 'hsl(45, 100%, 70%)';
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = 'hsl(45, 100%, 50%)';
+            ctx.fillText(w.word, w.x, w.y);
+          }
+          
+          ctx.restore();
           return true;
         });
       });
@@ -266,66 +377,8 @@ export const MatrixRainfall = ({ showGeometry = false }: BackgroundMatrixRainfal
         style={{ background: "#000" }}
       />
 
-      {/* Geometria Sacra Mandala */}
-      {showGeometry && (
-        <div className="fixed inset-0 flex items-center justify-center pointer-events-none -z-10">
-          <svg
-            width="400"
-            height="400"
-            viewBox="0 0 400 400"
-            className="opacity-20"
-            style={{ filter: "drop-shadow(0 0 20px rgba(255, 215, 0, 0.3))" }}
-          >
-            {/* Cerchi concentrici */}
-            {[50, 100, 150].map((r, i) => (
-              <circle
-                key={`circle-${i}`}
-                cx="200"
-                cy="200"
-                r={r}
-                fill="none"
-                stroke="hsl(45, 100%, 60%)"
-                strokeWidth="1"
-                opacity={0.4 - i * 0.1}
-              />
-            ))}
-
-            {/* Linee radiali */}
-            {Array.from({ length: 12 }).map((_, i) => {
-              const angle = (i * 30 * Math.PI) / 180;
-              const x1 = 200 + Math.cos(angle) * 50;
-              const y1 = 200 + Math.sin(angle) * 50;
-              const x2 = 200 + Math.cos(angle) * 150;
-              const y2 = 200 + Math.sin(angle) * 150;
-              return (
-                <line
-                  key={`line-${i}`}
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
-                  stroke="hsl(45, 100%, 60%)"
-                  strokeWidth="1"
-                  opacity="0.3"
-                />
-              );
-            })}
-
-            {/* Om centrale */}
-            <text
-              x="200"
-              y="215"
-              fontSize="48"
-              fontWeight="bold"
-              textAnchor="middle"
-              fill="hsl(45, 100%, 70%)"
-              className="animate-sacred-pulse"
-            >
-              ॐ
-            </text>
-          </svg>
-        </div>
-      )}
+      {/* Geometria Sacra Mandala Animato */}
+      {showGeometry && <AnimatedMandala />}
     </>
   );
 };

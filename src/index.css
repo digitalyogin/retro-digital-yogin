@@ -322,6 +322,106 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes draw-circle {
+  0% {
+    stroke-dashoffset: inherit;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.7;
+  }
+}
+
+@keyframes draw-line {
+  0% {
+    stroke-dasharray: 0, 1000;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dasharray: 1000, 0;
+    opacity: 0.6;
+  }
+}
+
+@keyframes draw-path {
+  0% {
+    stroke-dasharray: 0, 1000;
+    fill-opacity: 0;
+  }
+  70% {
+    stroke-dasharray: 1000, 0;
+    fill-opacity: 0;
+  }
+  100% {
+    fill-opacity: 0.2;
+  }
+}
+
+@keyframes mandala-rotate {
+  0% { 
+    transform: perspective(1000px) rotateY(0deg) rotateX(10deg); 
+  }
+  50% { 
+    transform: perspective(1000px) rotateY(180deg) rotateX(10deg); 
+  }
+  100% { 
+    transform: perspective(1000px) rotateY(360deg) rotateX(10deg); 
+  }
+}
+
+@keyframes node-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes sacred-pulse-intense {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+    filter: drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.5));
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 50px hsla(45, 100%, 50%, 1));
+  }
+}
+
+.animate-draw-circle {
+  animation: draw-circle 3s ease-in-out forwards;
+}
+
+.animate-draw-line {
+  animation: draw-line 1.5s ease-in-out forwards;
+}
+
+.animate-draw-path {
+  animation: draw-path 2s ease-in-out forwards;
+}
+
+.animate-mandala-rotate {
+  animation: mandala-rotate 20s linear infinite;
+}
+
+.animate-node-pulse {
+  animation: node-pulse 2s ease-in-out infinite;
+}
+
+.animate-sacred-pulse-intense {
+  animation: sacred-pulse-intense 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .animate-sacred-pulse {
   animation: sacred-pulse-smooth 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
