@@ -2,3 +2,6 @@ project_id = "tuxhgkzadyneejduyyzt"
 
 [functions.oracle-chat]
 verify_jwt = false
+
+[functions.oracle-scan]
+verify_jwt = false

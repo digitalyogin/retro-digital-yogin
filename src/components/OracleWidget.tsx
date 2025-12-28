@@ -1,15 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Search, MessageSquare, Sparkles } from "lucide-react";
+
+type Mode = "chat" | "scan";
 
 interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
 export const OracleWidget = () => {
+  const [mode, setMode] = useState<Mode>("chat");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [scanProgress, setScanProgress] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -20,92 +24,103 @@ export const OracleWidget = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const streamResponse = async (
+    endpoint: string,
+    body: object,
+    onChunk: (content: string) => void
+  ) => {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${endpoint}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify(body),
+      }
+    );
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    if (response.status === 429) {
+      throw new Error("Troppi messaggi. Riprova tra qualche secondo.");
+    }
+    if (response.status === 402) {
+      throw new Error("Crediti AI esauriti.");
+    }
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Errore nella connessione.");
+    }
+    if (!response.body) {
+      throw new Error("Nessuna risposta ricevuta.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let fullContent = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            fullContent += content;
+            onChunk(fullContent);
+          }
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    return fullContent;
+  };
+
+  const handleChat = async (userInput: string) => {
+    const userMessage: Message = { role: "user", content: userInput };
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
     setIsLoading(true);
 
-    let assistantContent = "";
-
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/oracle-chat`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ messages: [...messages, userMessage] }),
-        }
-      );
-
-      if (response.status === 429) {
-        throw new Error("Troppi messaggi. Riprova tra qualche secondo.");
-      }
-      if (response.status === 402) {
-        throw new Error("Crediti AI esauriti.");
-      }
-      if (!response.ok || !response.body) {
-        throw new Error("Errore nella connessione all'Oracle.");
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-
-      // Add empty assistant message to update progressively
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
-              setMessages((prev) =>
-                prev.map((m, i) =>
-                  i === prev.length - 1 ? { ...m, content: assistantContent } : m
-                )
-              );
-            }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
+      await streamResponse(
+        "oracle-chat",
+        { messages: [...messages, userMessage] },
+        (content) => {
+          setMessages((prev) =>
+            prev.map((m, i) =>
+              i === prev.length - 1 ? { ...m, content } : m
+            )
+          );
         }
-      }
+      );
     } catch (error) {
-      console.error("Oracle error:", error);
+      console.error("Chat error:", error);
       setMessages((prev) => [
-        ...prev,
+        ...prev.slice(0, -1),
         {
           role: "assistant",
-          content:
-            error instanceof Error
-              ? `ERRORE: ${error.message}`
-              : "ERRORE: Impossibile contattare l'Oracle.",
+          content: error instanceof Error ? `ERRORE: ${error.message}` : "ERRORE: Impossibile contattare l'Oracle.",
         },
       ]);
     } finally {
@@ -113,21 +128,120 @@ export const OracleWidget = () => {
     }
   };
 
+  const handleScan = async (url: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { role: "system", content: `🔍 SCANNING: ${url}` },
+    ]);
+    setIsLoading(true);
+    setScanProgress("Connessione al sito...");
+
+    try {
+      setTimeout(() => setScanProgress("Estrazione contenuti..."), 1500);
+      setTimeout(() => setScanProgress("Analisi AI in corso..."), 3000);
+
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      await streamResponse("oracle-scan", { url }, (content) => {
+        setScanProgress("");
+        setMessages((prev) =>
+          prev.map((m, i) =>
+            i === prev.length - 1 ? { ...m, content } : m
+          )
+        );
+      });
+    } catch (error) {
+      console.error("Scan error:", error);
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        {
+          role: "assistant",
+          content: error instanceof Error ? `ERRORE: ${error.message}` : "ERRORE: Impossibile analizzare il sito.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+      setScanProgress("");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userInput = input.trim();
+    setInput("");
+
+    if (mode === "scan") {
+      await handleScan(userInput);
+    } else {
+      await handleChat(userInput);
+    }
+  };
+
+  const switchMode = (newMode: Mode) => {
+    if (newMode !== mode) {
+      setMode(newMode);
+      setMessages([]);
+      setInput("");
+    }
+  };
+
   return (
     <div className="border-2 border-primary bg-card p-4 mb-8">
       {/* Header */}
-      <div className="flex items-center justify-between text-sm mb-4 border-b border-primary/30 pb-2">
-        <span className="text-primary font-terminal">🔮 DIGITAL_ORACLE v1.0</span>
-        <span className="text-green-500 animate-pulse">● ONLINE</span>
+      <div className="flex items-center justify-between text-sm mb-3 border-b border-primary/30 pb-2">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <span className="text-primary font-terminal">DIGITAL_ORACLE v2.0</span>
+        </div>
+        <span className="text-green-500 animate-pulse text-xs">● ONLINE</span>
       </div>
 
-      {/* Chat Area */}
-      <div className="h-48 overflow-y-auto mb-4 space-y-3 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent">
+      {/* Mode Selector */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => switchMode("chat")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm border transition-colors ${
+            mode === "chat"
+              ? "border-primary bg-primary/20 text-primary"
+              : "border-primary/30 text-muted-foreground hover:border-primary/60"
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" />
+          CHAT
+        </button>
+        <button
+          onClick={() => switchMode("scan")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm border transition-colors ${
+            mode === "scan"
+              ? "border-primary bg-primary/20 text-primary"
+              : "border-primary/30 text-muted-foreground hover:border-primary/60"
+          }`}
+        >
+          <Search className="w-4 h-4" />
+          SCAN
+        </button>
+      </div>
+
+      {/* Chat/Scan Area */}
+      <div className="h-56 overflow-y-auto mb-4 space-y-3 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent">
         {messages.length === 0 ? (
           <div className="text-muted-foreground text-sm space-y-2">
-            <p>{'>'} Benvenuto nel DIGITAL_ORACLE.</p>
-            <p>{'>'} Chiedi informazioni sulla tua presenza online o su come migliorare il tuo sito web.</p>
-            <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
+            {mode === "chat" ? (
+              <>
+                <p>{'>'} Modalità CHAT attiva.</p>
+                <p>{'>'} Chiedi informazioni sulla tua presenza online.</p>
+                <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
+              </>
+            ) : (
+              <>
+                <p>{'>'} Modalità SCAN attiva.</p>
+                <p>{'>'} Inserisci l'URL del tuo sito per un'analisi completa.</p>
+                <p className="text-muted-foreground text-xs">{'>'} Esempio: www.miosito.it</p>
+                <p className="text-primary animate-pulse">{'>'} In attesa di URL...</p>
+              </>
+            )}
           </div>
         ) : (
           messages.map((msg, idx) => (
@@ -136,11 +250,13 @@ export const OracleWidget = () => {
               className={`text-sm ${
                 msg.role === "user"
                   ? "text-primary"
+                  : msg.role === "system"
+                  ? "text-yellow-500"
                   : "text-foreground"
               }`}
             >
               <span className="text-muted-foreground">
-                {msg.role === "user" ? "[USER]" : "[ORACLE]"}
+                {msg.role === "user" ? "[USER]" : msg.role === "system" ? "[SYSTEM]" : "[ORACLE]"}
               </span>{" "}
               <span className="whitespace-pre-wrap">{msg.content}</span>
               {msg.role === "assistant" && msg.content === "" && isLoading && (
@@ -148,6 +264,12 @@ export const OracleWidget = () => {
               )}
             </div>
           ))
+        )}
+        {scanProgress && (
+          <div className="text-yellow-500 text-sm flex items-center gap-2">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            {scanProgress}
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -160,7 +282,7 @@ export const OracleWidget = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Scrivi la tua domanda..."
+            placeholder={mode === "chat" ? "Scrivi la tua domanda..." : "Inserisci URL (es: www.miosito.it)"}
             disabled={isLoading}
             className="w-full bg-background border border-primary/50 text-foreground px-8 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground disabled:opacity-50"
           />
@@ -172,6 +294,8 @@ export const OracleWidget = () => {
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
+          ) : mode === "scan" ? (
+            <Search className="w-4 h-4" />
           ) : (
             <Send className="w-4 h-4" />
           )}
@@ -180,7 +304,11 @@ export const OracleWidget = () => {
 
       {/* Footer */}
       <div className="text-xs text-muted-foreground mt-3 text-center">
-        Powered by DIGITAL_YOGIN :: <span className="text-primary">Richiedi un checkup completo ↓</span>
+        {mode === "scan" ? (
+          <span>Analisi powered by <span className="text-primary">FIRECRAWL + AI</span></span>
+        ) : (
+          <span>Powered by <span className="text-primary">DIGITAL_YOGIN</span></span>
+        )}
       </div>
     </div>
   );
