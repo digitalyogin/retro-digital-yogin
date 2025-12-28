@@ -26,14 +26,14 @@ export const CustomCursor = () => {
       }}
     >
       {isHovering ? (
-        // Simbolo OM con glow quando hover
+        // Simbolo OM con glow e animazione quando hover
         <div 
-          className="text-4xl font-bold text-primary"
+          className="text-4xl font-bold text-primary animate-pulse"
           style={{
             filter: 'drop-shadow(0 0 12px hsl(var(--primary))) drop-shadow(0 0 20px hsl(var(--primary) / 0.6))',
             textShadow: '0 0 15px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.5)',
-            transform: 'translate(-12px, -12px)',
-            transition: 'transform 0.05s linear',
+            transform: 'translate(-12px, -12px) scale(1.1)',
+            animation: 'pulse 1.5s ease-in-out infinite',
           }}
         >
           ॐ
