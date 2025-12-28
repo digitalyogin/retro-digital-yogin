@@ -412,3 +412,20 @@ All colors MUST be HSL.
 .animate-sacred-pulse {
   animation: sacred-pulse-smooth 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Custom Cursor OM animations */
+@keyframes omRotate {
+  0%, 100% { transform: translate(-12px, -12px) rotate(0deg) scale(1); }
+  25% { transform: translate(-12px, -12px) rotate(10deg) scale(1.1); }
+  50% { transform: translate(-12px, -12px) rotate(0deg) scale(1.15); }
+  75% { transform: translate(-12px, -12px) rotate(-10deg) scale(1.1); }
+}
+
+@keyframes omPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.animate-om {
+  animation: omRotate 2s ease-in-out infinite, omPulse 1.5s ease-in-out infinite;
+}
