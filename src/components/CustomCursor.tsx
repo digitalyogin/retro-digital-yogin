@@ -26,20 +26,16 @@ export const CustomCursor = () => {
       }}
     >
       {isHovering ? (
-        // Simbolo OM con glow, pulse e rotazione quando hover
         <div 
-          className="text-4xl font-bold text-primary"
+          className="text-4xl font-bold text-primary animate-om"
           style={{
             filter: 'drop-shadow(0 0 12px hsl(var(--primary))) drop-shadow(0 0 20px hsl(var(--primary) / 0.6))',
             textShadow: '0 0 15px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.5)',
-            transform: 'translate(-12px, -12px)',
-            animation: 'omRotate 2s ease-in-out infinite, omPulse 1.5s ease-in-out infinite',
           }}
         >
           ॐ
         </div>
       ) : (
-        // 8-bit Macintosh style arrow cursor
         <svg
           width="24"
           height="24"
@@ -51,34 +47,18 @@ export const CustomCursor = () => {
             filter: 'drop-shadow(1px 1px 0 rgba(0,0,0,0.8))',
           }}
         >
-          {/* Black outline */}
           <path
             d="M0 0 L0 14 L3 11 L5 16 L7 15 L5 10 L9 10 Z"
             fill="black"
             stroke="black"
             strokeWidth="1"
           />
-          {/* White fill */}
           <path
             d="M1 1 L1 12 L3 10 L5.5 14.5 L6 14 L4 9 L8 9 Z"
             fill="white"
           />
         </svg>
       )}
-      
-      {/* CSS for OM animations */}
-      <style>{`
-        @keyframes omRotate {
-          0%, 100% { transform: translate(-12px, -12px) rotate(0deg) scale(1); }
-          25% { transform: translate(-12px, -12px) rotate(10deg) scale(1.1); }
-          50% { transform: translate(-12px, -12px) rotate(0deg) scale(1.15); }
-          75% { transform: translate(-12px, -12px) rotate(-10deg) scale(1.1); }
-        }
-        @keyframes omPulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.8; }
-        }
-      `}</style>
     </div>
   );
 };
