@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Search, MessageSquare, Sparkles } from "lucide-react";
+import { Send, Loader2, Search, MessageSquare, Sparkles, Download, Mail, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
 
 type Mode = "chat" | "scan";
 
@@ -9,11 +12,18 @@ interface Message {
 }
 
 export const OracleWidget = () => {
+  const { toast } = useToast();
   const [mode, setMode] = useState<Mode>("chat");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [scanProgress, setScanProgress] = useState("");
+  const [lastScanUrl, setLastScanUrl] = useState("");
+  const [lastScanResult, setLastScanResult] = useState("");
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+  const [leadForm, setLeadForm] = useState({ name: "", email: "", phone: "" });
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -22,7 +32,119 @@ export const OracleWidget = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, showLeadForm]);
+
+  const extractScore = (text: string): number | null => {
+    const scoreMatch = text.match(/(?:SCORE|punteggio)[:\s]*(\d{1,3})/i);
+    if (scoreMatch) {
+      const score = parseInt(scoreMatch[1], 10);
+      return score <= 100 ? score : null;
+    }
+    return null;
+  };
+
+  const generatePDF = () => {
+    if (!lastScanResult || !lastScanUrl) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - margin * 2;
+
+    // Header
+    doc.setFillColor(26, 26, 26);
+    doc.rect(0, 0, pageWidth, 40, "F");
+    
+    doc.setTextColor(255, 107, 53); // Primary orange
+    doc.setFontSize(24);
+    doc.text("DIGITAL ORACLE", margin, 25);
+    
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(10);
+    doc.text("Report Analisi Presenza Online", margin, 35);
+
+    // URL analyzed
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(12);
+    doc.text(`Sito analizzato: ${lastScanUrl}`, margin, 55);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Data: ${new Date().toLocaleDateString("it-IT")}`, margin, 62);
+
+    // Separator
+    doc.setDrawColor(255, 107, 53);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 68, pageWidth - margin, 68);
+
+    // Content
+    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(11);
+    
+    const lines = doc.splitTextToSize(lastScanResult, maxWidth);
+    let y = 80;
+    const lineHeight = 6;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(lines[i], margin, y);
+      y += lineHeight;
+    }
+
+    // Footer
+    const lastPage = doc.getNumberOfPages();
+    doc.setPage(lastPage);
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Generato da Digital Yogin - www.digitalyogin.it", margin, 285);
+
+    doc.save(`oracle-report-${new Date().toISOString().split("T")[0]}.pdf`);
+
+    toast({
+      title: "PDF Generato",
+      description: "Il report è stato scaricato.",
+    });
+  };
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leadForm.email || !lastScanResult || !lastScanUrl) return;
+
+    setIsSubmittingLead(true);
+
+    try {
+      const score = extractScore(lastScanResult);
+
+      const { error } = await supabase.from("oracle_leads").insert({
+        email: leadForm.email,
+        name: leadForm.name || null,
+        phone: leadForm.phone || null,
+        website_url: lastScanUrl,
+        scan_result: lastScanResult,
+        score: score,
+      });
+
+      if (error) throw error;
+
+      setLeadSubmitted(true);
+      toast({
+        title: "Richiesta inviata!",
+        description: "Ti contatteremo presto per il checkup completo.",
+      });
+    } catch (error) {
+      console.error("Error submitting lead:", error);
+      toast({
+        title: "Errore",
+        description: "Impossibile inviare la richiesta. Riprova.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingLead(false);
+    }
+  };
 
   const streamResponse = async (
     endpoint: string,
@@ -129,6 +251,11 @@ export const OracleWidget = () => {
   };
 
   const handleScan = async (url: string) => {
+    setShowLeadForm(false);
+    setLeadSubmitted(false);
+    setLastScanUrl(url);
+    setLastScanResult("");
+
     setMessages((prev) => [
       ...prev,
       { role: "system", content: `🔍 SCANNING: ${url}` },
@@ -142,14 +269,20 @@ export const OracleWidget = () => {
 
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
-      await streamResponse("oracle-scan", { url }, (content) => {
+      const result = await streamResponse("oracle-scan", { url }, (content) => {
         setScanProgress("");
+        setLastScanResult(content);
         setMessages((prev) =>
           prev.map((m, i) =>
             i === prev.length - 1 ? { ...m, content } : m
           )
         );
       });
+
+      // Show lead form after successful scan
+      if (result) {
+        setShowLeadForm(true);
+      }
     } catch (error) {
       console.error("Scan error:", error);
       setMessages((prev) => [
@@ -184,6 +317,10 @@ export const OracleWidget = () => {
       setMode(newMode);
       setMessages([]);
       setInput("");
+      setShowLeadForm(false);
+      setLeadSubmitted(false);
+      setLastScanResult("");
+      setLastScanUrl("");
     }
   };
 
@@ -273,6 +410,78 @@ export const OracleWidget = () => {
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Lead Form (after scan) */}
+      {showLeadForm && !leadSubmitted && (
+        <div className="border border-primary/50 bg-primary/5 p-4 mb-4 space-y-3">
+          <div className="flex items-center gap-2 text-primary text-sm">
+            <Mail className="w-4 h-4" />
+            <span className="font-terminal">RICHIEDI_CHECKUP_COMPLETO</span>
+          </div>
+          <p className="text-muted-foreground text-xs">
+            Vuoi un'analisi più approfondita? Lascia i tuoi dati e ti contatteremo!
+          </p>
+          <form onSubmit={handleLeadSubmit} className="space-y-2">
+            <input
+              type="text"
+              value={leadForm.name}
+              onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+              placeholder="Nome (opzionale)"
+              className="w-full bg-background border border-primary/30 text-foreground px-3 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+            />
+            <input
+              type="email"
+              value={leadForm.email}
+              onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })}
+              placeholder="Email *"
+              required
+              className="w-full bg-background border border-primary/30 text-foreground px-3 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+            />
+            <input
+              type="tel"
+              value={leadForm.phone}
+              onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+              placeholder="Telefono (opzionale)"
+              className="w-full bg-background border border-primary/30 text-foreground px-3 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+            />
+            <button
+              type="submit"
+              disabled={isSubmittingLead || !leadForm.email}
+              className="w-full border border-primary bg-primary/20 py-2 text-primary hover:bg-primary/30 transition-colors disabled:opacity-50 text-sm font-terminal"
+            >
+              {isSubmittingLead ? (
+                <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+              ) : (
+                "INVIA_RICHIESTA"
+              )}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Lead Submitted Confirmation */}
+      {leadSubmitted && (
+        <div className="border border-green-500/50 bg-green-500/10 p-4 mb-4 flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-green-500" />
+          <div>
+            <p className="text-green-500 text-sm font-terminal">RICHIESTA_INVIATA</p>
+            <p className="text-muted-foreground text-xs">Ti contatteremo presto!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Actions (PDF Download) */}
+      {lastScanResult && !isLoading && (
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={generatePDF}
+            className="flex items-center gap-2 px-4 py-2 text-sm border border-primary/50 text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            SCARICA_PDF
+          </button>
+        </div>
+      )}
 
       {/* Input Area */}
       <form onSubmit={handleSubmit} className="flex gap-2">
