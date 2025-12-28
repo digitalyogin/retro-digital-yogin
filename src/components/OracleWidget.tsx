@@ -298,7 +298,7 @@ Per un checkup professionale completo, contattaci!
   };
 
   return (
-    <div className="border-2 border-primary bg-card p-6 md:p-8 mb-6 rounded-sm">
+    <div className="border-2 border-primary bg-card p-6 md:p-8 mb-6 rounded-sm animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 border-b border-primary/30 pb-3">
         <div className="flex items-center gap-3">
