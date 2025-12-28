@@ -298,57 +298,57 @@ Per un checkup professionale completo, contattaci!
   };
 
   return (
-    <div className="border-2 border-primary bg-card p-4 mb-8">
+    <div className="border-2 border-primary bg-card p-6 md:p-8 mb-6 rounded-sm">
       {/* Header */}
-      <div className="flex items-center justify-between text-sm mb-3 border-b border-primary/30 pb-2">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-primary font-terminal">DIGITAL_ORACLE v2.0</span>
+      <div className="flex items-center justify-between mb-4 border-b border-primary/30 pb-3">
+        <div className="flex items-center gap-3">
+          <Sparkles className="w-5 h-5 text-primary" />
+          <span className="text-primary font-terminal text-lg md:text-xl">DIGITAL_ORACLE v2.0</span>
         </div>
-        <span className="text-green-500 animate-pulse text-xs">● ONLINE</span>
+        <span className="text-green-500 animate-pulse text-sm">● ONLINE</span>
       </div>
 
       {/* Mode Selector */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-3 mb-5">
         <button
           onClick={() => switchMode("chat")}
-          className={`flex items-center gap-2 px-4 py-2 text-sm border transition-colors ${
+          className={`flex items-center gap-2 px-5 py-3 text-base border transition-colors ${
             mode === "chat"
               ? "border-primary bg-primary/20 text-primary"
               : "border-primary/30 text-muted-foreground hover:border-primary/60"
           }`}
         >
-          <MessageSquare className="w-4 h-4" />
+          <MessageSquare className="w-5 h-5" />
           CHAT
         </button>
         <button
           onClick={() => switchMode("scan")}
-          className={`flex items-center gap-2 px-4 py-2 text-sm border transition-colors ${
+          className={`flex items-center gap-2 px-5 py-3 text-base border transition-colors ${
             mode === "scan"
               ? "border-primary bg-primary/20 text-primary"
               : "border-primary/30 text-muted-foreground hover:border-primary/60"
           }`}
         >
-          <Search className="w-4 h-4" />
+          <Search className="w-5 h-5" />
           SCAN
         </button>
       </div>
 
-      {/* Chat/Scan Area */}
-      <div className="h-56 overflow-y-auto mb-4 space-y-3 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent">
+      {/* Chat/Scan Area - BIGGER */}
+      <div className="h-72 md:h-80 overflow-y-auto mb-5 space-y-4 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent pr-2">
         {messages.length === 0 ? (
-          <div className="text-muted-foreground text-sm space-y-2">
+          <div className="text-muted-foreground text-base space-y-3">
             {mode === "chat" ? (
               <>
-                <p>{'>'} Modalità CHAT attiva.</p>
+                <p className="text-lg">{'>'} Modalità CHAT attiva.</p>
                 <p>{'>'} Chiedi informazioni sulla tua presenza online.</p>
                 <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
               </>
             ) : (
               <>
-                <p>{'>'} Modalità SCAN attiva.</p>
+                <p className="text-lg">{'>'} Modalità SCAN attiva.</p>
                 <p>{'>'} Inserisci l'URL del tuo sito per un'analisi completa.</p>
-                <p className="text-muted-foreground text-xs">{'>'} Esempio: www.miosito.it</p>
+                <p className="text-muted-foreground">{'>'} Esempio: www.miosito.it</p>
                 <p className="text-primary animate-pulse">{'>'} In attesa di URL...</p>
               </>
             )}
@@ -357,7 +357,7 @@ Per un checkup professionale completo, contattaci!
           messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`text-sm ${
+              className={`text-base leading-relaxed ${
                 msg.role === "user"
                   ? "text-primary"
                   : msg.role === "system"
@@ -365,7 +365,7 @@ Per un checkup professionale completo, contattaci!
                   : "text-foreground"
               }`}
             >
-              <span className="text-muted-foreground">
+              <span className="text-muted-foreground font-semibold">
                 {msg.role === "user" ? "[USER]" : msg.role === "system" ? "[SYSTEM]" : "[ORACLE]"}
               </span>{" "}
               <span className="whitespace-pre-wrap">{msg.content}</span>
@@ -376,8 +376,8 @@ Per un checkup professionale completo, contattaci!
           ))
         )}
         {scanProgress && (
-          <div className="text-yellow-500 text-sm flex items-center gap-2">
-            <Loader2 className="w-3 h-3 animate-spin" />
+          <div className="text-yellow-500 text-base flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
             {scanProgress}
           </div>
         )}
@@ -386,21 +386,21 @@ Per un checkup professionale completo, contattaci!
 
       {/* Lead Form (after scan) */}
       {showLeadForm && !leadSubmitted && (
-        <div className="border border-primary/50 bg-primary/5 p-4 mb-4 space-y-3">
-          <div className="flex items-center gap-2 text-primary text-sm">
-            <Mail className="w-4 h-4" />
-            <span className="font-terminal">RICHIEDI_CHECKUP_COMPLETO</span>
+        <div className="border border-primary/50 bg-primary/5 p-5 mb-5 space-y-4 rounded-sm">
+          <div className="flex items-center gap-2 text-primary text-base">
+            <Mail className="w-5 h-5" />
+            <span className="font-terminal text-lg">RICHIEDI_CHECKUP_COMPLETO</span>
           </div>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-muted-foreground text-base">
             Vuoi un'analisi più approfondita? Lascia i tuoi dati e ti contatteremo!
           </p>
-          <form onSubmit={handleLeadSubmit} className="space-y-2">
+          <form onSubmit={handleLeadSubmit} className="space-y-3">
             <input
               type="text"
               value={leadForm.name}
               onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
               placeholder="Nome (opzionale)"
-              className="w-full bg-background border border-primary/30 text-foreground px-3 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+              className="w-full bg-background border border-primary/30 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground"
             />
             <input
               type="email"
@@ -408,22 +408,22 @@ Per un checkup professionale completo, contattaci!
               onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })}
               placeholder="Email *"
               required
-              className="w-full bg-background border border-primary/30 text-foreground px-3 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+              className="w-full bg-background border border-primary/30 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground"
             />
             <input
               type="tel"
               value={leadForm.phone}
               onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
               placeholder="Telefono (opzionale)"
-              className="w-full bg-background border border-primary/30 text-foreground px-3 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+              className="w-full bg-background border border-primary/30 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground"
             />
             <button
               type="submit"
               disabled={isSubmittingLead || !leadForm.email}
-              className="w-full border border-primary bg-primary/20 py-2 text-primary hover:bg-primary/30 transition-colors disabled:opacity-50 text-sm font-terminal"
+              className="w-full border border-primary bg-primary/20 py-3 text-primary hover:bg-primary/30 transition-colors disabled:opacity-50 text-base font-terminal"
             >
               {isSubmittingLead ? (
-                <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
               ) : (
                 "INVIA_RICHIESTA"
               )}
@@ -434,58 +434,58 @@ Per un checkup professionale completo, contattaci!
 
       {/* Lead Submitted Confirmation */}
       {leadSubmitted && (
-        <div className="border border-green-500/50 bg-green-500/10 p-4 mb-4 flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 text-green-500" />
+        <div className="border border-green-500/50 bg-green-500/10 p-5 mb-5 flex items-center gap-4 rounded-sm">
+          <CheckCircle className="w-6 h-6 text-green-500" />
           <div>
-            <p className="text-green-500 text-sm font-terminal">RICHIESTA_INVIATA</p>
-            <p className="text-muted-foreground text-xs">Ti contatteremo presto!</p>
+            <p className="text-green-500 text-base font-terminal">RICHIESTA_INVIATA</p>
+            <p className="text-muted-foreground text-base">Ti contatteremo presto!</p>
           </div>
         </div>
       )}
 
-      {/* Actions (PDF Download) */}
+      {/* Actions (Download) */}
       {lastScanResult && !isLoading && (
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-3 mb-5">
           <button
             onClick={downloadReport}
-            className="flex items-center gap-2 px-4 py-2 text-sm border border-primary/50 text-primary hover:bg-primary/10 transition-colors"
+            className="flex items-center gap-2 px-5 py-3 text-base border border-primary/50 text-primary hover:bg-primary/10 transition-colors"
           >
-            <Download className="w-4 h-4" />
-            SCARICA_PDF
+            <Download className="w-5 h-5" />
+            SCARICA_REPORT
           </button>
         </div>
       )}
 
       {/* Input Area */}
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-3">
         <div className="flex-1 relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary">{'>'}</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg">{'>'}</span>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={mode === "chat" ? "Scrivi la tua domanda..." : "Inserisci URL (es: www.miosito.it)"}
             disabled={isLoading}
-            className="w-full bg-background border border-primary/50 text-foreground px-8 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted-foreground disabled:opacity-50"
+            className="w-full bg-background border border-primary/50 text-foreground pl-10 pr-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground disabled:opacity-50"
           />
         </div>
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="border border-primary bg-primary/10 px-4 py-2 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="border border-primary bg-primary/10 px-5 py-3 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" />
           ) : mode === "scan" ? (
-            <Search className="w-4 h-4" />
+            <Search className="w-5 h-5" />
           ) : (
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5" />
           )}
         </button>
       </form>
 
       {/* Footer */}
-      <div className="text-xs text-muted-foreground mt-3 text-center">
+      <div className="text-sm text-muted-foreground mt-4 text-center">
         {mode === "scan" ? (
           <span>Analisi powered by <span className="text-primary">FIRECRAWL + AI</span></span>
         ) : (
