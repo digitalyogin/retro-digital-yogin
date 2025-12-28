@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Loader2, Search, MessageSquare, Sparkles, Download, Mail, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import jsPDF from "jspdf";
 
 type Mode = "chat" | "scan";
 
@@ -43,8 +42,11 @@ export const OracleWidget = () => {
     return null;
   };
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     if (!lastScanResult || !lastScanUrl) return;
+
+    // Dynamic import to avoid React conflicts
+    const { default: jsPDF } = await import("jspdf");
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
