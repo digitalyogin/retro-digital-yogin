@@ -42,72 +42,43 @@ export const OracleWidget = () => {
     return null;
   };
 
-  const generatePDF = async () => {
+  const downloadReport = () => {
     if (!lastScanResult || !lastScanUrl) return;
 
-    // Dynamic import to avoid React conflicts
-    const { default: jsPDF } = await import("jspdf");
+    const reportContent = `
+================================================================================
+                           DIGITAL ORACLE REPORT
+                      Analisi Presenza Online
+================================================================================
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 20;
-    const maxWidth = pageWidth - margin * 2;
+Sito analizzato: ${lastScanUrl}
+Data: ${new Date().toLocaleDateString("it-IT")}
 
-    // Header
-    doc.setFillColor(26, 26, 26);
-    doc.rect(0, 0, pageWidth, 40, "F");
-    
-    doc.setTextColor(255, 107, 53); // Primary orange
-    doc.setFontSize(24);
-    doc.text("DIGITAL ORACLE", margin, 25);
-    
-    doc.setTextColor(150, 150, 150);
-    doc.setFontSize(10);
-    doc.text("Report Analisi Presenza Online", margin, 35);
+--------------------------------------------------------------------------------
 
-    // URL analyzed
-    doc.setTextColor(50, 50, 50);
-    doc.setFontSize(12);
-    doc.text(`Sito analizzato: ${lastScanUrl}`, margin, 55);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Data: ${new Date().toLocaleDateString("it-IT")}`, margin, 62);
+${lastScanResult}
 
-    // Separator
-    doc.setDrawColor(255, 107, 53);
-    doc.setLineWidth(0.5);
-    doc.line(margin, 68, pageWidth - margin, 68);
+--------------------------------------------------------------------------------
 
-    // Content
-    doc.setTextColor(30, 30, 30);
-    doc.setFontSize(11);
-    
-    const lines = doc.splitTextToSize(lastScanResult, maxWidth);
-    let y = 80;
-    const lineHeight = 6;
+Generato da Digital Yogin - www.digitalyogin.it
+Per un checkup professionale completo, contattaci!
 
-    for (let i = 0; i < lines.length; i++) {
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(lines[i], margin, y);
-      y += lineHeight;
-    }
+================================================================================
+`;
 
-    // Footer
-    const lastPage = doc.getNumberOfPages();
-    doc.setPage(lastPage);
-    doc.setFontSize(9);
-    doc.setTextColor(150, 150, 150);
-    doc.text("Generato da Digital Yogin - www.digitalyogin.it", margin, 285);
-
-    doc.save(`oracle-report-${new Date().toISOString().split("T")[0]}.pdf`);
+    const blob = new Blob([reportContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `oracle-report-${new Date().toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
     toast({
-      title: "PDF Generato",
-      description: "Il report è stato scaricato.",
+      title: "Report Scaricato",
+      description: "Il report è stato salvato come file di testo.",
     });
   };
 
@@ -476,7 +447,7 @@ export const OracleWidget = () => {
       {lastScanResult && !isLoading && (
         <div className="flex gap-2 mb-4">
           <button
-            onClick={generatePDF}
+            onClick={downloadReport}
             className="flex items-center gap-2 px-4 py-2 text-sm border border-primary/50 text-primary hover:bg-primary/10 transition-colors"
           >
             <Download className="w-4 h-4" />
