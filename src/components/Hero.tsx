@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useMousePosition } from "@/hooks/useMousePosition";
+import { OracleWidget } from "./OracleWidget";
 
 export const Hero = () => {
   const [displayText, setDisplayText] = useState("");
@@ -58,16 +59,8 @@ export const Hero = () => {
   return (
     <section className="min-h-screen flex items-center justify-center px-4 relative">
       <div className="max-w-4xl w-full space-y-8 relative z-10">
-        {/* System Header */}
-        <div className="border-2 border-primary bg-card p-4 mb-8">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-primary">SYSTEM_INIT.EXE</span>
-            <span className="text-muted-foreground">v2.1.4</span>
-          </div>
-          <div className="h-2 bg-muted relative overflow-hidden">
-            <div className="absolute inset-0 bg-primary animate-pulse" style={{ width: loading ? '60%' : '100%' }} />
-          </div>
-        </div>
+        {/* Oracle Widget */}
+        <OracleWidget />
 
         {/* Main Title */}
         <div className="text-center space-y-4">
