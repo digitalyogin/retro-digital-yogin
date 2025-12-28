@@ -26,14 +26,14 @@ export const CustomCursor = () => {
       }}
     >
       {isHovering ? (
-        // Simbolo OM con glow e animazione quando hover
+        // Simbolo OM con glow, pulse e rotazione quando hover
         <div 
-          className="text-4xl font-bold text-primary animate-pulse"
+          className="text-4xl font-bold text-primary"
           style={{
             filter: 'drop-shadow(0 0 12px hsl(var(--primary))) drop-shadow(0 0 20px hsl(var(--primary) / 0.6))',
             textShadow: '0 0 15px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.5)',
-            transform: 'translate(-12px, -12px) scale(1.1)',
-            animation: 'pulse 1.5s ease-in-out infinite',
+            transform: 'translate(-12px, -12px)',
+            animation: 'omRotate 2s ease-in-out infinite, omPulse 1.5s ease-in-out infinite',
           }}
         >
           ॐ
@@ -65,6 +65,20 @@ export const CustomCursor = () => {
           />
         </svg>
       )}
+      
+      {/* CSS for OM animations */}
+      <style>{`
+        @keyframes omRotate {
+          0%, 100% { transform: translate(-12px, -12px) rotate(0deg) scale(1); }
+          25% { transform: translate(-12px, -12px) rotate(10deg) scale(1.1); }
+          50% { transform: translate(-12px, -12px) rotate(0deg) scale(1.15); }
+          75% { transform: translate(-12px, -12px) rotate(-10deg) scale(1.1); }
+        }
+        @keyframes omPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+      `}</style>
     </div>
   );
 };
