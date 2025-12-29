@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Industrial Terminal Palette - Weyland-Yutani Inspired */
+    /* Default: Industrial Terminal Palette - Weyland-Yutani Inspired */
     --background: 0 0% 0%;
     --foreground: 45 100% 65%;
 
@@ -43,6 +43,108 @@ All colors MUST be HSL.
     --terminal-glow: 0 0 15px hsl(45 100% 55% / 0.4);
     --scanline-opacity: 0.02;
     --grid-color: hsl(45 30% 30% / 0.03);
+  }
+
+  /* TRON Blue Theme */
+  :root.theme-tron {
+    --background: 210 100% 2%;
+    --foreground: 195 100% 60%;
+
+    --card: 210 50% 8%;
+    --card-foreground: 195 100% 60%;
+
+    --popover: 210 50% 8%;
+    --popover-foreground: 195 100% 60%;
+
+    --primary: 195 100% 50%;
+    --primary-foreground: 210 100% 5%;
+
+    --secondary: 210 30% 70%;
+    --secondary-foreground: 210 100% 5%;
+
+    --muted: 210 50% 15%;
+    --muted-foreground: 195 50% 50%;
+
+    --accent: 180 100% 45%;
+    --accent-foreground: 210 100% 5%;
+
+    --destructive: 0 85% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 195 80% 35%;
+    --input: 210 50% 12%;
+    --ring: 195 100% 50%;
+
+    --terminal-glow: 0 0 15px hsl(195 100% 50% / 0.5);
+    --grid-color: hsl(195 30% 30% / 0.05);
+  }
+
+  /* Matrix Green Theme */
+  :root.theme-matrix {
+    --background: 120 100% 1%;
+    --foreground: 120 100% 50%;
+
+    --card: 120 50% 5%;
+    --card-foreground: 120 100% 50%;
+
+    --popover: 120 50% 5%;
+    --popover-foreground: 120 100% 50%;
+
+    --primary: 120 100% 40%;
+    --primary-foreground: 120 100% 2%;
+
+    --secondary: 120 30% 60%;
+    --secondary-foreground: 120 100% 2%;
+
+    --muted: 120 50% 10%;
+    --muted-foreground: 120 50% 40%;
+
+    --accent: 90 100% 45%;
+    --accent-foreground: 120 100% 2%;
+
+    --destructive: 0 85% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 70% 30%;
+    --input: 120 50% 8%;
+    --ring: 120 100% 40%;
+
+    --terminal-glow: 0 0 20px hsl(120 100% 40% / 0.6);
+    --grid-color: hsl(120 30% 25% / 0.08);
+  }
+
+  /* Cyberpunk Pink Theme */
+  :root.theme-cyberpunk {
+    --background: 280 100% 2%;
+    --foreground: 320 100% 65%;
+
+    --card: 280 50% 8%;
+    --card-foreground: 320 100% 65%;
+
+    --popover: 280 50% 8%;
+    --popover-foreground: 320 100% 65%;
+
+    --primary: 320 100% 55%;
+    --primary-foreground: 280 100% 5%;
+
+    --secondary: 280 30% 70%;
+    --secondary-foreground: 280 100% 5%;
+
+    --muted: 280 50% 15%;
+    --muted-foreground: 320 50% 50%;
+
+    --accent: 50 100% 55%;
+    --accent-foreground: 280 100% 5%;
+
+    --destructive: 0 85% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 320 80% 40%;
+    --input: 280 50% 12%;
+    --ring: 320 100% 55%;
+
+    --terminal-glow: 0 0 20px hsl(320 100% 55% / 0.5);
+    --grid-color: hsl(320 30% 30% / 0.05);
   }
 }
 
