@@ -420,5 +420,5 @@ All colors MUST be HSL.
 }
 
 .animate-om {
-  animation: omRotate 2s ease-in-out infinite;
+  animation: omRotate 3s ease-in-out infinite;
 }
