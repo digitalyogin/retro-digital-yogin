@@ -4,9 +4,6 @@ import { Projects } from "@/components/Projects";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import { AsciiSkullBackground } from "@/components/AsciiSkullBackground";
-import { CustomCursor } from "@/components/CustomCursor";
-import { SystemStats } from "@/components/SystemStats";
-import { TerminalConsole } from "@/components/TerminalConsole";
 import { useScrollProgress } from "@/hooks/useScrollAnimation";
 
 const Index = () => {
@@ -16,11 +13,6 @@ const Index = () => {
     <div className="min-h-screen relative">
       {/* Background Effects */}
       <AsciiSkullBackground />
-      
-      {/* Interactive Elements */}
-      <CustomCursor />
-      <SystemStats />
-      <TerminalConsole />
 
       {/* Scroll Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
