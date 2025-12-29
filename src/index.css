@@ -67,8 +67,12 @@ All colors MUST be HSL.
     cursor: text !important;
   }
 
-  /* Subtle CRT Scanline Effect - modernized (disabled by default, add .crt class to body to enable) */
-  body.crt::before {
+  /* CRT Scanline Effect with curvature */
+  body.crt-mode {
+    overflow: hidden;
+  }
+  
+  body.crt-mode::before {
     content: "";
     position: fixed;
     top: 0;
@@ -77,13 +81,53 @@ All colors MUST be HSL.
     height: 100%;
     background: repeating-linear-gradient(
       0deg,
-      rgba(0, 0, 0, 0.05),
-      rgba(0, 0, 0, 0.05) 1px,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
       transparent 1px,
       transparent 3px
     );
     pointer-events: none;
+    z-index: 9998;
+    animation: crt-flicker 0.15s infinite;
+  }
+  
+  body.crt-mode::after {
+    content: "";
+    position: fixed;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
     z-index: 9999;
+  }
+  
+  body.crt-mode > * {
+    transform: perspective(1000px) rotateX(1deg);
+    transform-origin: center center;
+  }
+
+  /* Hacker mode - Matrix rain overlay */
+  body.hacker-mode {
+    background: hsl(120 100% 2%) !important;
+  }
+  
+  body.hacker-mode::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, 
+      transparent 0%,
+      hsla(120, 100%, 25%, 0.05) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 9997;
+    animation: matrix-scan 2s linear infinite;
   }
 
   /* Subtle Grid Background - modernized (disabled by default, add .grid class to body to enable) */
@@ -102,6 +146,16 @@ All colors MUST be HSL.
     z-index: 1;
     opacity: 0.6;
   }
+}
+
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.98; }
+}
+
+@keyframes matrix-scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
 }
 
 /* Industrial terminal effects */

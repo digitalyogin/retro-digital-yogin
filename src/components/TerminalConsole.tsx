@@ -8,7 +8,10 @@ import {
   playErrorSound, 
   playBootSound,
   playLightcycleSound,
-  playGlitchSound 
+  playGlitchSound,
+  playArcadeSound,
+  playHackerSound,
+  playCRTSound,
 } from '@/lib/terminalSounds';
 import {
   DIGITAL_YOGIN_LOGO,
@@ -19,6 +22,11 @@ import {
   TRON_QUOTES,
   generateGlitchText,
   SCAN_ANIMATION,
+  SNAKE_GAME_FRAMES,
+  PONG_GAME_FRAMES,
+  generateMatrixLine,
+  HACKER_HEADER,
+  ERROR_ALERTS,
 } from '@/lib/asciiArt';
 
 interface LogEntry {
@@ -51,6 +59,8 @@ export const TerminalConsole = () => {
   const [isBooting, setIsBooting] = useState(true);
   const [typingQueue, setTypingQueue] = useState<LogEntry[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [crtEnabled, setCrtEnabled] = useState(false);
+  const [hackerMode, setHackerMode] = useState(false);
   
   // System stats
   const [cpu, setCpu] = useState(0);
@@ -144,21 +154,7 @@ export const TerminalConsole = () => {
     }
   }, [isOpen, soundEnabled]);
 
-  // Periodic sacred alerts
-  useEffect(() => {
-    if (!isOpen || isBooting) return;
-    
-    const alertInterval = setInterval(() => {
-      const word = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
-      const symbol = SACRED_SYMBOLS[Math.floor(Math.random() * SACRED_SYMBOLS.length)];
-      setLogs(prev => [...prev, { 
-        text: `[${new Date().toLocaleTimeString('it-IT')}] ${symbol} ALERT: ${word} ${symbol}`, 
-        type: 'output' 
-      }]);
-    }, 15000);
-    
-    return () => clearInterval(alertInterval);
-  }, [isOpen, isBooting]);
+  // Sacred alerts now only appear on errors (removed periodic alerts)
 
   const getPromptText = () => {
     switch (mode) {
@@ -274,6 +270,9 @@ export const TerminalConsole = () => {
           '║ incentivi  - Vai agli incentivi    ║',
           '║ glitch     - ??? [CLASSIFIED]      ║',
           '║ lightcycle - Corri sulla Griglia   ║',
+          '║ arcade     - Mini-giochi TRON      ║',
+          '║ crt        - Toggle effetto CRT    ║',
+          '║ hack       - Modalità hacker       ║',
           '║ mcp        - Master Control Prog.  ║',
           '║ flynn      - Citazione di Flynn    ║',
           '║ tron       - Citazione di Tron     ║',
@@ -443,6 +442,96 @@ export const TerminalConsole = () => {
         addLog({ text: '01001000 01100101 01101100 01101100 01101111', type: 'output' });
         addLog({ text: 'Wake up, Neo...', type: 'success' }, true);
       },
+      
+      arcade: () => {
+        if (soundEnabled) playArcadeSound();
+        addLog({ text: '[ARCADE MODE] Seleziona gioco:', type: 'success' });
+        addLog({ text: '1. snake - Snake sulla Griglia', type: 'output' });
+        addLog({ text: '2. pong  - Disc Wars', type: 'output' });
+        addLog({ text: 'Digita "snake" o "pong" per iniziare', type: 'output' });
+      },
+      
+      snake: () => {
+        if (soundEnabled) playArcadeSound();
+        addLog({ text: '[SNAKE GRID] Inizializzazione...', type: 'success' });
+        let frameIndex = 0;
+        const gameInterval = setInterval(() => {
+          if (frameIndex < SNAKE_GAME_FRAMES.length) {
+            SNAKE_GAME_FRAMES[frameIndex].split('\n').forEach(line => {
+              addLog({ text: line, type: 'ascii' });
+            });
+            frameIndex++;
+          } else {
+            clearInterval(gameInterval);
+            addLog({ text: '[GAME OVER] Punteggio salvato nella Griglia', type: 'success' });
+          }
+        }, 1000);
+      },
+      
+      pong: () => {
+        if (soundEnabled) playArcadeSound();
+        addLog({ text: '[DISC WARS] Inizializzazione...', type: 'success' });
+        let frameIndex = 0;
+        const gameInterval = setInterval(() => {
+          if (frameIndex < PONG_GAME_FRAMES.length) {
+            PONG_GAME_FRAMES[frameIndex].split('\n').forEach(line => {
+              addLog({ text: line, type: 'ascii' });
+            });
+            frameIndex++;
+          } else {
+            clearInterval(gameInterval);
+            addLog({ text: TRON_QUOTES[0], type: 'success' });
+          }
+        }, 1200);
+      },
+      
+      crt: () => {
+        if (soundEnabled) playCRTSound();
+        const newState = !crtEnabled;
+        setCrtEnabled(newState);
+        
+        if (newState) {
+          document.body.classList.add('crt-mode');
+          addLog({ text: '[CRT MODE ATTIVATO]', type: 'success' });
+          addLog({ text: 'Scanlines e curvatura schermo abilitati', type: 'output' });
+          addLog({ text: 'Benvenuto negli anni 80, Program.', type: 'output' });
+        } else {
+          document.body.classList.remove('crt-mode');
+          addLog({ text: '[CRT MODE DISATTIVATO]', type: 'success' });
+          addLog({ text: 'Display moderno ripristinato', type: 'output' });
+        }
+      },
+      
+      hack: () => {
+        if (soundEnabled) playHackerSound();
+        const wasHackerMode = hackerMode;
+        setHackerMode(!wasHackerMode);
+        
+        if (!wasHackerMode) {
+          document.body.classList.add('hacker-mode');
+          HACKER_HEADER.split('\n').forEach(line => {
+            addLog({ text: line, type: 'success' });
+          });
+          
+          // Matrix rain effect
+          let streamCount = 0;
+          const matrixInterval = setInterval(() => {
+            if (streamCount < 20) {
+              addLog({ text: generateMatrixLine(50), type: 'output' });
+              streamCount++;
+            } else {
+              clearInterval(matrixInterval);
+              addLog({ text: '[INFILTRAZIONE COMPLETATA]', type: 'success' });
+              addLog({ text: 'Accesso totale alla Griglia ottenuto.', type: 'output' });
+              addLog({ text: '"Wake up, Neo..." - Trinity', type: 'output' });
+            }
+          }, 150);
+        } else {
+          document.body.classList.remove('hacker-mode');
+          addLog({ text: '[HACKER MODE DISATTIVATO]', type: 'success' });
+          addLog({ text: 'Connessione alla Griglia normalizzata', type: 'output' });
+        }
+      },
     };
 
     if (trimmedCmd in commands) {
@@ -450,6 +539,11 @@ export const TerminalConsole = () => {
     } else if (trimmedCmd !== '') {
       if (soundEnabled) playErrorSound();
       addLog({ text: `[ERRORE] Comando non riconosciuto: ${cmd}`, type: 'error' });
+      
+      // Show random error alert
+      const randomAlert = ERROR_ALERTS[Math.floor(Math.random() * ERROR_ALERTS.length)];
+      addLog({ text: `[${new Date().toLocaleTimeString('it-IT')}] ⚠ ${randomAlert}`, type: 'error' });
+      
       addLog({ text: 'Digita "help" per la lista dei comandi', type: 'output' });
     }
   };

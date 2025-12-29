@@ -159,3 +159,80 @@ export const playGlitchSound = () => {
     // Audio not supported or blocked
   }
 };
+
+// Arcade game sound (coin insert)
+export const playArcadeSound = () => {
+  try {
+    const ctx = getAudioContext();
+    const notes = [1200, 1600, 1400, 1800];
+    
+    notes.forEach((freq, i) => {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08);
+      
+      gain.gain.setValueAtTime(0.04, ctx.currentTime + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.1);
+      
+      oscillator.start(ctx.currentTime + i * 0.08);
+      oscillator.stop(ctx.currentTime + i * 0.08 + 0.1);
+    });
+  } catch (e) {
+    // Audio not supported or blocked
+  }
+};
+
+// Hacker mode sound (Matrix-like digital rain)
+export const playHackerSound = () => {
+  try {
+    const ctx = getAudioContext();
+    
+    for (let i = 0; i < 15; i++) {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(200 + Math.random() * 600, ctx.currentTime + i * 0.1);
+      
+      gain.gain.setValueAtTime(0.02, ctx.currentTime + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.08);
+      
+      oscillator.start(ctx.currentTime + i * 0.1);
+      oscillator.stop(ctx.currentTime + i * 0.1 + 0.08);
+    }
+  } catch (e) {
+    // Audio not supported or blocked
+  }
+};
+
+// CRT toggle sound
+export const playCRTSound = () => {
+  try {
+    const ctx = getAudioContext();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(60, ctx.currentTime);
+    oscillator.frequency.setValueAtTime(50, ctx.currentTime + 0.1);
+    
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.2);
+  } catch (e) {
+    // Audio not supported or blocked
+  }
+};
