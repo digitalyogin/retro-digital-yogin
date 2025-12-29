@@ -268,7 +268,7 @@ export const HACKER_HEADER = `
 ║  ██║  ██║██║  ██║╚██████╗██║  ██╗    ║
 ║  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ║
 ╠═══════════════════════════════════════╣
-║  INFILTRAZIONE GRIGLIA IN CORSO...    ║
+║  INFILTRAZIONE PORTALE IN CORSO...    ║
 ╚═══════════════════════════════════════╝`;
 
 // Error alerts for wrong commands
@@ -276,6 +276,6 @@ export const ERROR_ALERTS = [
   'ATTENZIONE: Comando non riconosciuto dal sistema',
   'ALERT: Protocollo sconosciuto rilevato',
   'SISTEMA: Input non valido nella matrice',
-  'GRIGLIA: Errore di sintassi nel flusso dati',
+  'PORTALE: Errore di sintassi nel flusso dati',
   'MCP: Accesso negato a questo comando',
 ];

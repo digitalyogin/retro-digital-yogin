@@ -190,7 +190,7 @@ export const TerminalConsole = () => {
         } else {
           if (soundEnabled) playSuccessSound();
           addLog({ text: '[ACCESSO GARANTITO]', type: 'success' });
-          addLog({ text: `Benvenuto nella Griglia, ${authData.email}`, type: 'success' });
+          addLog({ text: `Benvenuto nel Portale, ${authData.email}`, type: 'success' });
           addLog({ text: TRON_QUOTES[Math.floor(Math.random() * TRON_QUOTES.length)], type: 'output' });
         }
         setAuthData({ email: '', password: '' });
@@ -231,7 +231,7 @@ export const TerminalConsole = () => {
         } else {
           if (soundEnabled) playSuccessSound();
           addLog({ text: '[REGISTRAZIONE COMPLETATA]', type: 'success' });
-          addLog({ text: 'Sei ora parte della Griglia, Program.', type: 'success' });
+          addLog({ text: 'Sei ora parte del Portale, Program.', type: 'success' });
           addLog({ text: FLYNN_QUOTES[0], type: 'output' });
         }
         setAuthData({ email: '', password: '' });
@@ -262,7 +262,7 @@ export const TerminalConsole = () => {
           '║       COMANDI DISPONIBILI          ║',
           '╠════════════════════════════════════╣',
           '║ help       - Questa guida          ║',
-          '║ login      - Accedi alla Griglia   ║',
+          '║ login      - Accedi al Portale     ║',
           '║ register   - Unisciti al sistema   ║',
           '║ logout     - Disconnetti           ║',
           '║ whoami     - Chi sei, Program?     ║',
@@ -270,7 +270,7 @@ export const TerminalConsole = () => {
           '║ scan       - Apri Digital Oracle   ║',
           '║ incentivi  - Vai agli incentivi    ║',
           '║ glitch     - ??? [CLASSIFIED]      ║',
-          '║ lightcycle - Corri sulla Griglia   ║',
+          '║ lightcycle - Corri sul Portale     ║',
           '║ arcade     - Mini-giochi TRON      ║',
           '║ crt        - Toggle effetto CRT    ║',
           '║ hack       - Modalità hacker       ║',
@@ -288,18 +288,18 @@ export const TerminalConsole = () => {
       
       login: () => {
         if (user) {
-          addLog({ text: '[GIÀ CONNESSO] Sei già nella Griglia.', type: 'error' });
+          addLog({ text: '[GIÀ CONNESSO] Sei già nel Portale.', type: 'error' });
           return;
         }
         addLog({ text: '[PROTOCOLLO_ACCESSO INIZIALIZZATO]', type: 'success' });
-        addLog({ text: 'La Griglia richiede identificazione.', type: 'output' }, true);
+        addLog({ text: 'Il Portale richiede identificazione.', type: 'output' }, true);
         addLog({ text: 'Inserisci il tuo identificatore (email):', type: 'output' });
         setMode('login_email');
       },
       
       register: () => {
         if (user) {
-          addLog({ text: '[GIÀ REGISTRATO] Sei già parte della Griglia.', type: 'error' });
+          addLog({ text: '[GIÀ REGISTRATO] Sei già parte del Portale.', type: 'error' });
           return;
         }
         addLog({ text: '[CREAZIONE NUOVO UTENTE]', type: 'success' });
@@ -310,7 +310,7 @@ export const TerminalConsole = () => {
       
       logout: async () => {
         if (!user) {
-          addLog({ text: '[ERRORE] Non sei connesso alla Griglia.', type: 'error' });
+          addLog({ text: '[ERRORE] Non sei connesso al Portale.', type: 'error' });
           return;
         }
         addLog({ text: '[DISCONNESSIONE IN CORSO...]', type: 'output' });
@@ -425,7 +425,7 @@ export const TerminalConsole = () => {
       quote: () => {
         const allQuotes = [...TRON_QUOTES, ...MCP_QUOTES, ...FLYNN_QUOTES];
         const quote = allQuotes[Math.floor(Math.random() * allQuotes.length)];
-        addLog({ text: '[CITAZIONE DALLA GRIGLIA]', type: 'success' });
+        addLog({ text: '[CITAZIONE DAL PORTALE]', type: 'success' });
         addLog({ text: quote, type: 'output' }, true);
       },
       
@@ -495,7 +495,7 @@ export const TerminalConsole = () => {
       arcade: () => {
         if (soundEnabled) playArcadeSound();
         addLog({ text: '[ARCADE MODE] Seleziona gioco:', type: 'success' });
-        addLog({ text: '1. snake - Snake sulla Griglia', type: 'output' });
+        addLog({ text: '1. snake - Snake sul Portale', type: 'output' });
         addLog({ text: '2. pong  - Disc Wars', type: 'output' });
         addLog({ text: 'Digita "snake" o "pong" per iniziare', type: 'output' });
       },
@@ -512,7 +512,7 @@ export const TerminalConsole = () => {
             frameIndex++;
           } else {
             clearInterval(gameInterval);
-            addLog({ text: '[GAME OVER] Punteggio salvato nella Griglia', type: 'success' });
+            addLog({ text: '[GAME OVER] Punteggio salvato nel Portale', type: 'success' });
           }
         }, 1000);
       },
@@ -571,14 +571,14 @@ export const TerminalConsole = () => {
             } else {
               clearInterval(matrixInterval);
               addLog({ text: '[INFILTRAZIONE COMPLETATA]', type: 'success' });
-              addLog({ text: 'Accesso totale alla Griglia ottenuto.', type: 'output' });
+              addLog({ text: 'Accesso totale al Portale ottenuto.', type: 'output' });
               addLog({ text: '"Wake up, Neo..." - Trinity', type: 'output' });
             }
           }, 150);
         } else {
           document.body.classList.remove('hacker-mode');
           addLog({ text: '[HACKER MODE DISATTIVATO]', type: 'success' });
-          addLog({ text: 'Connessione alla Griglia normalizzata', type: 'output' });
+          addLog({ text: 'Connessione al Portale normalizzata', type: 'output' });
         }
       },
     };
