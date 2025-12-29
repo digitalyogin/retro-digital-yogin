@@ -95,7 +95,7 @@ export const SystemStats = () => {
   }, [isOpen]);
 
   return (
-    <div className="fixed top-4 right-4 z-50 font-mono">
+    <div className="fixed bottom-4 left-4 z-50 font-mono">
       {/* Contenitore unico per evitare offset */}
       <div className={`border-2 border-primary bg-card/95 backdrop-blur-sm transition-all duration-300 ${
         !isOpen ? 'w-auto' : isMinimized ? 'w-12 h-12' : 'w-80'
@@ -104,9 +104,10 @@ export const SystemStats = () => {
         {!isOpen ? (
           <button 
             onClick={() => setIsOpen(true)}
-            className="px-3 py-2 hover:bg-primary/10 transition-all text-xs text-primary w-full h-full text-left"
+            className="px-3 py-2 hover:bg-primary/10 transition-all text-xs text-primary w-full h-full text-left flex items-center gap-2"
           >
-            [SYSTEM_MONITOR]
+            <Activity size={12} className="text-primary animate-pulse" />
+            <span>[SYS_MONITOR]</span>
           </button>
         ) : (
           <>

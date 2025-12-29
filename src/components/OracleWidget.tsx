@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Search, MessageSquare, Sparkles, Download, Mail, CheckCircle } from "lucide-react";
+import { Loader2, Search, Sparkles, Download, Mail, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-type Mode = "chat" | "scan";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -12,18 +10,18 @@ interface Message {
 
 export const OracleWidget = () => {
   const { toast } = useToast();
-  const [mode, setMode] = useState<Mode>("chat");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [scanProgress, setScanProgress] = useState("");
-  const [lastScanUrl, setLastScanUrl] = useState("");
+  const [lastScanInput, setLastScanInput] = useState("");
   const [lastScanResult, setLastScanResult] = useState("");
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
   const [leadForm, setLeadForm] = useState({ name: "", email: "", phone: "" });
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const widgetRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,7 +41,7 @@ export const OracleWidget = () => {
   };
 
   const downloadReport = () => {
-    if (!lastScanResult || !lastScanUrl) return;
+    if (!lastScanResult || !lastScanInput) return;
 
     const reportContent = `
 ================================================================================
@@ -51,7 +49,7 @@ export const OracleWidget = () => {
                       Analisi Presenza Online
 ================================================================================
 
-Sito analizzato: ${lastScanUrl}
+Input analizzato: ${lastScanInput}
 Data: ${new Date().toLocaleDateString("it-IT")}
 
 --------------------------------------------------------------------------------
@@ -84,7 +82,7 @@ Per un checkup professionale completo, contattaci!
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leadForm.email || !lastScanResult || !lastScanUrl) return;
+    if (!leadForm.email || !lastScanResult || !lastScanInput) return;
 
     setIsSubmittingLead(true);
 
@@ -95,7 +93,7 @@ Per un checkup professionale completo, contattaci!
         email: leadForm.email,
         name: leadForm.name || null,
         phone: leadForm.phone || null,
-        website_url: lastScanUrl,
+        website_url: lastScanInput,
         scan_result: lastScanResult,
         score: score,
       });
@@ -190,59 +188,29 @@ Per un checkup professionale completo, contattaci!
     return fullContent;
   };
 
-  const handleChat = async (userInput: string) => {
-    const userMessage: Message = { role: "user", content: userInput };
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
-
-    try {
-      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-
-      await streamResponse(
-        "oracle-chat",
-        { messages: [...messages, userMessage] },
-        (content) => {
-          setMessages((prev) =>
-            prev.map((m, i) =>
-              i === prev.length - 1 ? { ...m, content } : m
-            )
-          );
-        }
-      );
-    } catch (error) {
-      console.error("Chat error:", error);
-      setMessages((prev) => [
-        ...prev.slice(0, -1),
-        {
-          role: "assistant",
-          content: error instanceof Error ? `ERRORE: ${error.message}` : "ERRORE: Impossibile contattare l'Oracle.",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleScan = async (url: string) => {
+  const handleScan = async (userInput: string) => {
     setShowLeadForm(false);
     setLeadSubmitted(false);
-    setLastScanUrl(url);
+    setLastScanInput(userInput);
     setLastScanResult("");
+
+    // Scroll widget into view when scan starts
+    widgetRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     setMessages((prev) => [
       ...prev,
-      { role: "system", content: `🔍 SCANNING: ${url}` },
+      { role: "system", content: `🔍 ANALISI: ${userInput}` },
     ]);
     setIsLoading(true);
-    setScanProgress("Connessione al sito...");
+    setScanProgress("Connessione in corso...");
 
     try {
-      setTimeout(() => setScanProgress("Estrazione contenuti..."), 1500);
-      setTimeout(() => setScanProgress("Analisi AI in corso..."), 3000);
+      setTimeout(() => setScanProgress("Analisi in corso..."), 1500);
+      setTimeout(() => setScanProgress("Elaborazione AI..."), 3000);
 
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
-      const result = await streamResponse("oracle-scan", { url }, (content) => {
+      const result = await streamResponse("oracle-scan", { input: userInput }, (content) => {
         setScanProgress("");
         setLastScanResult(content);
         setMessages((prev) =>
@@ -262,7 +230,7 @@ Per un checkup professionale completo, contattaci!
         ...prev.slice(0, -1),
         {
           role: "assistant",
-          content: error instanceof Error ? `ERRORE: ${error.message}` : "ERRORE: Impossibile analizzare il sito.",
+          content: error instanceof Error ? `ERRORE: ${error.message}` : "ERRORE: Impossibile completare l'analisi.",
         },
       ]);
     } finally {
@@ -277,28 +245,11 @@ Per un checkup professionale completo, contattaci!
 
     const userInput = input.trim();
     setInput("");
-
-    if (mode === "scan") {
-      await handleScan(userInput);
-    } else {
-      await handleChat(userInput);
-    }
-  };
-
-  const switchMode = (newMode: Mode) => {
-    if (newMode !== mode) {
-      setMode(newMode);
-      setMessages([]);
-      setInput("");
-      setShowLeadForm(false);
-      setLeadSubmitted(false);
-      setLastScanResult("");
-      setLastScanUrl("");
-    }
+    await handleScan(userInput);
   };
 
   return (
-    <div className="border-2 border-primary bg-card p-6 md:p-8 mb-6 rounded-sm animate-fade-in">
+    <div ref={widgetRef} className="border-2 border-primary bg-card p-6 md:p-8 mb-6 rounded-sm animate-fade-in scroll-mt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 border-b border-primary/30 pb-3">
         <div className="flex items-center gap-3">
@@ -308,50 +259,17 @@ Per un checkup professionale completo, contattaci!
         <span className="text-green-500 animate-pulse text-sm">● ONLINE</span>
       </div>
 
-      {/* Mode Selector */}
-      <div className="flex gap-3 mb-5">
-        <button
-          onClick={() => switchMode("chat")}
-          className={`flex items-center gap-2 px-5 py-3 text-base border transition-colors ${
-            mode === "chat"
-              ? "border-primary bg-primary/20 text-primary"
-              : "border-primary/30 text-muted-foreground hover:border-primary/60"
-          }`}
-        >
-          <MessageSquare className="w-5 h-5" />
-          CHAT
-        </button>
-        <button
-          onClick={() => switchMode("scan")}
-          className={`flex items-center gap-2 px-5 py-3 text-base border transition-colors ${
-            mode === "scan"
-              ? "border-primary bg-primary/20 text-primary"
-              : "border-primary/30 text-muted-foreground hover:border-primary/60"
-          }`}
-        >
-          <Search className="w-5 h-5" />
-          SCAN
-        </button>
-      </div>
-
-      {/* Chat/Scan Area - BIGGER */}
+      {/* Scan Area */}
       <div className="h-72 md:h-80 overflow-y-auto mb-5 space-y-4 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent pr-2">
         {messages.length === 0 ? (
           <div className="text-muted-foreground text-base space-y-3">
-            {mode === "chat" ? (
-              <>
-                <p className="text-lg">{'>'} Modalità CHAT attiva.</p>
-                <p>{'>'} Chiedi informazioni sulla tua presenza online.</p>
-                <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg">{'>'} Modalità SCAN attiva.</p>
-                <p>{'>'} Inserisci l'URL del tuo sito per un'analisi completa.</p>
-                <p className="text-muted-foreground">{'>'} Esempio: www.miosito.it</p>
-                <p className="text-primary animate-pulse">{'>'} In attesa di URL...</p>
-              </>
-            )}
+            <p className="text-lg">{'>'} DIGITAL_ORACLE pronto per l'analisi.</p>
+            <p>{'>'} Inserisci:</p>
+            <p className="text-primary/80 pl-4">• URL del tuo sito (es: www.miosito.it)</p>
+            <p className="text-primary/80 pl-4">• Profilo social (es: instagram.com/tuobrand)</p>
+            <p className="text-primary/80 pl-4">• Descrizione della tua attività (es: "Ho una sartoria a Milano, non ho un sito")</p>
+            <p className="text-muted-foreground mt-4">{'>'} L'Oracle ti guiderà con consigli personalizzati, incentivi statali e strategie di crescita.</p>
+            <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
           </div>
         ) : (
           messages.map((msg, idx) => (
@@ -464,7 +382,7 @@ Per un checkup professionale completo, contattaci!
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={mode === "chat" ? "Scrivi la tua domanda..." : "Inserisci URL (es: www.miosito.it)"}
+            placeholder="URL, profilo social o descrivi la tua attività..."
             disabled={isLoading}
             className="w-full bg-background border border-primary/50 text-foreground pl-10 pr-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground disabled:opacity-50"
           />
@@ -476,21 +394,15 @@ Per un checkup professionale completo, contattaci!
         >
           {isLoading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
-          ) : mode === "scan" ? (
-            <Search className="w-5 h-5" />
           ) : (
-            <Send className="w-5 h-5" />
+            <Search className="w-5 h-5" />
           )}
         </button>
       </form>
 
       {/* Footer */}
       <div className="text-sm text-muted-foreground mt-4 text-center">
-        {mode === "scan" ? (
-          <span>Analisi powered by <span className="text-primary">FIRECRAWL + AI</span></span>
-        ) : (
-          <span>Powered by <span className="text-primary">DIGITAL_YOGIN</span></span>
-        )}
+        <span>Analisi powered by <span className="text-primary">DIGITAL_YOGIN AI</span></span>
       </div>
     </div>
   );
