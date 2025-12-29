@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLeads from "./pages/AdminLeads";
 import Incentivi from "./pages/Incentivi";
+import Auth from "./pages/Auth";
+import Notifiche from "./pages/Notifiche";
 import IntroLoader from "./components/IntroLoader";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<AdminLeads />} />
             <Route path="/incentivi" element={<Incentivi />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/notifiche" element={<Notifiche />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

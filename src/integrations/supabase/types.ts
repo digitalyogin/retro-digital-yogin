@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      notification_subscriptions: {
+        Row: {
+          alert_days_before: number
+          created_at: string
+          deadline_alerts_enabled: boolean
+          id: string
+          newsletter_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_days_before?: number
+          created_at?: string
+          deadline_alerts_enabled?: boolean
+          id?: string
+          newsletter_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_days_before?: number
+          created_at?: string
+          deadline_alerts_enabled?: boolean
+          id?: string
+          newsletter_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       oracle_leads: {
         Row: {
           created_at: string
@@ -53,6 +83,54 @@ export type Database = {
           status?: string
           updated_at?: string
           website_url?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_favorite_incentives: {
+        Row: {
+          created_at: string
+          id: string
+          incentive_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          incentive_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          incentive_id?: string
+          user_id?: string
         }
         Relationships: []
       }
