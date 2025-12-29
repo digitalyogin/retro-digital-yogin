@@ -57,8 +57,14 @@ All colors MUST be HSL.
     cursor: none;
   }
 
-  * {
+  *:not(input):not(textarea):not([contenteditable="true"]) {
     cursor: none !important;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: text !important;
   }
 
   /* Subtle CRT Scanline Effect - modernized (disabled by default, add .crt class to body to enable) */
