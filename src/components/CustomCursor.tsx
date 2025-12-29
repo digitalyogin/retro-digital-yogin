@@ -4,17 +4,24 @@ import { useMousePosition } from '@/hooks/useMousePosition';
 export const CustomCursor = () => {
   const { x, y } = useMousePosition();
   const [isHovering, setIsHovering] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const isInteractive = target.closest('a, button, input, [role="button"]');
-      setIsHovering(!!isInteractive);
+      const isTextInput = target.closest('input, textarea, [contenteditable="true"]');
+      const isClickable = target.closest('a, button, [role="button"]');
+      
+      setIsTyping(!!isTextInput);
+      setIsHovering(!!isClickable && !isTextInput);
     };
 
     document.addEventListener('mouseover', handleMouseOver);
     return () => document.removeEventListener('mouseover', handleMouseOver);
   }, []);
+
+  // Nasconde il cursore custom quando si è in un campo di testo
+  if (isTyping) return null;
 
   return (
     <div
