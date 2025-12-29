@@ -146,17 +146,42 @@ All colors MUST be HSL.
     --terminal-glow: 0 0 20px hsl(320 100% 55% / 0.5);
     --grid-color: hsl(320 30% 30% / 0.05);
   }
+
+  /* Theme transition animation */
+  :root {
+    transition: 
+      --background 0.5s ease-in-out,
+      --foreground 0.5s ease-in-out,
+      --primary 0.5s ease-in-out,
+      --accent 0.5s ease-in-out;
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
+    transition: background-color 0.5s ease-in-out, 
+                color 0.5s ease-in-out, 
+                border-color 0.5s ease-in-out,
+                box-shadow 0.5s ease-in-out;
   }
 
   body {
     @apply bg-background text-foreground font-terminal;
     position: relative;
     cursor: none;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+  }
+
+  /* Theme change flash effect */
+  @keyframes theme-flash {
+    0% { opacity: 1; filter: brightness(1); }
+    50% { opacity: 0.8; filter: brightness(1.5); }
+    100% { opacity: 1; filter: brightness(1); }
+  }
+
+  .theme-transitioning {
+    animation: theme-flash 0.5s ease-in-out;
   }
 
   *:not(input):not(textarea):not([contenteditable="true"]) {

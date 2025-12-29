@@ -451,38 +451,45 @@ export const TerminalConsole = () => {
       
       default: () => {
         if (soundEnabled) playSuccessSound();
+        document.body.classList.add('theme-transitioning');
         document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
         setCurrentTheme('default');
         addLog({ text: '[TEMA ATTIVATO] Yogin Gold', type: 'success' });
         addLog({ text: '"La via di mezzo tra antico e moderno"', type: 'output' });
+        setTimeout(() => document.body.classList.remove('theme-transitioning'), 500);
       },
       
       tron: () => {
         if (soundEnabled) playSuccessSound();
+        document.body.classList.add('theme-transitioning');
         document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
         document.documentElement.classList.add('theme-tron');
         setCurrentTheme('tron');
         addLog({ text: '[TEMA ATTIVATO] TRON Blue', type: 'success' });
         addLog({ text: '"Greetings, Program." - MCP', type: 'output' });
+        setTimeout(() => document.body.classList.remove('theme-transitioning'), 500);
       },
       
       matrix: () => {
-        addLog({ text: 'Inizializzazione protocollo Matrix...', type: 'success' });
         if (soundEnabled) playSuccessSound();
+        document.body.classList.add('theme-transitioning');
         document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
         document.documentElement.classList.add('theme-matrix');
         setCurrentTheme('matrix');
         addLog({ text: '[TEMA ATTIVATO] Matrix Green', type: 'success' });
         addLog({ text: '"Wake up, Neo..." - Trinity', type: 'output' });
+        setTimeout(() => document.body.classList.remove('theme-transitioning'), 500);
       },
       
       cyberpunk: () => {
         if (soundEnabled) playSuccessSound();
+        document.body.classList.add('theme-transitioning');
         document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
         document.documentElement.classList.add('theme-cyberpunk');
         setCurrentTheme('cyberpunk');
         addLog({ text: '[TEMA ATTIVATO] Cyberpunk Pink', type: 'success' });
         addLog({ text: '"Night City non dorme mai, chooms."', type: 'output' });
+        setTimeout(() => document.body.classList.remove('theme-transitioning'), 500);
       },
       
       arcade: () => {
