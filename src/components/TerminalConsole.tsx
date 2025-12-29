@@ -61,6 +61,7 @@ export const TerminalConsole = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [crtEnabled, setCrtEnabled] = useState(false);
   const [hackerMode, setHackerMode] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<'default' | 'tron' | 'matrix' | 'cyberpunk'>('default');
   
   // System stats
   const [cpu, setCpu] = useState(0);
@@ -273,9 +274,10 @@ export const TerminalConsole = () => {
           '║ arcade     - Mini-giochi TRON      ║',
           '║ crt        - Toggle effetto CRT    ║',
           '║ hack       - Modalità hacker       ║',
-          '║ mcp        - Master Control Prog.  ║',
-          '║ flynn      - Citazione di Flynn    ║',
-          '║ tron       - Citazione di Tron     ║',
+          '║ theme      - Cambia tema colori    ║',
+          '║ mcp        - Citazione MCP         ║',
+          '║ flynn      - Citazione Flynn       ║',
+          '║ quote      - Citazione casuale     ║',
           '║ logo       - ASCII Art logo        ║',
           '║ sound      - Toggle audio 8-bit    ║',
           '║ clear      - Pulisci terminale     ║',
@@ -420,9 +422,10 @@ export const TerminalConsole = () => {
         addLog({ text: quote, type: 'output' }, true);
       },
       
-      tron: () => {
-        const quote = TRON_QUOTES[Math.floor(Math.random() * TRON_QUOTES.length)];
-        addLog({ text: '[TRON]', type: 'success' });
+      quote: () => {
+        const allQuotes = [...TRON_QUOTES, ...MCP_QUOTES, ...FLYNN_QUOTES];
+        const quote = allQuotes[Math.floor(Math.random() * allQuotes.length)];
+        addLog({ text: '[CITAZIONE DALLA GRIGLIA]', type: 'success' });
         addLog({ text: quote, type: 'output' }, true);
       },
       
@@ -437,10 +440,49 @@ export const TerminalConsole = () => {
         addLog({ text: `[AUDIO ${!soundEnabled ? 'ATTIVATO' : 'DISATTIVATO'}]`, type: 'success' });
       },
       
+      theme: () => {
+        addLog({ text: '[THEME SELECTOR] Scegli un tema:', type: 'success' });
+        addLog({ text: '• default   - Yogin Gold (originale)', type: currentTheme === 'default' ? 'success' : 'output' });
+        addLog({ text: '• tron      - TRON Blue', type: currentTheme === 'tron' ? 'success' : 'output' });
+        addLog({ text: '• matrix    - Matrix Green', type: currentTheme === 'matrix' ? 'success' : 'output' });
+        addLog({ text: '• cyberpunk - Cyberpunk Pink', type: currentTheme === 'cyberpunk' ? 'success' : 'output' });
+        addLog({ text: 'Digita il nome del tema per attivarlo', type: 'output' });
+      },
+      
+      default: () => {
+        if (soundEnabled) playSuccessSound();
+        document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
+        setCurrentTheme('default');
+        addLog({ text: '[TEMA ATTIVATO] Yogin Gold', type: 'success' });
+        addLog({ text: '"La via di mezzo tra antico e moderno"', type: 'output' });
+      },
+      
+      tron: () => {
+        if (soundEnabled) playSuccessSound();
+        document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
+        document.documentElement.classList.add('theme-tron');
+        setCurrentTheme('tron');
+        addLog({ text: '[TEMA ATTIVATO] TRON Blue', type: 'success' });
+        addLog({ text: '"Greetings, Program." - MCP', type: 'output' });
+      },
+      
       matrix: () => {
         addLog({ text: 'Inizializzazione protocollo Matrix...', type: 'success' });
-        addLog({ text: '01001000 01100101 01101100 01101100 01101111', type: 'output' });
-        addLog({ text: 'Wake up, Neo...', type: 'success' }, true);
+        if (soundEnabled) playSuccessSound();
+        document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
+        document.documentElement.classList.add('theme-matrix');
+        setCurrentTheme('matrix');
+        addLog({ text: '[TEMA ATTIVATO] Matrix Green', type: 'success' });
+        addLog({ text: '"Wake up, Neo..." - Trinity', type: 'output' });
+      },
+      
+      cyberpunk: () => {
+        if (soundEnabled) playSuccessSound();
+        document.documentElement.classList.remove('theme-tron', 'theme-matrix', 'theme-cyberpunk');
+        document.documentElement.classList.add('theme-cyberpunk');
+        setCurrentTheme('cyberpunk');
+        addLog({ text: '[TEMA ATTIVATO] Cyberpunk Pink', type: 'success' });
+        addLog({ text: '"Night City non dorme mai, chooms."', type: 'output' });
       },
       
       arcade: () => {
