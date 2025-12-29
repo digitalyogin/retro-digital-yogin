@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Loader2, Search, Sparkles, Download, Mail, CheckCircle } from "lucide-react";
+import { Loader2, Search, Sparkles, Download, Mail, CheckCircle, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -10,6 +11,7 @@ interface Message {
 
 export const OracleWidget = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,8 +22,21 @@ export const OracleWidget = () => {
   const [leadSubmitted, setLeadSubmitted] = useState(false);
   const [leadForm, setLeadForm] = useState({ name: "", email: "", phone: "" });
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [hasIncentives, setHasIncentives] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
+
+  // Check if the response mentions incentives
+  const checkForIncentives = (text: string): boolean => {
+    const incentiveKeywords = [
+      "incentiv", "bonus", "fondo", "bando", "agevolazion", 
+      "contribut", "finanziament", "tasso zero", "fondo perduto",
+      "impresa donna", "resto al sud", "digitalizzazione", "credito d'imposta",
+      "smart&start", "NITO", "voucher"
+    ];
+    const lowerText = text.toLowerCase();
+    return incentiveKeywords.some(keyword => lowerText.includes(keyword));
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -193,6 +208,7 @@ Per un checkup professionale completo, contattaci!
     setLeadSubmitted(false);
     setLastScanInput(userInput);
     setLastScanResult("");
+    setHasIncentives(false);
 
     // Scroll widget into view when scan starts
     widgetRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -220,9 +236,10 @@ Per un checkup professionale completo, contattaci!
         );
       });
 
-      // Show lead form after successful scan
+      // Show lead form and check for incentives after successful scan
       if (result) {
         setShowLeadForm(true);
+        setHasIncentives(checkForIncentives(result));
       }
     } catch (error) {
       console.error("Scan error:", error);
@@ -361,9 +378,9 @@ Per un checkup professionale completo, contattaci!
         </div>
       )}
 
-      {/* Actions (Download) */}
+      {/* Actions (Download + Incentives) */}
       {lastScanResult && !isLoading && (
-        <div className="flex gap-3 mb-5">
+        <div className="flex flex-wrap gap-3 mb-5">
           <button
             onClick={downloadReport}
             className="flex items-center gap-2 px-5 py-3 text-base border border-primary/50 text-primary hover:bg-primary/10 transition-colors"
@@ -371,6 +388,15 @@ Per un checkup professionale completo, contattaci!
             <Download className="w-5 h-5" />
             SCARICA_REPORT
           </button>
+          {hasIncentives && (
+            <button
+              onClick={() => navigate("/incentivi")}
+              className="flex items-center gap-2 px-5 py-3 text-base border border-green-500/50 bg-green-500/10 text-green-500 hover:bg-green-500/20 transition-colors animate-pulse"
+            >
+              <Gift className="w-5 h-5" />
+              SCOPRI_INCENTIVI
+            </button>
+          )}
         </div>
       )}
 
