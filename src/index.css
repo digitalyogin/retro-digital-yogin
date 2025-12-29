@@ -449,3 +449,12 @@ All colors MUST be HSL.
 .animate-om {
   animation: omGlitch 1.5s ease-in-out infinite;
 }
+
+/* Glitch effect for terminal command */
+.glitch-effect {
+  animation: screen-shake 0.5s ease-in-out;
+}
+
+.glitch-effect * {
+  animation: glitch 0.1s linear infinite;
+}

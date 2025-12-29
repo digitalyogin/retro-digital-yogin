@@ -11,6 +11,8 @@ import Incentivi from "./pages/Incentivi";
 import Auth from "./pages/Auth";
 import Notifiche from "./pages/Notifiche";
 import IntroLoader from "./components/IntroLoader";
+import { CustomCursor } from "./components/CustomCursor";
+import { TerminalConsole } from "./components/TerminalConsole";
 
 const queryClient = new QueryClient();
 
@@ -22,8 +24,10 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        {showIntro && <IntroLoader onComplete={() => setShowIntro(false)} />}
+        <CustomCursor />
         <BrowserRouter>
+          <TerminalConsole />
+          {showIntro && <IntroLoader onComplete={() => setShowIntro(false)} />}
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<AdminLeads />} />

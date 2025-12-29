@@ -1,89 +1,462 @@
-import { useState, useEffect, useRef } from 'react';
-import { Terminal, Minimize2, Maximize2, X } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Terminal, Minimize2, Maximize2, X, Cpu, HardDrive, Wifi } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { 
+  playKeyBeep, 
+  playSuccessSound, 
+  playErrorSound, 
+  playBootSound,
+  playLightcycleSound,
+  playGlitchSound 
+} from '@/lib/terminalSounds';
+import {
+  DIGITAL_YOGIN_LOGO,
+  LIGHTCYCLE_FRAMES,
+  BOOT_SEQUENCE,
+  MCP_QUOTES,
+  FLYNN_QUOTES,
+  TRON_QUOTES,
+  generateGlitchText,
+  SCAN_ANIMATION,
+} from '@/lib/asciiArt';
 
 interface LogEntry {
   text: string;
-  type: 'input' | 'output' | 'error' | 'success';
+  type: 'input' | 'output' | 'error' | 'success' | 'ascii';
 }
 
+type TerminalMode = 
+  | 'normal' 
+  | 'login_email' 
+  | 'login_password' 
+  | 'register_email' 
+  | 'register_password' 
+  | 'register_confirm';
+
+const SACRED_SYMBOLS = "ॐΩψφθλπ∞∆Σ☿♀⊕♂♃♄⛢☉☽अआइईउऊऋएऐओऔ".split('');
+const KEYWORDS = ['VOLONTÀ', 'RAPPRESENTAZIONE', 'MAYA', 'VELO', 'ILLUSIONE', 'REALTÀ'];
+
 export const TerminalConsole = () => {
+  const navigate = useNavigate();
+  const { user, signIn, signUp, signOut, loading: authLoading } = useAuth();
+  
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState('');
-  const [logs, setLogs] = useState<LogEntry[]>([
-    { text: 'DIGITAL_YOGIN Terminal v2.4.1', type: 'success' },
-    { text: 'Digita "help" per la lista dei comandi disponibili', type: 'output' },
-  ]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [mode, setMode] = useState<TerminalMode>('normal');
+  const [authData, setAuthData] = useState({ email: '', password: '' });
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isBooting, setIsBooting] = useState(true);
+  const [typingQueue, setTypingQueue] = useState<LogEntry[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  
+  // System stats
+  const [cpu, setCpu] = useState(0);
+  const [memory, setMemory] = useState(0);
+  const [network, setNetwork] = useState(0);
+  
   const inputRef = useRef<HTMLInputElement>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const bootCompleted = useRef(false);
 
-  const commands = {
-    help: () => [
-      { text: 'Comandi disponibili:', type: 'output' as const },
-      { text: '  help       - Mostra questa guida', type: 'output' as const },
-      { text: '  servizi    - Mostra servizi disponibili', type: 'output' as const },
-      { text: '  progetti   - Mostra progetti completati', type: 'output' as const },
-      { text: '  info       - Informazioni su Digital Yogin', type: 'output' as const },
-      { text: '  clear      - Pulisci il terminale', type: 'output' as const },
-      { text: '  matrix     - ???', type: 'output' as const },
-    ],
-    servizi: () => [
-      { text: '=== SERVIZI DISPONIBILI ===', type: 'success' as const },
-      { text: '01. Sviluppo Web', type: 'output' as const },
-      { text: '02. App Mobili', type: 'output' as const },
-      { text: '03. Design UI/UX', type: 'output' as const },
-      { text: '04. Consulenza Tech', type: 'output' as const },
-    ],
-    progetti: () => [
-      { text: '=== DATABASE PROGETTI ===', type: 'success' as const },
-      { text: 'Totale progetti completati: 6', type: 'output' as const },
-      { text: 'In produzione: 2', type: 'output' as const },
-      { text: 'Deployed: 3', type: 'output' as const },
-      { text: 'In sviluppo: 1', type: 'output' as const },
-    ],
-    info: () => [
-      { text: '=== DIGITAL YOGIN ===', type: 'success' as const },
-      { text: 'Agenzia digitale specializzata in:', type: 'output' as const },
-      { text: '- Sviluppo web e mobile', type: 'output' as const },
-      { text: '- Design UI/UX', type: 'output' as const },
-      { text: '- Consulenza tecnologica', type: 'output' as const },
-      { text: '"La via di mezzo tra l\'antico e il moderno"', type: 'output' as const },
-    ],
-    matrix: () => [
-      { text: 'Inizializzazione protocollo Matrix...', type: 'success' as const },
-      { text: '01001000 01100101 01101100 01101100 01101111', type: 'output' as const },
-      { text: 'Wake up, Neo...', type: 'success' as const },
-    ],
-    clear: () => [],
+  // System stats updater
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCpu(Math.floor(Math.random() * 40) + 30);
+      setMemory(Math.floor(Math.random() * 30) + 50);
+      setNetwork(Math.floor(Math.random() * 50) + 30);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Typing effect processor
+  const typeText = useCallback((text: string, onComplete: () => void) => {
+    let index = 0;
+    const chars: string[] = [];
+    
+    const typeChar = () => {
+      if (index < text.length) {
+        chars.push(text[index]);
+        if (soundEnabled && Math.random() < 0.3) playKeyBeep();
+        index++;
+        setLogs(prev => {
+          const newLogs = [...prev];
+          if (newLogs.length > 0) {
+            newLogs[newLogs.length - 1] = { ...newLogs[newLogs.length - 1], text: chars.join('') };
+          }
+          return newLogs;
+        });
+        setTimeout(typeChar, 15 + Math.random() * 25);
+      } else {
+        onComplete();
+      }
+    };
+    
+    setLogs(prev => [...prev, { text: '', type: 'output' }]);
+    typeChar();
+  }, [soundEnabled]);
+
+  // Add log with optional typing effect
+  const addLog = useCallback((entry: LogEntry, withTyping = false) => {
+    if (withTyping && entry.type !== 'input') {
+      setTypingQueue(prev => [...prev, entry]);
+    } else {
+      setLogs(prev => [...prev, entry]);
+    }
+  }, []);
+
+  // Process typing queue
+  useEffect(() => {
+    if (typingQueue.length > 0 && !isTyping) {
+      setIsTyping(true);
+      const entry = typingQueue[0];
+      typeText(entry.text, () => {
+        setTypingQueue(prev => prev.slice(1));
+        setIsTyping(false);
+      });
+    }
+  }, [typingQueue, isTyping, typeText]);
+
+  // Boot sequence
+  useEffect(() => {
+    if (isOpen && !bootCompleted.current) {
+      bootCompleted.current = true;
+      if (soundEnabled) playBootSound();
+      
+      let i = 0;
+      const bootInterval = setInterval(() => {
+        if (i < BOOT_SEQUENCE.length) {
+          setLogs(prev => [...prev, { text: BOOT_SEQUENCE[i], type: i < 4 ? 'ascii' : 'success' }]);
+          i++;
+        } else {
+          clearInterval(bootInterval);
+          setIsBooting(false);
+          setLogs(prev => [...prev, 
+            { text: '', type: 'output' },
+            { text: 'Digita "help" per la lista dei comandi disponibili', type: 'output' }
+          ]);
+        }
+      }, 100);
+      
+      return () => clearInterval(bootInterval);
+    }
+  }, [isOpen, soundEnabled]);
+
+  // Periodic sacred alerts
+  useEffect(() => {
+    if (!isOpen || isBooting) return;
+    
+    const alertInterval = setInterval(() => {
+      const word = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
+      const symbol = SACRED_SYMBOLS[Math.floor(Math.random() * SACRED_SYMBOLS.length)];
+      setLogs(prev => [...prev, { 
+        text: `[${new Date().toLocaleTimeString('it-IT')}] ${symbol} ALERT: ${word} ${symbol}`, 
+        type: 'output' 
+      }]);
+    }, 15000);
+    
+    return () => clearInterval(alertInterval);
+  }, [isOpen, isBooting]);
+
+  const getPromptText = () => {
+    switch (mode) {
+      case 'login_email': return 'EMAIL >';
+      case 'login_password': return 'PASSWORD >';
+      case 'register_email': return 'EMAIL >';
+      case 'register_password': return 'PASSWORD >';
+      case 'register_confirm': return 'CONFERMA >';
+      default: return '>';
+    }
   };
 
-  const executeCommand = (cmd: string) => {
+  const handleAuthInput = async (value: string) => {
+    switch (mode) {
+      case 'login_email':
+        setAuthData({ ...authData, email: value });
+        addLog({ text: `EMAIL > ${value}`, type: 'input' });
+        addLog({ text: 'Inserisci la tua chiave di accesso:', type: 'output' }, true);
+        setMode('login_password');
+        break;
+        
+      case 'login_password':
+        addLog({ text: 'PASSWORD > ********', type: 'input' });
+        addLog({ text: '[VERIFICA IN CORSO...]', type: 'output' }, true);
+        
+        const { error: loginError } = await signIn(authData.email, value);
+        
+        if (loginError) {
+          if (soundEnabled) playErrorSound();
+          addLog({ text: `[ERRORE] ${loginError.message}`, type: 'error' });
+          addLog({ text: 'Accesso negato. Riprova con "login"', type: 'error' });
+        } else {
+          if (soundEnabled) playSuccessSound();
+          addLog({ text: '[ACCESSO GARANTITO]', type: 'success' });
+          addLog({ text: `Benvenuto nella Griglia, ${authData.email}`, type: 'success' });
+          addLog({ text: TRON_QUOTES[Math.floor(Math.random() * TRON_QUOTES.length)], type: 'output' });
+        }
+        setAuthData({ email: '', password: '' });
+        setMode('normal');
+        break;
+        
+      case 'register_email':
+        setAuthData({ ...authData, email: value });
+        addLog({ text: `EMAIL > ${value}`, type: 'input' });
+        addLog({ text: 'Crea la tua chiave di accesso:', type: 'output' }, true);
+        setMode('register_password');
+        break;
+        
+      case 'register_password':
+        setAuthData({ ...authData, password: value });
+        addLog({ text: 'PASSWORD > ********', type: 'input' });
+        addLog({ text: 'Conferma la chiave di accesso:', type: 'output' }, true);
+        setMode('register_confirm');
+        break;
+        
+      case 'register_confirm':
+        if (value !== authData.password) {
+          if (soundEnabled) playErrorSound();
+          addLog({ text: '[ERRORE] Le chiavi non corrispondono!', type: 'error' });
+          setAuthData({ email: '', password: '' });
+          setMode('normal');
+          return;
+        }
+        
+        addLog({ text: 'CONFERMA > ********', type: 'input' });
+        addLog({ text: '[CREAZIONE UTENTE IN CORSO...]', type: 'output' }, true);
+        
+        const { error: signUpError } = await signUp(authData.email, authData.password);
+        
+        if (signUpError) {
+          if (soundEnabled) playErrorSound();
+          addLog({ text: `[ERRORE] ${signUpError.message}`, type: 'error' });
+        } else {
+          if (soundEnabled) playSuccessSound();
+          addLog({ text: '[REGISTRAZIONE COMPLETATA]', type: 'success' });
+          addLog({ text: 'Sei ora parte della Griglia, Program.', type: 'success' });
+          addLog({ text: FLYNN_QUOTES[0], type: 'output' });
+        }
+        setAuthData({ email: '', password: '' });
+        setMode('normal');
+        break;
+    }
+  };
+
+  const executeCommand = async (cmd: string) => {
     const trimmedCmd = cmd.trim().toLowerCase();
     
-    setLogs(prev => [...prev, { text: `> ${cmd}`, type: 'input' }]);
+    if (mode !== 'normal') {
+      await handleAuthInput(cmd);
+      return;
+    }
+    
+    addLog({ text: `> ${cmd}`, type: 'input' });
 
     if (trimmedCmd === 'clear') {
       setLogs([]);
       return;
     }
 
+    const commands: Record<string, () => void> = {
+      help: () => {
+        const helpText = [
+          '╔════════════════════════════════════╗',
+          '║       COMANDI DISPONIBILI          ║',
+          '╠════════════════════════════════════╣',
+          '║ help       - Questa guida          ║',
+          '║ login      - Accedi alla Griglia   ║',
+          '║ register   - Unisciti al sistema   ║',
+          '║ logout     - Disconnetti           ║',
+          '║ whoami     - Chi sei, Program?     ║',
+          '║ status     - Stato del sistema     ║',
+          '║ scan       - Apri Digital Oracle   ║',
+          '║ incentivi  - Vai agli incentivi    ║',
+          '║ glitch     - ??? [CLASSIFIED]      ║',
+          '║ lightcycle - Corri sulla Griglia   ║',
+          '║ mcp        - Master Control Prog.  ║',
+          '║ flynn      - Citazione di Flynn    ║',
+          '║ tron       - Citazione di Tron     ║',
+          '║ logo       - ASCII Art logo        ║',
+          '║ sound      - Toggle audio 8-bit    ║',
+          '║ clear      - Pulisci terminale     ║',
+          '╚════════════════════════════════════╝',
+        ];
+        helpText.forEach(line => addLog({ text: line, type: 'output' }));
+      },
+      
+      login: () => {
+        if (user) {
+          addLog({ text: '[GIÀ CONNESSO] Sei già nella Griglia.', type: 'error' });
+          return;
+        }
+        addLog({ text: '[PROTOCOLLO_ACCESSO INIZIALIZZATO]', type: 'success' });
+        addLog({ text: 'La Griglia richiede identificazione.', type: 'output' }, true);
+        addLog({ text: 'Inserisci il tuo identificatore (email):', type: 'output' });
+        setMode('login_email');
+      },
+      
+      register: () => {
+        if (user) {
+          addLog({ text: '[GIÀ REGISTRATO] Sei già parte della Griglia.', type: 'error' });
+          return;
+        }
+        addLog({ text: '[CREAZIONE NUOVO UTENTE]', type: 'success' });
+        addLog({ text: 'Benvenuto, nuovo Program.', type: 'output' }, true);
+        addLog({ text: 'Inserisci il tuo identificatore (email):', type: 'output' });
+        setMode('register_email');
+      },
+      
+      logout: async () => {
+        if (!user) {
+          addLog({ text: '[ERRORE] Non sei connesso alla Griglia.', type: 'error' });
+          return;
+        }
+        addLog({ text: '[DISCONNESSIONE IN CORSO...]', type: 'output' });
+        await signOut();
+        if (soundEnabled) playSuccessSound();
+        addLog({ text: MCP_QUOTES[0], type: 'success' });
+        addLog({ text: '[SESSIONE TERMINATA]', type: 'success' });
+      },
+      
+      whoami: () => {
+        if (user) {
+          addLog({ text: `[UTENTE IDENTIFICATO]`, type: 'success' });
+          addLog({ text: `ID: ${user.email}`, type: 'output' });
+          addLog({ text: `STATUS: PROGRAM ATTIVO`, type: 'output' });
+        } else {
+          addLog({ text: '[GUEST_USER]', type: 'output' });
+          addLog({ text: 'Non identificato. Usa "login" o "register".', type: 'output' });
+        }
+      },
+      
+      status: () => {
+        addLog({ text: '╔═══════ SYSTEM STATUS ═══════╗', type: 'success' });
+        addLog({ text: `║ CPU:    [${cpu}%] ${'█'.repeat(Math.floor(cpu/5))}${'░'.repeat(20-Math.floor(cpu/5))}`, type: 'output' });
+        addLog({ text: `║ MEMORY: [${memory}%] ${'█'.repeat(Math.floor(memory/5))}${'░'.repeat(20-Math.floor(memory/5))}`, type: 'output' });
+        addLog({ text: `║ NETWORK:[${network}%] ${'█'.repeat(Math.floor(network/5))}${'░'.repeat(20-Math.floor(network/5))}`, type: 'output' });
+        addLog({ text: '║ GRID:   [ONLINE]            ║', type: 'success' });
+        addLog({ text: '╚═════════════════════════════╝', type: 'success' });
+      },
+      
+      scan: () => {
+        addLog({ text: '[INIZIALIZZAZIONE DIGITAL ORACLE...]', type: 'success' });
+        SCAN_ANIMATION.forEach((frame, i) => {
+          setTimeout(() => {
+            setLogs(prev => {
+              const newLogs = [...prev];
+              if (newLogs[newLogs.length - 1]?.text.startsWith('[')) {
+                newLogs[newLogs.length - 1] = { text: frame, type: 'output' };
+              } else {
+                newLogs.push({ text: frame, type: 'output' });
+              }
+              return newLogs;
+            });
+          }, i * 200);
+        });
+        setTimeout(() => {
+          addLog({ text: '[ORACLE PRONTO] Scroll to Oracle Widget...', type: 'success' });
+          document.getElementById('oracle-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, SCAN_ANIMATION.length * 200);
+      },
+      
+      incentivi: () => {
+        addLog({ text: '[NAVIGAZIONE] Reindirizzamento a /incentivi...', type: 'success' });
+        setTimeout(() => navigate('/incentivi'), 500);
+      },
+      
+      glitch: () => {
+        if (soundEnabled) playGlitchSound();
+        const glitchedLogs: LogEntry[] = [];
+        for (let i = 0; i < 5; i++) {
+          glitchedLogs.push({ text: generateGlitchText('MATRIX_DISTORTION_DETECTED'), type: 'error' });
+        }
+        glitchedLogs.forEach((log, i) => {
+          setTimeout(() => {
+            addLog(log);
+          }, i * 100);
+        });
+        setTimeout(() => {
+          addLog({ text: '[REALTÀ STABILIZZATA]', type: 'success' });
+        }, 600);
+        
+        // Apply glitch effect to page
+        document.body.classList.add('glitch-effect');
+        setTimeout(() => document.body.classList.remove('glitch-effect'), 500);
+      },
+      
+      lightcycle: () => {
+        if (soundEnabled) playLightcycleSound();
+        addLog({ text: '[LIGHTCYCLE ATTIVATA]', type: 'success' });
+        let frameIndex = 0;
+        const animInterval = setInterval(() => {
+          if (frameIndex < LIGHTCYCLE_FRAMES.length * 3) {
+            const frame = LIGHTCYCLE_FRAMES[frameIndex % LIGHTCYCLE_FRAMES.length];
+            setLogs(prev => {
+              const newLogs = [...prev];
+              if (newLogs[newLogs.length - 1]?.type === 'ascii') {
+                newLogs[newLogs.length - 1] = { text: frame, type: 'ascii' };
+              } else {
+                newLogs.push({ text: frame, type: 'ascii' });
+              }
+              return newLogs;
+            });
+            frameIndex++;
+          } else {
+            clearInterval(animInterval);
+            addLog({ text: '"The game has changed." - CLU', type: 'output' });
+          }
+        }, 150);
+      },
+      
+      mcp: () => {
+        const quote = MCP_QUOTES[Math.floor(Math.random() * MCP_QUOTES.length)];
+        addLog({ text: '[MASTER CONTROL PROGRAM]', type: 'error' });
+        addLog({ text: quote, type: 'output' }, true);
+      },
+      
+      flynn: () => {
+        const quote = FLYNN_QUOTES[Math.floor(Math.random() * FLYNN_QUOTES.length)];
+        addLog({ text: '[KEVIN FLYNN]', type: 'success' });
+        addLog({ text: quote, type: 'output' }, true);
+      },
+      
+      tron: () => {
+        const quote = TRON_QUOTES[Math.floor(Math.random() * TRON_QUOTES.length)];
+        addLog({ text: '[TRON]', type: 'success' });
+        addLog({ text: quote, type: 'output' }, true);
+      },
+      
+      logo: () => {
+        DIGITAL_YOGIN_LOGO.split('\n').forEach(line => {
+          addLog({ text: line, type: 'ascii' });
+        });
+      },
+      
+      sound: () => {
+        setSoundEnabled(!soundEnabled);
+        addLog({ text: `[AUDIO ${!soundEnabled ? 'ATTIVATO' : 'DISATTIVATO'}]`, type: 'success' });
+      },
+      
+      matrix: () => {
+        addLog({ text: 'Inizializzazione protocollo Matrix...', type: 'success' });
+        addLog({ text: '01001000 01100101 01101100 01101100 01101111', type: 'output' });
+        addLog({ text: 'Wake up, Neo...', type: 'success' }, true);
+      },
+    };
+
     if (trimmedCmd in commands) {
-      const output = commands[trimmedCmd as keyof typeof commands]();
-      setLogs(prev => [...prev, ...output]);
-    } else if (trimmedCmd === '') {
-      return;
-    } else {
-      setLogs(prev => [
-        ...prev,
-        { text: `Comando non riconosciuto: ${cmd}`, type: 'error' },
-        { text: 'Digita "help" per la lista dei comandi', type: 'output' },
-      ]);
+      commands[trimmedCmd]();
+    } else if (trimmedCmd !== '') {
+      if (soundEnabled) playErrorSound();
+      addLog({ text: `[ERRORE] Comando non riconosciuto: ${cmd}`, type: 'error' });
+      addLog({ text: 'Digita "help" per la lista dei comandi', type: 'output' });
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim()) {
+    if (input.trim() || mode !== 'normal') {
       executeCommand(input);
       setInput('');
     }
@@ -115,15 +488,36 @@ export const TerminalConsole = () => {
 
   return (
     <div className={`fixed bottom-4 left-4 z-50 border-2 border-primary bg-card/95 backdrop-blur-sm font-mono transition-all duration-300 ${
-      isMinimized ? 'w-64 h-12' : 'w-full max-w-2xl h-96'
+      isMinimized ? 'w-64 h-12' : 'w-full max-w-2xl h-[28rem]'
     }`}>
-      {/* Header */}
+      {/* Header with System Stats */}
       <div className="border-b border-primary p-2 flex items-center justify-between bg-primary/10">
-        <div className="flex items-center gap-2">
-          <Terminal className="text-primary" size={16} />
-          <span className="text-xs text-primary">DIGITAL_YOGIN_TERMINAL</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Terminal className="text-primary" size={16} />
+            <span className="text-xs text-primary hidden sm:inline">YOGIN_TERMINAL</span>
+          </div>
+          {!isMinimized && (
+            <div className="hidden md:flex items-center gap-3 text-[10px]">
+              <div className="flex items-center gap-1">
+                <Cpu size={10} className="text-primary" />
+                <span className="text-primary">{cpu}%</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <HardDrive size={10} className="text-accent" />
+                <span className="text-accent">{memory}%</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Wifi size={10} className="text-secondary" />
+                <span className="text-secondary">{network}%</span>
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
+          {user && !isMinimized && (
+            <span className="text-[10px] text-accent hidden sm:inline">● {user.email?.split('@')[0]}</span>
+          )}
           <button
             onClick={() => setIsMinimized(!isMinimized)}
             className="text-primary hover:bg-primary/20 p-1"
@@ -146,10 +540,11 @@ export const TerminalConsole = () => {
             {logs.map((log, index) => (
               <div
                 key={index}
-                className={`${
+                className={`whitespace-pre-wrap ${
                   log.type === 'input' ? 'text-primary' :
                   log.type === 'error' ? 'text-destructive' :
                   log.type === 'success' ? 'text-accent' :
+                  log.type === 'ascii' ? 'text-primary font-bold' :
                   'text-muted-foreground'
                 }`}
               >
@@ -162,14 +557,15 @@ export const TerminalConsole = () => {
           {/* Input */}
           <form onSubmit={handleSubmit} className="border-t border-primary p-2">
             <div className="flex items-center gap-2">
-              <span className="text-primary text-xs">{'>'}</span>
+              <span className="text-primary text-xs">{getPromptText()}</span>
               <input
                 ref={inputRef}
-                type="text"
+                type={mode.includes('password') ? 'password' : 'text'}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 className="flex-1 bg-transparent text-primary text-xs outline-none placeholder-muted-foreground"
-                placeholder="Digita un comando..."
+                placeholder={mode === 'normal' ? 'Digita un comando...' : ''}
+                disabled={isBooting || authLoading}
               />
             </div>
           </form>
