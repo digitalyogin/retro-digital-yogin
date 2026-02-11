@@ -13,6 +13,7 @@ import Notifiche from "./pages/Notifiche";
 import IntroLoader from "./components/IntroLoader";
 import { CustomCursor } from "./components/CustomCursor";
 import { TerminalConsole } from "./components/TerminalConsole";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => {
         <Sonner />
         <CustomCursor />
         <BrowserRouter>
+          <ScrollToTop />
           <TerminalConsole />
           {showIntro && <IntroLoader onComplete={() => setShowIntro(false)} />}
           <Routes>
