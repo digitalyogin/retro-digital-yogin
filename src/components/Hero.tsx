@@ -81,12 +81,7 @@ export const Hero = () => {
 
         {/* Services Grid */}
         <div className="grid md:grid-cols-2 gap-4 mt-8">
-          <div 
-            ref={cardRef1}
-            className="border border-primary p-6 bg-card/50 card-3d holo-border cursor-pointer"
-            onMouseMove={(e) => handleMouseMove(e, cardRef1)}
-            onMouseLeave={() => handleMouseLeave(cardRef1)}
-          >
+          <div className="border border-primary p-6 bg-card/50">
             <div className="text-primary text-base mb-2">{'>'} SERVIZIO_01</div>
             <h3 className="text-xl md:text-2xl font-bold mb-2">SVILUPPO_WEB</h3>
             <p className="text-base text-muted-foreground">
@@ -94,12 +89,7 @@ export const Hero = () => {
             </p>
           </div>
 
-          <div 
-            ref={cardRef2}
-            className="border border-primary p-6 bg-card/50 card-3d holo-border cursor-pointer"
-            onMouseMove={(e) => handleMouseMove(e, cardRef2)}
-            onMouseLeave={() => handleMouseLeave(cardRef2)}
-          >
+          <div className="border border-primary p-6 bg-card/50">
             <div className="text-primary text-base mb-2">{'>'} SERVIZIO_02</div>
             <h3 className="text-xl md:text-2xl font-bold mb-2">APP_MOBILI</h3>
             <p className="text-base text-muted-foreground">
@@ -109,7 +99,7 @@ export const Hero = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="text-center mt-8">
+        <div className="text-center mt-12">
           <div className="inline-block border border-primary px-6 py-3 animate-pulse">
             <span className="text-primary text-base">SCROLL_DOWN :: ↓</span>
           </div>
