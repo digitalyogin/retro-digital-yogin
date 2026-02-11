@@ -29,7 +29,7 @@ const App = () => {
         <BrowserRouter>
           <ScrollToTop />
           <TerminalConsole />
-          {showIntro && <IntroLoader onComplete={() => setShowIntro(false)} />}
+          {showIntro && <IntroLoader onComplete={() => { setShowIntro(false); window.scrollTo(0, 0); }} />}
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<AdminLeads />} />
