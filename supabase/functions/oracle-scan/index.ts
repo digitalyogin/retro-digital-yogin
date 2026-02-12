@@ -142,15 +142,19 @@ serve(async (req) => {
       const scrapeData = await scrapeResponse.json();
 
       if (!scrapeResponse.ok || !scrapeData.success) {
-        console.error("Firecrawl error:", scrapeData);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: scrapeData.error || "Impossibile analizzare. Verifica che l'URL sia corretto." 
-          }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+        console.warn("Firecrawl failed, falling back to URL-only analysis:", scrapeData.error);
+        
+        // Fallback: analyze based on URL alone without scraped content
+        analysisPrompt = `
+TIPO DI ANALISI: ${inputType === 'social' ? 'PROFILO SOCIAL' : 'SITO WEB'} (analisi basata solo sull'URL)
+
+URL fornito: ${formattedUrl}
+
+NOTA: Non è stato possibile scansionare direttamente il contenuto del sito/profilo. 
+Analizza comunque basandoti sull'URL e sulla tua conoscenza della piattaforma.
+Fornisci consigli generali ma utili per migliorare la presenza digitale su questa piattaforma.
+Se è un profilo social, dai suggerimenti specifici per quella piattaforma.`;
+      } else {
 
       const siteContent = scrapeData.data?.markdown || scrapeData.markdown || "";
       const siteLinks = scrapeData.data?.links || scrapeData.links || [];
@@ -190,6 +194,7 @@ LINK TROVATI (${siteLinks.length} totali):
 ${siteLinks.slice(0, 10).join("\n")}
 
 Analizza questi dati e fornisci il report completo.`;
+      }
       }
     } else {
       // Description mode - no scraping needed
