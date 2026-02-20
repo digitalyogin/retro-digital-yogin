@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, ExternalLink, Euro, Building2, Users, Laptop, Rocket, Heart, Star, Bell, User, LogOut, Filter } from "lucide-react";
+import { ArrowLeft, ExternalLink, Euro, Building2, Users, Laptop, Rocket, Heart, Star, Bell, User, LogOut, Filter, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -107,6 +108,8 @@ const incentives: IncentiveCard[] = [
   }
 ];
 
+const LAST_UPDATED = "12 Febbraio 2026";
+
 const categoryColors = {
   digitalizzazione: "border-blue-500/50 bg-blue-500/10",
   impresa: "border-primary/50 bg-primary/10",
@@ -197,6 +200,21 @@ const Incentivi = () => {
             Scopri tutti i bandi e gli incentivi per la <span className="text-primary">digitalizzazione</span>, 
             l'<span className="text-primary">imprenditoria femminile</span> e le <span className="text-primary">nuove imprese</span>.
           </p>
+          <p className="text-sm text-muted-foreground mt-3 font-terminal">
+            ULTIMO_AGGIORNAMENTO: {LAST_UPDATED}
+          </p>
+        </div>
+      </section>
+
+      {/* Disclaimer Banner */}
+      <section className="border-b border-yellow-500/30">
+        <div className="container mx-auto px-4 py-4">
+          <Alert className="border-yellow-500/50 bg-yellow-500/10">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            <AlertDescription className="text-muted-foreground text-sm ml-2">
+              Questo portale è un servizio informativo indipendente e <strong className="text-foreground">NON è affiliato, associato o sponsorizzato</strong> da alcun ente statale, ministeriale o erogatore di fondi. Le informazioni riportate hanno scopo puramente divulgativo. Verifica sempre i dettagli aggiornati sui siti ufficiali degli enti competenti.
+            </AlertDescription>
+          </Alert>
         </div>
       </section>
 
