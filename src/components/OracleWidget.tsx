@@ -271,7 +271,7 @@ Per un checkup professionale completo, contattaci!
       <div className="flex items-center justify-between mb-4 border-b border-primary/30 pb-3">
         <div className="flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-primary" />
-          <span className="text-primary font-terminal text-lg md:text-xl">TURIYA v2.0</span>
+          <span className="text-primary font-terminal text-lg md:text-xl">TURIYA v2.0  </span>
         </div>
         <span className="text-green-500 animate-pulse text-sm">● ONLINE</span>
       </div>
