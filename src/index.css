@@ -8,41 +8,41 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Default: Industrial Terminal Palette - Weyland-Yutani Inspired */
-    --background: 0 0% 0%;
-    --foreground: 45 100% 65%;
+    /* CRT Phosphor Green Terminal */
+    --background: 140 100% 1%;
+    --foreground: 140 60% 75%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 45 100% 65%;
+    --card: 140 30% 4%;
+    --card-foreground: 140 60% 75%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 45 100% 65%;
+    --popover: 140 30% 4%;
+    --popover-foreground: 140 60% 75%;
 
-    --primary: 45 100% 55%;
-    --primary-foreground: 0 0% 5%;
+    --primary: 140 100% 50%;
+    --primary-foreground: 140 100% 3%;
 
-    --secondary: 0 0% 75%;
-    --secondary-foreground: 0 0% 5%;
+    --secondary: 185 100% 60%;
+    --secondary-foreground: 185 100% 5%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 45 50% 50%;
+    --muted: 140 20% 10%;
+    --muted-foreground: 140 30% 45%;
 
-    --accent: 35 100% 50%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 40 100% 60%;
+    --accent-foreground: 40 100% 5%;
 
     --destructive: 0 85% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 45 70% 40%;
-    --input: 0 0% 12%;
-    --ring: 45 100% 55%;
+    --border: 140 40% 18%;
+    --input: 140 20% 5%;
+    --ring: 140 100% 50%;
 
     --radius: 0rem;
 
-    /* Industrial terminal effects */
-    --terminal-glow: 0 0 15px hsl(45 100% 55% / 0.4);
-    --scanline-opacity: 0.02;
-    --grid-color: hsl(45 30% 30% / 0.03);
+    /* CRT terminal effects */
+    --terminal-glow: 0 0 15px hsl(140 100% 50% / 0.4);
+    --scanline-opacity: 0.03;
+    --grid-color: hsl(140 30% 25% / 0.05);
   }
 
   /* TRON Blue Theme */
