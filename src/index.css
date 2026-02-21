@@ -270,6 +270,19 @@ All colors MUST be HSL.
   50% { opacity: 0.98; }
 }
 
+@keyframes text-flicker {
+  0%, 100% { opacity: 1; }
+  10% { opacity: 0.3; }
+  20% { opacity: 0.8; }
+  30% { opacity: 0.4; }
+  40% { opacity: 1; }
+  50% { opacity: 0.2; }
+  60% { opacity: 0.9; }
+  70% { opacity: 0.5; }
+  80% { opacity: 1; }
+  90% { opacity: 0.3; }
+}
+
 @keyframes matrix-scan {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100%); }
