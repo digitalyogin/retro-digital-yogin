@@ -169,7 +169,6 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-terminal;
     position: relative;
-    cursor: none;
     transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
   }
 
@@ -184,15 +183,6 @@ All colors MUST be HSL.
     animation: theme-flash 0.5s ease-in-out;
   }
 
-  *:not(input):not(textarea):not([contenteditable="true"]) {
-    cursor: none !important;
-  }
-
-  input,
-  textarea,
-  [contenteditable="true"] {
-    cursor: text !important;
-  }
 
   /* CRT Scanline Effect with curvature */
   body.crt-mode {
