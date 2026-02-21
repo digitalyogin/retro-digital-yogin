@@ -23,8 +23,31 @@ export const OracleWidget = () => {
   const [leadForm, setLeadForm] = useState({ name: "", email: "", phone: "" });
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [hasIncentives, setHasIncentives] = useState(false);
+  const [isFlickering, setIsFlickering] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
+  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Start flickering after inactivity
+  useEffect(() => {
+    const resetInactivity = () => {
+      setIsFlickering(false);
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = setTimeout(() => {
+        setIsFlickering(true);
+        // Stop flickering after 3 seconds
+        setTimeout(() => setIsFlickering(false), 3000);
+      }, 8000);
+    };
+
+    resetInactivity();
+    const events = ["mousemove", "keydown", "click", "scroll"];
+    events.forEach((e) => window.addEventListener(e, resetInactivity));
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, resetInactivity));
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    };
+  }, []);
 
   // Check if the response mentions incentives
   const checkForIncentives = (text: string): boolean => {
@@ -285,7 +308,7 @@ Per un checkup professionale completo, contattaci!
             <p className="text-primary/80 pl-4">• URL del tuo sito (es: www.miosito.it)</p>
             <p className="text-primary/80 pl-4">• Profilo social (es: instagram.com/tuobrand)</p>
             <p className="text-primary/80 pl-4">• Descrizione della tua attività (es: "Ho una sartoria a Milano, non ho un sito")</p>
-            <p className="text-muted-foreground mt-4">{'>'} Turiya ti guiderà con consigli personalizzati, incentivi statali e strategie di crescita.</p>
+            <p className={`text-secondary mt-4 ${isFlickering ? "animate-[text-flicker_0.15s_ease-in-out_infinite]" : ""}`}>{'>'} Turiya ti guiderà con consigli personalizzati, incentivi statali e strategie di crescita.</p>
             <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
           </div> :
 
