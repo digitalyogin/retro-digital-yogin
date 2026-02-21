@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { playBootSound } from '@/lib/terminalSounds';
 
 interface IntroLoaderProps {
   onComplete: () => void;
@@ -15,7 +16,7 @@ const BOOT_LINES = [
 const ASCII_LOGO = [
   '╔═══════════════════════════════════╗',
   '║   Y O G I N   A K A S H A        ║',
-  '║   DIGITAL ORACLE TERMINAL v3.1   ║',
+  '║   Digital Turiya Terminal  v3.1   ║',
   '╚═══════════════════════════════════╝',
 ];
 
@@ -25,15 +26,31 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [dontShow, setDontShow] = useState(false);
   const [flickerOn, setFlickerOn] = useState(false);
+  const [glitchLine, setGlitchLine] = useState<number | null>(null);
+  const hasInteracted = useRef(false);
   const prefersReducedMotion = useRef(
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
-  const skipRef = useRef<HTMLButtonElement>(null);
 
   const finish = useCallback(() => {
     if (dontShow) localStorage.setItem('introSeen', 'true');
+    // Play boot beep on user interaction (finish is always user-triggered)
+    if (hasInteracted.current) {
+      playBootSound();
+    }
     onComplete();
   }, [dontShow, onComplete]);
+
+  // Track first interaction for audio policy
+  useEffect(() => {
+    const markInteracted = () => { hasInteracted.current = true; };
+    window.addEventListener('click', markInteracted, { once: true });
+    window.addEventListener('keydown', markInteracted, { once: true });
+    return () => {
+      window.removeEventListener('click', markInteracted);
+      window.removeEventListener('keydown', markInteracted);
+    };
+  }, []);
 
   // Reduced motion: show static briefly then auto-complete
   useEffect(() => {
@@ -63,19 +80,32 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
       timers.push(setTimeout(() => setVisibleLines(i + 1), line.delay));
     });
 
-    // Show logo after last line
     timers.push(setTimeout(() => setShowLogo(true), 4000));
-    // Show prompt
     timers.push(setTimeout(() => setShowPrompt(true), 4600));
 
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  // Keyboard: Enter to skip
+  // Random micro-glitch (very rare)
+  useEffect(() => {
+    if (prefersReducedMotion.current) return;
+    const interval = setInterval(() => {
+      // ~15% chance every 2s
+      if (Math.random() < 0.15 && visibleLines > 0) {
+        const line = Math.floor(Math.random() * visibleLines);
+        setGlitchLine(line);
+        setTimeout(() => setGlitchLine(null), 120);
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [visibleLines]);
+
+  // Keyboard: Enter/Esc to skip
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === 'Escape') {
         e.preventDefault();
+        hasInteracted.current = true;
         finish();
       }
     };
@@ -106,8 +136,11 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
           {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
             <div
               key={i}
-              className="text-primary text-sm sm:text-base tracking-wider"
-              style={{ textShadow: '0 0 8px hsl(145 100% 65% / 0.5)' }}
+              className={`text-primary text-sm sm:text-base tracking-wider ${glitchLine === i ? 'glitch' : ''}`}
+              style={{
+                textShadow: '0 0 8px hsl(145 100% 65% / 0.5)',
+                ...(glitchLine === i ? { transform: `translateX(${Math.random() * 4 - 2}px)`, opacity: 0.7 } : {}),
+              }}
             >
               {line.text}
               {i === visibleLines - 1 && !showLogo && (
@@ -142,13 +175,12 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
               {'>'} PRESS ENTER TO INITIALIZE
             </p>
 
-            {/* Skip button */}
+            {/* Enter button */}
             <button
-              ref={skipRef}
-              onClick={finish}
+              onClick={() => { hasInteracted.current = true; finish(); }}
               className="text-muted-foreground hover:text-primary text-sm border border-border hover:border-primary px-4 py-2 transition-colors font-terminal uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             >
-              [SKIP INTRO]
+              [ENTER]
             </button>
 
             {/* Don't show again */}
