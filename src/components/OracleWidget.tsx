@@ -281,7 +281,7 @@ Per un checkup professionale completo, contattaci!
         {messages.length === 0 ?
         <div className="text-muted-foreground text-2xl space-y-3">
             <p className="text-primary/90 text-lg">Inserisci il tuo sito, profilo social o descrivi la tua attività per ricevere un'analisi personalizzata.</p>
-            <p>{'>'} Esempi:</p>
+            <p>{'>'} Inserisci uno di questi esempi:</p>
             <p className="text-primary/80 pl-4">• URL del tuo sito (es: www.miosito.it)</p>
             <p className="text-primary/80 pl-4">• Profilo social (es: instagram.com/tuobrand)</p>
             <p className="text-primary/80 pl-4">• Descrizione della tua attività (es: "Ho una sartoria a Milano, non ho un sito")</p>
