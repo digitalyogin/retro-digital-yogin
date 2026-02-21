@@ -22,7 +22,9 @@ import { ScrollToTop } from "./components/ScrollToTop";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    return localStorage.getItem('introSeen') !== 'true';
+  });
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,240 +1,171 @@
-import { useState, useEffect } from 'react';
-
-type LoaderPhase = 'boot' | 'loading' | 'breach' | 'recovery' | 'granted' | 'complete';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface IntroLoaderProps {
   onComplete: () => void;
 }
 
+const BOOT_LINES = [
+  { text: 'BOOTING YOGIN AKASHA...', delay: 0 },
+  { text: 'MEMORY CHECK ............ OK', delay: 800 },
+  { text: 'TERMINAL INTERFACE ...... OK', delay: 1600 },
+  { text: 'THREAT MATRIX ........... ONLINE', delay: 2400 },
+  { text: 'URL ANALYZER ............ READY', delay: 3200 },
+];
+
+const ASCII_LOGO = [
+  '╔═══════════════════════════════════╗',
+  '║   Y O G I N   A K A S H A        ║',
+  '║   DIGITAL ORACLE TERMINAL v3.1   ║',
+  '╚═══════════════════════════════════╝',
+];
+
 const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
-  const [phase, setPhase] = useState<LoaderPhase>('boot');
-  const [bootText, setBootText] = useState<string[]>([]);
-  const [progress, setProgress] = useState(0);
-  const [showSkip, setShowSkip] = useState(false);
+  const [visibleLines, setVisibleLines] = useState(0);
+  const [showLogo, setShowLogo] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [dontShow, setDontShow] = useState(false);
+  const [flickerOn, setFlickerOn] = useState(false);
+  const prefersReducedMotion = useRef(
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+  const skipRef = useRef<HTMLButtonElement>(null);
 
-  const bootMessages = [
-    'SISTEMA_INIT.EXE',
-    'SISTEMI DIGITALI WEYLAND-YUTANI v2.4.1',
-    'CARICAMENTO MODULI PRINCIPALI...',
-    'INIZIALIZZAZIONE RETE NEURALE...',
-    'STABILIMENTO CONNESSIONE SICURA...',
-  ];
-
-  const loadingMessages = [
-    'VERIFICA CREDENZIALI...',
-    'CARICAMENTO PROTOCOLLO_DATABASE...',
-    'SINCRONIZZAZIONE PROCESSORI_QUANTICI...',
-    'CALIBRAZIONE INTERFACCIA_NEURALE...',
-  ];
-
-  const breachMessages = [
-    '>>> ACCESSO_NON_AUTORIZZATO_RILEVATO <<<',
-    'AVVISO: FIREWALL_COMPROMESSO',
-    'ALLARME: INTRUSIONE_IN_CORSO',
-    'INTEGRITÀ_SISTEMA: CRITICA',
-  ];
-
-  const recoveryMessages = [
-    'ATTIVAZIONE_CONTROMISURE...',
-    'ISOLAMENTO_VETTORE_MINACCIA...',
-    'RIPRISTINO_PROTOCOLLI_SICURI...',
-    'STABILIZZAZIONE_SISTEMA...',
-  ];
-
-  useEffect(() => {
-    // Show skip button after 2 seconds
-    const skipTimer = setTimeout(() => setShowSkip(true), 2000);
-
-    // Boot phase
-    if (phase === 'boot') {
-      bootMessages.forEach((msg, index) => {
-        setTimeout(() => {
-          setBootText(prev => [...prev, msg]);
-        }, index * 500);
-      });
-
-      setTimeout(() => setPhase('loading'), 3000);
-    }
-
-    // Loading phase
-    if (phase === 'loading') {
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(progressInterval);
-            setTimeout(() => setPhase('breach'), 400);
-            return 100;
-          }
-          return prev + 3;
-        });
-      }, 50);
-
-      return () => clearInterval(progressInterval);
-    }
-
-    // Breach phase
-    if (phase === 'breach') {
-      setTimeout(() => setPhase('recovery'), 1500);
-    }
-
-    // Recovery phase
-    if (phase === 'recovery') {
-      setTimeout(() => setPhase('granted'), 1200);
-    }
-
-    // Access granted phase
-    if (phase === 'granted') {
-      setTimeout(() => {
-        setPhase('complete');
-        onComplete();
-      }, 1500);
-    }
-
-    return () => clearTimeout(skipTimer);
-  }, [phase, onComplete]);
-
-  // Handle skip
-  const handleSkip = () => {
-    setPhase('complete');
+  const finish = useCallback(() => {
+    if (dontShow) localStorage.setItem('introSeen', 'true');
     onComplete();
-  };
+  }, [dontShow, onComplete]);
 
-  // Handle ESC key
+  // Reduced motion: show static briefly then auto-complete
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleSkip();
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    if (prefersReducedMotion.current) {
+      setVisibleLines(BOOT_LINES.length);
+      setShowLogo(true);
+      setShowPrompt(true);
+      const t = setTimeout(finish, 1200);
+      return () => clearTimeout(t);
+    }
+  }, [finish]);
+
+  // CRT power-on flicker
+  useEffect(() => {
+    if (prefersReducedMotion.current) return;
+    setFlickerOn(true);
+    const t = setTimeout(() => setFlickerOn(false), 300);
+    return () => clearTimeout(t);
   }, []);
 
-  if (phase === 'complete') return null;
+  // Typewriter sequence
+  useEffect(() => {
+    if (prefersReducedMotion.current) return;
+    const timers: NodeJS.Timeout[] = [];
+
+    BOOT_LINES.forEach((line, i) => {
+      timers.push(setTimeout(() => setVisibleLines(i + 1), line.delay));
+    });
+
+    // Show logo after last line
+    timers.push(setTimeout(() => setShowLogo(true), 4000));
+    // Show prompt
+    timers.push(setTimeout(() => setShowPrompt(true), 4600));
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  // Keyboard: Enter to skip
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        e.preventDefault();
+        finish();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [finish]);
 
   return (
-    <div className={`fixed inset-0 z-[9999] bg-background flex items-center justify-center overflow-hidden ${
-      phase === 'breach' ? 'animate-screen-shake' : ''
-    }`}>
-      {/* Animated Grid Background */}
-      <div className="absolute inset-0 animate-scroll-grid">
-        <div className="absolute inset-0 grid-background opacity-40" />
-      </div>
+    <div
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden transition-opacity duration-300 ${flickerOn ? 'animate-[crt-power-on_0.3s_ease-out]' : ''}`}
+      style={{ background: 'hsl(140 30% 2%)' }}
+      role="dialog"
+      aria-label="Boot sequence intro"
+    >
+      {/* Scanline overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 z-10"
+        style={{
+          background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 3px)',
+          opacity: 0.5,
+        }}
+      />
 
-      {/* Scanline Effect */}
-      <div className="absolute inset-0 scanline-overlay" />
+      {/* Content */}
+      <div className="relative z-20 w-full max-w-2xl px-6 font-terminal">
+        {/* Boot lines */}
+        <div className="space-y-2 mb-8">
+          {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
+            <div
+              key={i}
+              className="text-primary text-sm sm:text-base tracking-wider"
+              style={{ textShadow: '0 0 8px hsl(145 100% 65% / 0.5)' }}
+            >
+              {line.text}
+              {i === visibleLines - 1 && !showLogo && (
+                <span className="terminal-cursor ml-1">_</span>
+              )}
+            </div>
+          ))}
+        </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 w-full max-w-4xl px-8">
-        
-        {/* Boot Phase */}
-        {phase === 'boot' && (
-          <div className="space-y-2 font-mono">
-            {bootText.map((text, index) => (
+        {/* ASCII Logo */}
+        {showLogo && (
+          <div className="mb-8 animate-fade-in">
+            {ASCII_LOGO.map((line, i) => (
               <div
-                key={index}
-                className="text-primary text-glow animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
+                key={i}
+                className="text-secondary text-xs sm:text-sm tracking-widest text-center"
+                style={{ textShadow: '0 0 12px hsl(189 100% 70% / 0.4)' }}
               >
-                {text}
-                {index === bootText.length - 1 && <span className="terminal-cursor">_</span>}
+                {line}
               </div>
             ))}
           </div>
         )}
 
-        {/* Loading Phase */}
-        {phase === 'loading' && (
-          <div className="space-y-6">
-            <div className="text-primary text-2xl text-glow border-glow border-2 border-primary p-6">
-              INIZIALIZZAZIONE SISTEMA
-            </div>
-            
-            {loadingMessages.map((msg, index) => (
-              <div key={index} className="space-y-2 animate-fade-in" style={{ animationDelay: `${index * 200}ms` }}>
-                <div className="text-primary font-mono text-sm">{msg}</div>
-                <div className="w-full h-2 bg-muted border border-border">
-                  <div 
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+        {/* Prompt */}
+        {showPrompt && (
+          <div className="text-center space-y-6 animate-fade-in">
+            <p
+              className="text-accent text-lg sm:text-xl tracking-wide animate-pulse"
+              style={{ textShadow: '0 0 10px hsl(40 100% 60% / 0.5)' }}
+            >
+              {'>'} PRESS ENTER TO INITIALIZE
+            </p>
 
-            <div className="text-primary text-xl font-mono text-center mt-8">
-              CARICAMENTO... {progress}%
-            </div>
-          </div>
-        )}
+            {/* Skip button */}
+            <button
+              ref={skipRef}
+              onClick={finish}
+              className="text-muted-foreground hover:text-primary text-sm border border-border hover:border-primary px-4 py-2 transition-colors font-terminal uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+            >
+              [SKIP INTRO]
+            </button>
 
-        {/* Breach Phase */}
-        {phase === 'breach' && (
-          <div className="space-y-4 animate-pulse">
-            <div className="text-destructive text-3xl text-center font-mono border-4 border-destructive p-8 warning-flash glitch">
-              ⚠ VIOLAZIONE SICUREZZA RILEVATA ⚠
-            </div>
-            
-            {breachMessages.map((msg, index) => (
-              <div
-                key={index}
-                className="text-destructive font-mono text-xl text-center glitch"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                {msg}
-              </div>
-            ))}
-
-            <div className="mt-8 h-1 bg-destructive animate-pulse" />
-          </div>
-        )}
-
-        {/* Recovery Phase */}
-        {phase === 'recovery' && (
-          <div className="space-y-4">
-            <div className="text-accent text-2xl text-center font-mono border-2 border-accent p-6">
-              ATTIVAZIONE CONTROMISURE
-            </div>
-            
-            {recoveryMessages.map((msg, index) => (
-              <div
-                key={index}
-                className="text-accent font-mono animate-fade-in"
-                style={{ animationDelay: `${index * 200}ms` }}
-              >
-                {'>'} {msg}
-              </div>
-            ))}
-
-            <div className="w-full h-3 bg-muted border border-accent mt-6">
-              <div className="h-full bg-accent animate-pulse" style={{ width: '85%' }} />
-            </div>
-          </div>
-        )}
-
-        {/* Access Granted Phase */}
-        {phase === 'granted' && (
-          <div className="text-center space-y-6 animate-scale-in">
-            <div className="text-primary text-4xl font-mono text-glow border-glow border-4 border-primary p-12">
-              ACCESSO CONSENTITO
-            </div>
-            <div className="text-primary text-lg font-mono">
-              BENVENUTO NEI SISTEMI DIGITAL YOGIN
-            </div>
-            <div className="text-muted-foreground text-sm font-mono">
-              CONNESSIONE SICURA STABILITA
-            </div>
+            {/* Don't show again */}
+            <label className="flex items-center justify-center gap-3 text-muted-foreground text-xs cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={dontShow}
+                onChange={(e) => setDontShow(e.target.checked)}
+                className="w-4 h-4 accent-primary bg-background border-border focus:ring-2 focus:ring-ring"
+              />
+              <span className="group-hover:text-primary transition-colors">
+                DON'T SHOW AGAIN
+              </span>
+            </label>
           </div>
         )}
       </div>
-
-      {/* Skip Button */}
-      {showSkip && (
-        <button
-          onClick={handleSkip}
-          className="fixed bottom-8 right-8 text-muted-foreground hover:text-primary font-mono text-sm border border-border hover:border-primary px-4 py-2 transition-colors"
-        >
-          [ESC] SALTA INTRO
-        </button>
-      )}
     </div>
   );
 };
