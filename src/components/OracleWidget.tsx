@@ -285,7 +285,7 @@ Per un checkup professionale completo, contattaci!
             <p className="text-primary/80 pl-4">• URL del tuo sito (es: www.miosito.it)</p>
             <p className="text-primary/80 pl-4">• Profilo social (es: instagram.com/tuobrand)</p>
             <p className="text-primary/80 pl-4">• Descrizione della tua attività (es: "Ho una sartoria a Milano, non ho un sito")</p>
-            <p className="text-muted-foreground mt-4">{'>'} L'Oracle ti guiderà con consigli personalizzati, incentivi statali e strategie di crescita.</p>
+            <p className="text-muted-foreground mt-4">{'>'} Turiya ti guiderà con consigli personalizzati, incentivi statali e strategie di crescita.</p>
             <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
           </div> :
 
