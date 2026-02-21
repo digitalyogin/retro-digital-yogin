@@ -366,6 +366,14 @@ All colors MUST be HSL.
   }
 }
 
+/* CRT Power-on effect */
+@keyframes crt-power-on {
+  0% { opacity: 0; filter: brightness(3) contrast(2); }
+  30% { opacity: 0.6; filter: brightness(1.8) contrast(1.2); }
+  60% { opacity: 0.9; filter: brightness(1.2) contrast(1); }
+  100% { opacity: 1; filter: brightness(1) contrast(1); }
+}
+
 /* Intro Loader Animations */
 @keyframes scroll-grid {
   0% {
