@@ -129,6 +129,8 @@ const AdminLeads = () => {
                 onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                 className="w-full bg-background border border-primary/50 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary"
                 required
+                maxLength={255}
+                autoComplete="email"
               />
             </div>
             <div>
@@ -139,6 +141,8 @@ const AdminLeads = () => {
                 onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                 className="w-full bg-background border border-primary/50 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary"
                 required
+                maxLength={128}
+                autoComplete="current-password"
               />
             </div>
             <button
