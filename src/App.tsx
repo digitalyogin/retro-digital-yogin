@@ -6,10 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RetroLayout } from "./components/RetroLayout";
 import QuickScan from "./pages/QuickScan";
-import FullReport from "./pages/FullReport";
-import History from "./pages/History";
-import ExportPage from "./pages/ExportPage";
-import Settings from "./pages/Settings";
+import ChiSiamo from "./pages/ChiSiamo";
+import ProgettiOnline from "./pages/ProgettiOnline";
+import Contatti from "./pages/Contatti";
 import About from "./pages/About";
 import AdminLeads from "./pages/AdminLeads";
 import Incentivi from "./pages/Incentivi";
@@ -38,10 +37,9 @@ const App = () => {
             {/* Terminal-style routes with RetroLayout */}
             <Route path="/" element={<RetroLayout><QuickScan /></RetroLayout>} />
             <Route path="/01" element={<RetroLayout><QuickScan /></RetroLayout>} />
-            <Route path="/02" element={<RetroLayout><FullReport /></RetroLayout>} />
-            <Route path="/03" element={<RetroLayout><History /></RetroLayout>} />
-            <Route path="/04" element={<RetroLayout><ExportPage /></RetroLayout>} />
-            <Route path="/09" element={<RetroLayout><Settings /></RetroLayout>} />
+            <Route path="/02" element={<RetroLayout><ChiSiamo /></RetroLayout>} />
+            <Route path="/03" element={<RetroLayout><ProgettiOnline /></RetroLayout>} />
+            <Route path="/04" element={<RetroLayout><Contatti /></RetroLayout>} />
             <Route path="/99" element={<RetroLayout><About /></RetroLayout>} />
             
             {/* Standalone routes */}
