@@ -1,73 +1,90 @@
-# Welcome to your Lovable project
+# Yogin Akasha — Digital Turiya Terminal v3.1
 
-## Project info
+Applicazione web retro-terminal (stile CRT anni '80/'90) per l'analisi di URL e sicurezza digitale.
 
-**URL**: https://lovable.dev/projects/5965aa77-b896-4b47-97d1-288633f69c87
+**Live**: [retro-digital-yogin.lovable.app](https://retro-digital-yogin.lovable.app)
 
-## How can I edit this code?
+## Stack tecnologico
 
-There are several ways of editing your application.
+- **Vite** + **React 18** + **TypeScript**
+- **Tailwind CSS** + **shadcn/ui**
+- **Lovable Cloud** (backend, auth, database)
+- **Tanstack React Query** per data fetching
 
-**Use Lovable**
+## Funzionalità principali
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5965aa77-b896-4b47-97d1-288633f69c87) and start prompting.
+### Intro Boot Sequence (CRT cinematica)
+- Schermata di avvio stile computer anni '80 con effetto CRT power-on
+- Sequenza typewriter progressiva: `BOOTING YOGIN AKASHA...`, `MEMORY CHECK`, `TERMINAL INTERFACE`, `THREAT MATRIX`, `URL ANALYZER`
+- Logo ASCII "YOGIN AKASHA — Digital Turiya Terminal v3.1"
+- Prompt lampeggiante `PRESS ENTER TO INITIALIZE`
+- Effetti: scanline overlay, text glow, cursor blink, micro-glitch casuale (~15% ogni 2s)
+- Beep audio 8-bit solo su interazione utente (rispetta autoplay policy)
+- Checkbox "Don't show again" → salva preferenza in `localStorage` (`introSeen`)
+- Accessibilità: rispetta `prefers-reduced-motion` (intro statica + auto-skip), focus visibile, supporto tastiera completo (Enter/Esc)
 
-Changes made via Lovable will be committed automatically to this repo.
+### URL Analyzer (Quick Scan)
+- Analisi rapida di URL con punteggio di sicurezza
+- Interfaccia terminale retro con input stile command-line
 
-**Use your preferred IDE**
+### Full Report
+- Report dettagliato con analisi approfondita
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Cronologia (History)
+- Storico delle scansioni effettuate
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Export
+- Esportazione risultati
 
-Follow these steps:
+### Incentivi
+- Sezione dedicata agli incentivi digitali
+
+### Impostazioni
+- Configurazione preferenze utente
+
+### Notifiche
+- Sistema di notifiche con sottoscrizioni personalizzabili
+
+### Autenticazione
+- Login/signup con gestione profili utente
+
+### Admin Leads
+- Dashboard amministrativa per gestione lead da scansioni Oracle
+
+## Struttura route
+
+| Path | Pagina |
+|------|--------|
+| `/` `/01` | Quick Scan (URL Analyzer) |
+| `/02` | Full Report |
+| `/03` | History |
+| `/04` | Export |
+| `/09` | Settings |
+| `/99` | About |
+| `/admin` | Admin Leads |
+| `/incentivi` | Incentivi |
+| `/auth` | Autenticazione |
+| `/notifiche` | Notifiche |
+
+## Design system
+
+Tema retro-terminale con palette verde fosforo su nero:
+- `--phosphor` (#3cff7a) — colore primario
+- `--cyan` (#4de8ff) — accenti secondari
+- `--amber` (#ffcc66) — prompt e warning
+- `--danger` (#ff5f56) — errori
+- Font: `Share Tech Mono`, `VT323`
+- Effetti: scanline overlay, glow, CRT flicker
+
+## Sviluppo locale
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Deploy
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/5965aa77-b896-4b47-97d1-288633f69c87) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Apri [Lovable](https://lovable.dev/projects/5965aa77-b896-4b47-97d1-288633f69c87) → Share → Publish.
