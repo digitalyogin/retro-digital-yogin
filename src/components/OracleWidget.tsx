@@ -120,7 +120,19 @@ Per un checkup professionale completo, contattaci!
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leadForm.email || !lastScanResult || !lastScanInput) return;
+    const emailTrimmed = leadForm.email.trim();
+    if (!emailTrimmed || !lastScanResult || !lastScanInput) return;
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrimmed)) {
+      toast({ title: "Email non valida", description: "Inserisci un indirizzo email corretto.", variant: "destructive" });
+      return;
+    }
+    // Phone validation (optional but if present, must be digits/spaces/+)
+    if (leadForm.phone && !/^[+\d\s()-]{0,20}$/.test(leadForm.phone)) {
+      toast({ title: "Telefono non valido", description: "Inserisci un numero di telefono valido.", variant: "destructive" });
+      return;
+    }
 
     setIsSubmittingLead(true);
 
@@ -128,9 +140,9 @@ Per un checkup professionale completo, contattaci!
       const score = extractScore(lastScanResult);
 
       const { error } = await supabase.from("oracle_leads").insert({
-        email: leadForm.email,
-        name: leadForm.name || null,
-        phone: leadForm.phone || null,
+        email: emailTrimmed,
+        name: leadForm.name.trim().slice(0, 100) || null,
+        phone: leadForm.phone.trim().slice(0, 20) || null,
         website_url: lastScanInput,
         scan_result: lastScanResult,
         score: score
@@ -160,17 +172,31 @@ Per un checkup professionale completo, contattaci!
   body: object,
   onChunk: (content: string) => void) =>
   {
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${endpoint}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
-        },
-        body: JSON.stringify(body)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+    let response: Response;
+    try {
+      response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${endpoint}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        }
+      );
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        throw new Error("Timeout: il server non ha risposto in tempo.");
       }
-    );
+      throw new Error("Errore di rete. Controlla la connessione.");
+    }
+    clearTimeout(timeoutId);
 
     if (response.status === 429) {
       throw new Error("Troppi messaggi. Riprova tra qualche secondo.");
@@ -358,6 +384,7 @@ Per un checkup professionale completo, contattaci!
             value={leadForm.name}
             onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
             placeholder="Nome (opzionale)"
+            maxLength={100}
             className="w-full bg-background border border-primary/30 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground" />
 
             <input
@@ -366,6 +393,7 @@ Per un checkup professionale completo, contattaci!
             onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })}
             placeholder="Email *"
             required
+            maxLength={255}
             className="w-full bg-background border border-primary/30 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground" />
 
             <input
@@ -373,6 +401,8 @@ Per un checkup professionale completo, contattaci!
             value={leadForm.phone}
             onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
             placeholder="Telefono (opzionale)"
+            maxLength={20}
+            pattern="[+\d\s()\-]*"
             className="w-full bg-background border border-primary/30 text-foreground px-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground" />
 
             <button
@@ -433,6 +463,7 @@ Per un checkup professionale completo, contattaci!
             onChange={(e) => setInput(e.target.value)}
             placeholder="URL, profilo social o descrivi la tua attività..."
             disabled={isLoading}
+            maxLength={500}
             className="w-full bg-background border border-primary/50 text-foreground pl-10 pr-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground disabled:opacity-50" />
 
         </div>
