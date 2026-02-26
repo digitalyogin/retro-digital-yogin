@@ -8,6 +8,7 @@ import { RetroLayout } from "./components/RetroLayout";
 import QuickScan from "./pages/QuickScan";
 import ChiSiamo from "./pages/ChiSiamo";
 import ProgettiOnline from "./pages/ProgettiOnline";
+import ProgettoDettaglio from "./pages/ProgettoDettaglio";
 import Contatti from "./pages/Contatti";
 import About from "./pages/About";
 import AdminLeads from "./pages/AdminLeads";
@@ -39,6 +40,7 @@ const App = () => {
             <Route path="/01" element={<RetroLayout><QuickScan /></RetroLayout>} />
             <Route path="/02" element={<RetroLayout><ChiSiamo /></RetroLayout>} />
             <Route path="/03" element={<RetroLayout><ProgettiOnline /></RetroLayout>} />
+            <Route path="/03/:slug" element={<RetroLayout><ProgettoDettaglio /></RetroLayout>} />
             <Route path="/04" element={<RetroLayout><Contatti /></RetroLayout>} />
             <Route path="/99" element={<RetroLayout><About /></RetroLayout>} />
             

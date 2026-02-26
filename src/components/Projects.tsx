@@ -1,62 +1,13 @@
 import { useRef, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-
-const projects = [
-  {
-    id: "PRJ_001",
-    title: "E-COMMERCE_PLATFORM",
-    description: "Piattaforma di vendita online completa con gestione prodotti, carrello e pagamenti integrati",
-    client: "RETAIL_CLIENT_A",
-    status: "DEPLOYED",
-    tech: ["React", "Node.js", "PostgreSQL"]
-  },
-  {
-    id: "PRJ_002",
-    title: "MOBILE_APP_FITNESS",
-    description: "Applicazione mobile per tracking allenamenti e nutrizione con integrazione wearables",
-    client: "HEALTH_CORP_B",
-    status: "IN_PRODUCTION",
-    tech: ["React Native", "Firebase", "GraphQL"]
-  },
-  {
-    id: "PRJ_003",
-    title: "CORPORATE_WEBSITE",
-    description: "Sito web aziendale multilingua con CMS personalizzato e sistema di prenotazioni",
-    client: "ENTERPRISE_C",
-    status: "DEPLOYED",
-    tech: ["Next.js", "Strapi", "AWS"]
-  },
-  {
-    id: "PRJ_004",
-    title: "BOOKING_SYSTEM",
-    description: "Sistema di prenotazione online per strutture ricettive con gestione disponibilità real-time",
-    client: "HOSPITALITY_D",
-    status: "IN_DEVELOPMENT",
-    tech: ["Vue.js", "Laravel", "MySQL"]
-  },
-  {
-    id: "PRJ_005",
-    title: "ANALYTICS_DASHBOARD",
-    description: "Dashboard interattiva per analisi dati e visualizzazione KPI aziendali in tempo reale",
-    client: "FINTECH_E",
-    status: "DEPLOYED",
-    tech: ["React", "D3.js", "Python"]
-  },
-  {
-    id: "PRJ_006",
-    title: "SOCIAL_PLATFORM",
-    description: "Piattaforma social di nicchia con sistema di messaggistica e content sharing",
-    client: "STARTUP_F",
-    status: "BETA",
-    tech: ["React", "Socket.io", "MongoDB"]
-  }
-];
+import { projects } from "@/lib/projectsData";
 
 export const Projects = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const isVisible = useScrollAnimation(sectionRef);
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   return (
     <section ref={sectionRef} id="progetti" className="py-20 px-4 border-t-2 border-primary relative z-10">
@@ -78,6 +29,7 @@ export const Projects = () => {
           {projects.map((project, index) => (
             <div 
               key={project.id}
+              onClick={() => navigate(`/03/${project.slug}`)}
               className="border border-primary bg-card p-6 hover:border-2 hover:border-accent transition-all group relative overflow-hidden cursor-pointer"
               style={{ 
                 animationDelay: `${index * 0.15}s`,
@@ -104,13 +56,8 @@ export const Projects = () => {
                     {project.title}
                   </h3>
                 </div>
-                <div className={`text-xs px-2 py-1 border ${
-                  project.status === 'DEPLOYED' ? 'border-primary text-primary' :
-                  project.status === 'IN_PRODUCTION' ? 'border-accent text-accent' :
-                  project.status === 'BETA' ? 'border-secondary text-secondary' :
-                  'border-muted-foreground text-muted-foreground'
-                }`}>
-                  {project.status}
+                <div className="text-xs px-2 py-1 border border-primary text-primary">
+                  {project.year}
                 </div>
               </div>
 
