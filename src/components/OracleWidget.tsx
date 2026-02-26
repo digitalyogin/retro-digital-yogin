@@ -482,7 +482,7 @@ Per un checkup professionale completo, contattaci!
 
       {/* Footer */}
       <div className="text-sm text-muted-foreground mt-4 text-center">
-        <span>Analisi powered by <span className="text-primary">DIGITAL_YOGIN AI</span></span>
+        <span className="text-base">Analisi powered by <span className="text-primary">DIGITAL_YOGIN AI</span></span>
       </div>
     </div>);
 
