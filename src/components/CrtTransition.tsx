@@ -1,215 +1,168 @@
-import { useState, useEffect } from "react";
-import { playCrtTransitionSound, playCrtPowerOnSound } from "@/lib/terminalSounds";
+import { useEffect, useRef, useCallback } from "react";
+import { playExitSound, playEnterSound } from "@/lib/terminalSounds";
 
 interface CrtTransitionProps {
   active: boolean;
   onComplete: () => void;
 }
 
+// Matrix characters: katakana + digits + symbols
+const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789@#$%&*+=<>{}[]";
+
 /**
- * Cinematic CRT power-off / power-on transition.
- * Phase 1: Screen shrinks vertically to a horizontal white line (TV off)
- * Phase 2: Line glows bright with phosphor afterglow
- * Phase 3: Static burst + screen expands back (TV on)
+ * Matrix Dissolve transition.
+ * Phase 1 (dissolve): Characters rain down, overlay darkens
+ * Phase 2 (rain): Full screen of falling characters
+ * Phase 3 (emerge): Characters fade out radially from center
  */
 export const CrtTransition = ({ active, onComplete }: CrtTransitionProps) => {
-  const [phase, setPhase] = useState<
-    "idle" | "shrink" | "line" | "static" | "expand" | "done"
-  >("idle");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animRef = useRef<number>(0);
+  const phaseRef = useRef<"idle" | "dissolve" | "rain" | "emerge" | "done">("idle");
+  const startTimeRef = useRef(0);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
-  useEffect(() => {
-    if (!active) {
-      setPhase("idle");
+  const DISSOLVE_MS = 500;
+  const RAIN_MS = 400;
+  const EMERGE_MS = 500;
+
+  const animate = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const elapsed = performance.now() - startTimeRef.current;
+    const fontSize = 14;
+    const cols = Math.ceil(w / fontSize);
+
+    // Phase transitions
+    if (phaseRef.current === "dissolve" && elapsed >= DISSOLVE_MS) {
+      phaseRef.current = "rain";
+      startTimeRef.current = performance.now();
+      animRef.current = requestAnimationFrame(animate);
+      return;
+    }
+    if (phaseRef.current === "rain" && elapsed >= RAIN_MS) {
+      phaseRef.current = "emerge";
+      startTimeRef.current = performance.now();
+      playEnterSound();
+      animRef.current = requestAnimationFrame(animate);
+      return;
+    }
+    if (phaseRef.current === "emerge" && elapsed >= EMERGE_MS) {
+      phaseRef.current = "done";
+      onCompleteRef.current();
       return;
     }
 
-    // Start shrink
-    setPhase("shrink");
-    playCrtTransitionSound();
+    const phase = phaseRef.current;
+    if (phase === "done" || phase === "idle") return;
 
-    const t1 = setTimeout(() => setPhase("line"), 350);
-    const t2 = setTimeout(() => {
-      setPhase("static");
-      playCrtPowerOnSound();
-    }, 700);
-    const t3 = setTimeout(() => setPhase("expand"), 1000);
-    const t4 = setTimeout(() => {
-      setPhase("done");
-      onComplete();
-    }, 1400);
+    // Semi-transparent black to create trail effect
+    ctx.fillStyle = phase === "emerge"
+      ? `rgba(0, 0, 0, ${0.15 - (elapsed / EMERGE_MS) * 0.12})`
+      : "rgba(0, 0, 0, 0.12)";
+    ctx.fillRect(0, 0, w, h);
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-    };
-  }, [active, onComplete]);
+    // Coverage factor: how much of the screen should be covered
+    let coverage = 1;
+    if (phase === "dissolve") {
+      coverage = elapsed / DISSOLVE_MS;
+    }
 
-  if (phase === "idle" || phase === "done") return null;
+    // Draw columns of falling characters
+    ctx.font = `${fontSize}px "Share Tech Mono", monospace`;
+
+    for (let i = 0; i < cols; i++) {
+      // Each column has a slightly different speed
+      const speed = 0.5 + (((i * 7 + 13) % 17) / 17) * 1.5;
+      const totalElapsed = phase === "dissolve" ? elapsed :
+        phase === "rain" ? DISSOLVE_MS + elapsed :
+          DISSOLVE_MS + RAIN_MS + elapsed;
+      const y = ((totalElapsed * speed * 0.15) + (i * 37 % h)) % (h + fontSize);
+
+      // Only draw if within coverage
+      if (phase === "dissolve" && i / cols > coverage * 1.3) continue;
+
+      // Emerge: radial fade from center
+      if (phase === "emerge") {
+        const cx = w / 2;
+        const cy = h / 2;
+        const x = i * fontSize;
+        const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+        const maxDist = Math.sqrt(cx ** 2 + cy ** 2);
+        const fadeProgress = elapsed / EMERGE_MS;
+        const threshold = fadeProgress * maxDist * 1.5;
+        if (dist < threshold) continue;
+      }
+
+      const char = CHARS[Math.floor(Math.random() * CHARS.length)];
+
+      // Bright leading character
+      ctx.fillStyle = "#3cff7a";
+      ctx.globalAlpha = 0.9 + Math.random() * 0.1;
+      ctx.fillText(char, i * fontSize, y);
+
+      // Dimmer trailing characters
+      if (Math.random() > 0.6) {
+        ctx.fillStyle = "#1ea34a";
+        ctx.globalAlpha = 0.4 + Math.random() * 0.3;
+        const trailChar = CHARS[Math.floor(Math.random() * CHARS.length)];
+        ctx.fillText(trailChar, i * fontSize, y - fontSize);
+      }
+
+      ctx.globalAlpha = 1;
+    }
+
+    // During dissolve, darken background progressively
+    if (phase === "dissolve") {
+      ctx.fillStyle = `rgba(0, 0, 0, ${coverage * 0.03})`;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    animRef.current = requestAnimationFrame(animate);
+  }, []);
+
+  useEffect(() => {
+    if (!active) {
+      phaseRef.current = "idle";
+      cancelAnimationFrame(animRef.current);
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Clear canvas to black
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Start mostly transparent so the page shows through initially
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    phaseRef.current = "dissolve";
+    startTimeRef.current = performance.now();
+    playExitSound();
+    animRef.current = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animRef.current);
+  }, [active, animate]);
+
+  if (!active && phaseRef.current === "idle") return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] pointer-events-none overflow-hidden">
-      {/* RGB Shift layers during shrink & static */}
-      {(phase === "shrink" || phase === "static") && (
-        <>
-          {/* Red channel offset */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "hsl(0 100% 50% / 0.08)",
-              mixBlendMode: "screen",
-              animation: "rgb-shift-r 0.08s steps(2) infinite",
-            }}
-          />
-          {/* Green channel offset */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "hsl(120 100% 50% / 0.06)",
-              mixBlendMode: "screen",
-              animation: "rgb-shift-g 0.1s steps(2) infinite",
-            }}
-          />
-          {/* Blue channel offset */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "hsl(240 100% 50% / 0.06)",
-              mixBlendMode: "screen",
-              animation: "rgb-shift-b 0.12s steps(3) infinite",
-            }}
-          />
-          {/* Chromatic aberration bars */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `repeating-linear-gradient(
-                90deg,
-                hsl(0 100% 50% / 0.04) 0px,
-                transparent 1px,
-                transparent 3px,
-                hsl(120 100% 50% / 0.03) 3px,
-                transparent 4px,
-                transparent 6px,
-                hsl(240 100% 50% / 0.04) 6px,
-                transparent 7px,
-                transparent 9px
-              )`,
-              animation: "rgb-bars-scroll 0.15s linear infinite",
-            }}
-          />
-        </>
-      )}
-
-      {/* Full black overlay that shrinks vertically like an old TV */}
-      <div
-        className="absolute inset-0 bg-background"
-        style={{
-          transition: phase === "shrink" ? "clip-path 350ms ease-in" :
-                     phase === "expand" ? "clip-path 350ms ease-out, opacity 200ms" :
-                     "none",
-          clipPath: phase === "shrink"
-            ? "inset(48% 0 48% 0)"
-            : phase === "line"
-            ? "inset(49.5% 0 49.5% 0)"
-            : phase === "static" || phase === "expand"
-            ? "inset(0 0 0 0)"
-            : "inset(0 0 0 0)",
-          opacity: phase === "expand" ? 0 : 1,
-        }}
-      />
-
-      {/* Phosphor glow line */}
-      {(phase === "line" || phase === "static") && (
-        <div
-          className="absolute left-0 right-0"
-          style={{
-            top: "50%",
-            transform: "translateY(-50%)",
-            height: phase === "line" ? "3px" : "2px",
-            background: "linear-gradient(90deg, transparent 2%, hsl(0 100% 60% / 0.4) 10%, hsl(var(--primary)) 25%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 75%, hsl(240 100% 60% / 0.4) 90%, transparent 98%)",
-            boxShadow: `
-              0 0 20px 8px hsl(var(--primary) / 0.7),
-              0 0 60px 20px hsl(var(--primary) / 0.4),
-              0 0 100px 40px hsl(var(--primary) / 0.15)
-            `,
-            animation: phase === "line" ? "crt-line-pulse 0.15s ease-in-out infinite alternate" : "none",
-            transition: "height 200ms, opacity 300ms",
-            opacity: phase === "static" ? 0.3 : 1,
-          }}
-        />
-      )}
-
-      {/* Static noise burst on power-on */}
-      {phase === "static" && (
-        <>
-          <canvas
-            className="absolute inset-0 w-full h-full"
-            style={{ opacity: 0.4, mixBlendMode: "screen" }}
-            ref={(canvas) => {
-              if (!canvas) return;
-              const ctx = canvas.getContext("2d");
-              if (!ctx) return;
-              canvas.width = 320;
-              canvas.height = 180;
-              let frame = 0;
-              const draw = () => {
-                if (frame > 8) return;
-                const imgData = ctx.createImageData(320, 180);
-                for (let i = 0; i < imgData.data.length; i += 4) {
-                  // RGB noise with channel separation
-                  imgData.data[i] = Math.random() * 255;     // R
-                  imgData.data[i + 1] = Math.random() * 255; // G
-                  imgData.data[i + 2] = Math.random() * 255; // B
-                  imgData.data[i + 3] = 180;
-                }
-                ctx.putImageData(imgData, 0, 0);
-                frame++;
-                requestAnimationFrame(draw);
-              };
-              draw();
-            }}
-          />
-          {/* Horizontal rolling bar */}
-          <div
-            className="absolute left-0 right-0 h-16"
-            style={{
-              background: "linear-gradient(180deg, transparent, hsl(var(--primary) / 0.08), transparent)",
-              animation: "crt-roll 0.3s linear infinite",
-            }}
-          />
-        </>
-      )}
-
-      {/* RGB shift flash on expand */}
-      {phase === "expand" && (
-        <>
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "radial-gradient(ellipse at center, transparent 50%, hsl(var(--primary) / 0.15) 100%)",
-              animation: "crt-flash 400ms ease-out forwards",
-            }}
-          />
-          {/* Brief RGB split on power-on */}
-          <div className="absolute inset-0" style={{
-            boxShadow: "inset -3px 0 0 hsl(0 100% 50% / 0.15), inset 3px 0 0 hsl(240 100% 50% / 0.15)",
-            animation: "crt-flash 300ms ease-out forwards",
-          }} />
-        </>
-      )}
-
-      {/* Scanlines always visible during transition */}
-      {phase !== "expand" && (
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)",
-            opacity: 0.6,
-          }}
-        />
-      )}
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 z-[9999] pointer-events-none"
+      style={{ background: "transparent" }}
+    />
   );
 };
