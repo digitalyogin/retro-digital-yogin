@@ -114,7 +114,7 @@ export const RetroLayout = ({ children }: RetroLayoutProps) => {
             <button
               key={item.code}
               onClick={() => navigate(item.path)}
-              className={`px-3 py-1 text-xs font-terminal border transition-all ${
+              className={`px-3 py-1 text-lg font-terminal border transition-all ${
                 activeCode === item.code
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border text-muted-foreground hover:border-primary hover:text-primary"
