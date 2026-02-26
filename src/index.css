@@ -672,3 +672,28 @@ All colors MUST be HSL.
   0% { top: -4rem; }
   100% { top: calc(100% + 4rem); }
 }
+
+/* RGB Shift / Chromatic Aberration */
+@keyframes rgb-shift-r {
+  0% { transform: translate(-3px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  100% { transform: translate(-1px, 2px); }
+}
+
+@keyframes rgb-shift-g {
+  0% { transform: translate(1px, -2px); }
+  50% { transform: translate(-2px, 1px); }
+  100% { transform: translate(3px, -1px); }
+}
+
+@keyframes rgb-shift-b {
+  0% { transform: translate(2px, 2px); }
+  33% { transform: translate(-3px, -1px); }
+  66% { transform: translate(1px, 3px); }
+  100% { transform: translate(-2px, -2px); }
+}
+
+@keyframes rgb-bars-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(9px); }
+}

@@ -50,6 +50,58 @@ export const CrtTransition = ({ active, onComplete }: CrtTransitionProps) => {
 
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-none overflow-hidden">
+      {/* RGB Shift layers during shrink & static */}
+      {(phase === "shrink" || phase === "static") && (
+        <>
+          {/* Red channel offset */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "hsl(0 100% 50% / 0.08)",
+              mixBlendMode: "screen",
+              animation: "rgb-shift-r 0.08s steps(2) infinite",
+            }}
+          />
+          {/* Green channel offset */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "hsl(120 100% 50% / 0.06)",
+              mixBlendMode: "screen",
+              animation: "rgb-shift-g 0.1s steps(2) infinite",
+            }}
+          />
+          {/* Blue channel offset */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "hsl(240 100% 50% / 0.06)",
+              mixBlendMode: "screen",
+              animation: "rgb-shift-b 0.12s steps(3) infinite",
+            }}
+          />
+          {/* Chromatic aberration bars */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `repeating-linear-gradient(
+                90deg,
+                hsl(0 100% 50% / 0.04) 0px,
+                transparent 1px,
+                transparent 3px,
+                hsl(120 100% 50% / 0.03) 3px,
+                transparent 4px,
+                transparent 6px,
+                hsl(240 100% 50% / 0.04) 6px,
+                transparent 7px,
+                transparent 9px
+              )`,
+              animation: "rgb-bars-scroll 0.15s linear infinite",
+            }}
+          />
+        </>
+      )}
+
       {/* Full black overlay that shrinks vertically like an old TV */}
       <div
         className="absolute inset-0 bg-background"
@@ -76,7 +128,7 @@ export const CrtTransition = ({ active, onComplete }: CrtTransitionProps) => {
             top: "50%",
             transform: "translateY(-50%)",
             height: phase === "line" ? "3px" : "2px",
-            background: "linear-gradient(90deg, transparent 2%, hsl(var(--primary)) 15%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 85%, transparent 98%)",
+            background: "linear-gradient(90deg, transparent 2%, hsl(0 100% 60% / 0.4) 10%, hsl(var(--primary)) 25%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 75%, hsl(240 100% 60% / 0.4) 90%, transparent 98%)",
             boxShadow: `
               0 0 20px 8px hsl(var(--primary) / 0.7),
               0 0 60px 20px hsl(var(--primary) / 0.4),
@@ -106,11 +158,11 @@ export const CrtTransition = ({ active, onComplete }: CrtTransitionProps) => {
                 if (frame > 8) return;
                 const imgData = ctx.createImageData(320, 180);
                 for (let i = 0; i < imgData.data.length; i += 4) {
-                  const v = Math.random() * 255;
-                  imgData.data[i] = v * 0.3;
-                  imgData.data[i + 1] = v;
-                  imgData.data[i + 2] = v * 0.5;
-                  imgData.data[i + 3] = 200;
+                  // RGB noise with channel separation
+                  imgData.data[i] = Math.random() * 255;     // R
+                  imgData.data[i + 1] = Math.random() * 255; // G
+                  imgData.data[i + 2] = Math.random() * 255; // B
+                  imgData.data[i + 3] = 180;
                 }
                 ctx.putImageData(imgData, 0, 0);
                 frame++;
@@ -130,15 +182,22 @@ export const CrtTransition = ({ active, onComplete }: CrtTransitionProps) => {
         </>
       )}
 
-      {/* Screen edge vignette during expand */}
+      {/* RGB shift flash on expand */}
       {phase === "expand" && (
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse at center, transparent 50%, hsl(var(--primary) / 0.15) 100%)",
-            animation: "crt-flash 400ms ease-out forwards",
-          }}
-        />
+        <>
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(ellipse at center, transparent 50%, hsl(var(--primary) / 0.15) 100%)",
+              animation: "crt-flash 400ms ease-out forwards",
+            }}
+          />
+          {/* Brief RGB split on power-on */}
+          <div className="absolute inset-0" style={{
+            boxShadow: "inset -3px 0 0 hsl(0 100% 50% / 0.15), inset 3px 0 0 hsl(240 100% 50% / 0.15)",
+            animation: "crt-flash 300ms ease-out forwards",
+          }} />
+        </>
       )}
 
       {/* Scanlines always visible during transition */}
