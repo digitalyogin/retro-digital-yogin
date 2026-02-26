@@ -662,3 +662,13 @@ All colors MUST be HSL.
   0% { opacity: 0.5; }
   100% { opacity: 0; }
 }
+
+@keyframes crt-line-pulse {
+  0% { opacity: 0.8; filter: brightness(1); }
+  100% { opacity: 1; filter: brightness(1.5); }
+}
+
+@keyframes crt-roll {
+  0% { top: -4rem; }
+  100% { top: calc(100% + 4rem); }
+}
