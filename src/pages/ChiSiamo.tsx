@@ -4,7 +4,7 @@ const ChiSiamo = () => {
       <div className="w-full max-w-4xl border border-border bg-card p-8 space-y-6">
         <h1 className="text-2xl font-terminal text-primary text-glow mb-4">[02] CHI_SIAMO</h1>
 
-        <div className="space-y-4 text-muted-foreground font-terminal text-sm">
+        <div className="space-y-4 text-muted-foreground font-terminal text-2xl">
           {/* Headline */}
           <div className="border border-border p-4">
             <p className="text-primary text-lg leading-relaxed">
