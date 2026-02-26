@@ -300,7 +300,7 @@ export const playCrtTransitionSound = async () => {
     const noiseGain = ctx.createGain();
     noiseSource.connect(noiseGain);
     noiseGain.connect(ctx.destination);
-    noiseGain.gain.setValueAtTime(0.12, ctx.currentTime);
+    noiseGain.gain.setValueAtTime(0.035, ctx.currentTime);
     noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
     noiseSource.start(ctx.currentTime);
     noiseSource.stop(ctx.currentTime + 0.3);
@@ -313,7 +313,7 @@ export const playCrtTransitionSound = async () => {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(1200, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.4);
-    oscGain.gain.setValueAtTime(0.15, ctx.currentTime);
+    oscGain.gain.setValueAtTime(0.04, ctx.currentTime);
     oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.5);
@@ -326,7 +326,7 @@ export const playCrtTransitionSound = async () => {
     zap.type = 'square';
     zap.frequency.setValueAtTime(4000, ctx.currentTime + 0.05);
     zap.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
-    zapGain.gain.setValueAtTime(0.08, ctx.currentTime + 0.05);
+    zapGain.gain.setValueAtTime(0.02, ctx.currentTime + 0.05);
     zapGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
     zap.start(ctx.currentTime + 0.05);
     zap.stop(ctx.currentTime + 0.2);
@@ -349,8 +349,8 @@ export const playCrtPowerOnSound = async () => {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(60, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.3);
-    oscGain.gain.setValueAtTime(0.1, ctx.currentTime);
-    oscGain.gain.setValueAtTime(0.15, ctx.currentTime + 0.15);
+    oscGain.gain.setValueAtTime(0.03, ctx.currentTime);
+    oscGain.gain.setValueAtTime(0.04, ctx.currentTime + 0.15);
     oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.5);
@@ -367,7 +367,7 @@ export const playCrtPowerOnSound = async () => {
     const noiseGain = ctx.createGain();
     noiseSource.connect(noiseGain);
     noiseGain.connect(ctx.destination);
-    noiseGain.gain.setValueAtTime(0.08, ctx.currentTime + 0.25);
+    noiseGain.gain.setValueAtTime(0.025, ctx.currentTime + 0.25);
     noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     noiseSource.start(ctx.currentTime + 0.25);
     noiseSource.stop(ctx.currentTime + 0.4);
