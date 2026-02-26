@@ -71,7 +71,7 @@ const BlogDettaglio = () => {
           prose-li:text-muted-foreground prose-li:text-base
           prose-a:text-accent prose-a:no-underline hover:prose-a:text-primary
           prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground prose-blockquote:bg-card prose-blockquote:py-2 prose-blockquote:px-4
-          prose-img:border prose-img:border-primary/30 prose-img:rounded-none prose-img:my-6
+          prose-img:border prose-img:border-primary/30 prose-img:rounded-none prose-img:my-6 prose-img:max-w-md prose-img:w-full prose-img:mx-auto
           prose-table:border prose-table:border-primary/30
           prose-th:text-primary prose-th:border-primary/30
           prose-td:border-primary/30
