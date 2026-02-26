@@ -86,7 +86,7 @@ export const Projects = () => {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <div className="text-primary text-xs mb-1">{project.id}</div>
-                      <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                      <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
                         {project.title}
                       </h3>
                     </div>
@@ -96,7 +96,7 @@ export const Projects = () => {
                   </div>
 
                   {/* Description */}
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                  <p className="text-2xl text-muted-foreground mb-4 leading-relaxed">
                     {project.description}
                   </p>
 
