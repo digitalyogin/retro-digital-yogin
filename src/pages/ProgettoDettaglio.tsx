@@ -107,7 +107,7 @@ const ProgettoDettaglio = () => {
             <h2 className="text-lg font-terminal text-primary mb-3">[SERVIZI]</h2>
             <ul className="space-y-2">
               {project.services.map((s, i) => (
-                <li key={i} className="text-muted-foreground font-terminal text-2xl flex items-start gap-2">
+                <li key={i} className="text-muted-foreground font-terminal text-base md:text-2xl flex items-start gap-2">
                   <span className="text-primary">{">"}</span> {s}
                 </li>
               ))}
@@ -119,7 +119,7 @@ const ProgettoDettaglio = () => {
             <h2 className="text-lg font-terminal text-primary mb-3">[DETTAGLI]</h2>
             <div className="space-y-4">
               {project.fullDescription.map((p, i) => (
-                <p key={i} className="text-muted-foreground font-terminal text-2xl leading-relaxed">
+                <p key={i} className="text-muted-foreground font-terminal text-base md:text-2xl leading-relaxed">
                   <span className="text-primary">{">"}</span> {p}
                 </p>
               ))}
