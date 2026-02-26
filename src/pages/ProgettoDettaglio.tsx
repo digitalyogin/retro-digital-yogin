@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { projects } from "@/lib/projectsData";
 import { ExternalLink, ArrowLeft } from "lucide-react";
@@ -6,6 +7,13 @@ const ProgettoDettaglio = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const project = projects.find((p) => p.slug === slug);
+  const [loaded, setLoaded] = useState(false);
+
+  // CRT boot-up animation on mount
+  useEffect(() => {
+    const t = setTimeout(() => setLoaded(true), 100);
+    return () => clearTimeout(t);
+  }, []);
 
   if (!project) {
     return (
@@ -22,7 +30,14 @@ const ProgettoDettaglio = () => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-120px)] px-4 py-8">
+    <div
+      className={`flex flex-col items-center min-h-[calc(100vh-120px)] px-4 py-8 transition-all duration-700 ${
+        loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      }`}
+      style={{
+        animation: loaded ? "crt-power-on 0.6s ease-out" : "none",
+      }}
+    >
       <div className="w-full max-w-3xl">
         {/* Back */}
         <button
@@ -32,6 +47,20 @@ const ProgettoDettaglio = () => {
           <ArrowLeft className="w-4 h-4" />
           {"<"} BACK_TO_PROJECTS
         </button>
+
+        {/* Hero Image */}
+        <div className="border border-border mb-6 overflow-hidden relative">
+          <img
+            src={project.image}
+            alt={project.title}
+            className="w-full h-64 md:h-80 object-cover"
+          />
+          {/* CRT overlay on image */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px)",
+          }} />
+          <div className="absolute inset-0 bg-primary/5 mix-blend-multiply pointer-events-none" />
+        </div>
 
         {/* Header */}
         <div className="border border-border bg-card p-8 mb-6">

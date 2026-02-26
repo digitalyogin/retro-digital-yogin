@@ -650,3 +650,15 @@ All colors MUST be HSL.
 .glitch-effect * {
   animation: glitch 0.1s linear infinite;
 }
+
+/* CRT Transition effects */
+@keyframes crt-static {
+  0% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+  100% { opacity: 0.9; }
+}
+
+@keyframes crt-flash {
+  0% { opacity: 0.5; }
+  100% { opacity: 0; }
+}
