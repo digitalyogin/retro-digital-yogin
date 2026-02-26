@@ -186,7 +186,7 @@ Per un checkup professionale completo, contattaci!
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
           },
           body: JSON.stringify(body),
-          signal: controller.signal,
+          signal: controller.signal
         }
       );
     } catch (err) {
@@ -335,7 +335,7 @@ Per un checkup professionale completo, contattaci!
             <p className="text-primary/80 pl-4">• Profilo social (es: instagram.com/tuobrand)</p>
             <p className="text-primary/80 pl-4">• Descrizione della tua attività (es: "Ho una sartoria a Milano, non ho un sito")</p>
             <p className={`text-secondary mt-4 ${isFlickering ? "animate-[text-flicker_0.15s_ease-in-out_infinite]" : ""}`}>{'>'} Turiya ti guiderà con consigli personalizzati, incentivi statali e strategie di crescita.</p>
-            <p className="text-primary animate-pulse">{'>'} In attesa di input...</p>
+            <p className="text-primary animate-pulse text-2xl">{'>'} In attesa di input...</p>
           </div> :
 
         messages.map((msg, idx) =>
