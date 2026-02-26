@@ -4,6 +4,7 @@ export interface Project {
   title: string;
   client: string;
   year: string;
+  image: string;
   services: string[];
   website: string;
   description: string;
@@ -19,6 +20,7 @@ export const projects: Project[] = [
     title: "HOYA_VISION_CARE",
     client: "Hoya Lens Italia",
     year: "2022",
+    image: "/images/projects/hoya-vision-care.png",
     services: ["Gestionale admin - React e Firebase", "App user in Flutter per iOS e Android"],
     website: "https://www.hoyavision.com/it/",
     description: "App e gestionale per distribuzione contenuti informativi e commerciali agli ottici, gestibile in totale autonomia dallo staff Hoya.",
@@ -37,6 +39,7 @@ export const projects: Project[] = [
     title: "WE-BOLD",
     client: "WeBold",
     year: "2022",
+    image: "/images/projects/we-bold.png",
     services: ["Webapp in React e Firebase", "App nativa in SwiftUI per iOS e Flutter per Android"],
     website: "https://we-bold.com/",
     description: "Piattaforma digitale per la formazione degli iscritti e candidatura a posizioni lavorative nel campo educativo e delle attività ludiche per bambini.",
@@ -55,6 +58,7 @@ export const projects: Project[] = [
     title: "APP_MIGRANT_REGIONE_MARCHE",
     client: "Regione Marche / Luna srl",
     year: "2022",
+    image: "/images/projects/app-migrant-regione-marche.png",
     services: ["Flutter iOS & Android", "Web app development"],
     website: "https://www.regione.marche.it/Regione-Utile/Lavoro-e-Formazione-Professionale/Progetto-Migrant-net",
     description: "App dedicata ai migranti nelle Marche per smistare richieste e metterli in contatto con la Regione per lavoro e servizi, realizzata in tre lingue.",
@@ -73,6 +77,7 @@ export const projects: Project[] = [
     title: "BUONAPPE",
     client: "Non Solo Pizza (progetto interno)",
     year: "2021",
+    image: "/images/projects/buonappe.png",
     services: ["App Design e icon logo", "Sviluppo app in Flutter per iOS e Android"],
     website: "https://www.buonappe.com/",
     description: "App per gestire take away e delivery in totale autonomia, senza dipendere dai grandi player come JustEat o Deliveroo. Nata durante il COVID-19.",
@@ -91,6 +96,7 @@ export const projects: Project[] = [
     title: "FTO_REMOTEFLY",
     client: "FTOremotefly srl",
     year: "2021",
+    image: "/images/projects/fto-remotefly.png",
     services: ["Web Design", "Web Development"],
     website: "https://www.ftoremotefly.com/",
     description: "Sito web nuovo e più performante per azienda specializzata in droni, produzioni multimediali, rilievi tecnici e corsi. Eliminati servizi superflui e rinnovato il brand.",
@@ -109,6 +115,7 @@ export const projects: Project[] = [
     title: "FUROR_DI_VINO",
     client: "Valleogra distribuzioni",
     year: "2021",
+    image: "/images/projects/furor-di-vino.png",
     services: ["Branding Design & Web Design", "Sviluppo custom Shopify"],
     website: "https://furordivino.com/",
     description: "Branding completo e e-commerce custom su Shopify per azienda specializzata nella vendita online di vini, distillati e liquori.",
