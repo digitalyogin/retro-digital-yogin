@@ -10,7 +10,8 @@ import ChiSiamo from "./pages/ChiSiamo";
 import ProgettiOnline from "./pages/ProgettiOnline";
 import ProgettoDettaglio from "./pages/ProgettoDettaglio";
 import Contatti from "./pages/Contatti";
-import About from "./pages/About";
+import Blog from "./pages/Blog";
+import BlogDettaglio from "./pages/BlogDettaglio";
 import AdminLeads from "./pages/AdminLeads";
 import Incentivi from "./pages/Incentivi";
 import Auth from "./pages/Auth";
@@ -42,7 +43,8 @@ const App = () => {
             <Route path="/03" element={<RetroLayout><ProgettiOnline /></RetroLayout>} />
             <Route path="/03/:slug" element={<RetroLayout><ProgettoDettaglio /></RetroLayout>} />
             <Route path="/04" element={<RetroLayout><Contatti /></RetroLayout>} />
-            <Route path="/99" element={<RetroLayout><About /></RetroLayout>} />
+            <Route path="/05" element={<RetroLayout><Blog /></RetroLayout>} />
+            <Route path="/05/:slug" element={<RetroLayout><BlogDettaglio /></RetroLayout>} />
             
             {/* Standalone routes */}
             <Route path="/admin" element={<AdminLeads />} />
