@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import { Volume2, VolumeX } from "lucide-react";
+import { isSoundEnabled, toggleSound } from "@/lib/terminalSounds";
 interface RetroLayoutProps {
   children: React.ReactNode;
 }
@@ -18,6 +19,7 @@ export const RetroLayout = ({ children }: RetroLayoutProps) => {
   const location = useLocation();
   const [commandInput, setCommandInput] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [soundOn, setSoundOn] = useState(isSoundEnabled);
 
   // Update clock every second
   useEffect(() => {
@@ -92,6 +94,13 @@ export const RetroLayout = ({ children }: RetroLayoutProps) => {
           <span className="text-muted-foreground hidden md:inline">v3.0</span>
         </div>
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setSoundOn(toggleSound())}
+            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+            title={soundOn ? "Disattiva suoni" : "Attiva suoni"}
+          >
+            {soundOn ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+          </button>
           <span className="text-muted-foreground hidden sm:inline">{dateStr}</span>
           <span className="text-secondary">{timeStr}</span>
           <span className="flex items-center gap-1">

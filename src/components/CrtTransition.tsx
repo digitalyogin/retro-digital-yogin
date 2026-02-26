@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { playCrtTransitionSound, playCrtPowerOnSound } from "@/lib/terminalSounds";
 
 interface CrtTransitionProps {
   active: boolean;
@@ -19,9 +20,13 @@ export const CrtTransition = ({ active, onComplete }: CrtTransitionProps) => {
     }
 
     setPhase("collapse");
+    playCrtTransitionSound();
 
     const t1 = setTimeout(() => setPhase("line"), 300);
-    const t2 = setTimeout(() => setPhase("expand"), 600);
+    const t2 = setTimeout(() => {
+      setPhase("expand");
+      playCrtPowerOnSound();
+    }, 600);
     const t3 = setTimeout(() => {
       setPhase("done");
       onComplete();
