@@ -464,7 +464,7 @@ Per un checkup professionale completo, contattaci!
             placeholder="URL, profilo social o descrivi la tua attività..."
             disabled={isLoading}
             maxLength={500}
-            className="w-full bg-background border border-primary/50 text-foreground pl-10 pr-4 py-3 text-base focus:outline-none focus:border-primary placeholder:text-muted-foreground disabled:opacity-50" />
+            className="w-full bg-background border border-primary/50 text-foreground pl-10 pr-4 py-3 text-2xl focus:outline-none focus:border-primary placeholder:text-muted-foreground disabled:opacity-50" />
 
         </div>
         <button
