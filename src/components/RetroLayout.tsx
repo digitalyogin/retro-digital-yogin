@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { code: "02", label: "CHI_SIAMO", path: "/02" },
   { code: "03", label: "PROGETTI", path: "/03" },
   { code: "04", label: "CONTATTI", path: "/04" },
-  { code: "99", label: "ABOUT", path: "/99" },
+  { code: "05", label: "BLOG", path: "/05" },
 ];
 
 export const RetroLayout = ({ children }: RetroLayoutProps) => {
