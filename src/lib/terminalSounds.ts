@@ -315,3 +315,11 @@ export const playCmdSubmitSound = () => playWavSound("Rainbow5.wav", 0.25);
 
 // Command Center AI response sound
 export const playCmdResponseSound = () => playWavSound("Rainbow6.wav", 0.25);
+
+// Intro ENTER sound
+export const playIntroEnterSound = () => playWavSound("Ice_Rise1.wav", 0.35);
+
+// Matrix transition sounds (legacy mapping)
+export const playEnterSound = () => playWavSound("Rainbow1.wav", 0.3);
+export const playExitSound = () => playWavSound("Rainbow2.wav", 0.3);
+export const playTransitionDoneSound = () => playWavSound("Rainbow3.wav", 0.28);

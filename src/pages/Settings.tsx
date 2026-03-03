@@ -1,4 +1,5 @@
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { setTuriyaIntroDone } from "@/lib/preferences/storage";
 
 type ToggleRowProps = {
   label: string;
@@ -59,19 +60,12 @@ const Settings = () => {
             description="Apri di default la modalita guidata nel Command Center."
           />
 
-          <ToggleRow
-            label="MOSTRA_HINT"
-            value={preferences.showPersistentHint}
-            onChange={(value) => updatePreferences({ showPersistentHint: value })}
-            description="Mostra o nascondi il suggerimento rapido per nuovi utenti."
-          />
-
           <div className="border border-border p-4 flex flex-wrap gap-3">
             <button
-              onClick={() => updatePreferences({ onboardingSeen: false, showPersistentHint: true })}
+              onClick={() => setTuriyaIntroDone(false)}
               className="px-4 py-2 border border-primary text-primary hover:bg-primary/10 transition-colors"
             >
-              RIVEDI_TUTORIAL
+              RIESEGUI_INTRODUZIONE_TURIYA
             </button>
             <button
               onClick={resetPreferences}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { playBootSound } from '@/lib/terminalSounds';
+import { playIntroEnterSound } from '@/lib/terminalSounds';
 
 interface IntroLoaderProps {
   onComplete: () => void;
@@ -40,9 +40,9 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
         // Ignore storage write errors in restricted preview environments.
       }
     }
-    // Play boot beep on user interaction (finish is always user-triggered)
+    // Play intro enter sound on user interaction (finish is always user-triggered)
     if (hasInteracted.current) {
-      playBootSound();
+      playIntroEnterSound();
     }
     onComplete();
   }, [dontShow, onComplete]);

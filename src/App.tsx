@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import About from "./pages/About";
 import ChiSiamo from "./pages/ChiSiamo";
 import ProgettiPage from "./pages/ProgettiPage";
+import ProgettoDettaglio from "./pages/ProgettoDettaglio";
 import Contatti from "./pages/Contatti";
 import BlogIndex from "./pages/BlogIndex";
 import BlogArticle from "./pages/BlogArticle";
@@ -23,6 +24,10 @@ import Notifiche from "./pages/Notifiche";
 import NotFound from "./pages/NotFound";
 import IntroLoader from "./components/IntroLoader";
 import { ScrollToTop } from "./components/ScrollToTop";
+import {
+  getTuriyaIntroDone,
+  TURIYA_ONBOARDING_EVENT,
+} from "@/lib/preferences/storage";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +54,9 @@ const App = () => {
             <IntroLoader
               onComplete={() => {
                 setShowIntro(false);
+                if (!getTuriyaIntroDone() && typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent(TURIYA_ONBOARDING_EVENT));
+                }
                 if (typeof window !== "undefined") {
                   window.scrollTo(0, 0);
                 }
@@ -66,6 +74,7 @@ const App = () => {
             <Route path="/99" element={<RetroLayout><About /></RetroLayout>} />
             <Route path="/chi-siamo" element={<RetroLayout><ChiSiamo /></RetroLayout>} />
             <Route path="/progetti" element={<RetroLayout><ProgettiPage /></RetroLayout>} />
+            <Route path="/progetti/:slug" element={<RetroLayout><ProgettoDettaglio /></RetroLayout>} />
             <Route path="/contatti" element={<RetroLayout><Contatti /></RetroLayout>} />
             <Route path="/blog" element={<RetroLayout><BlogIndex /></RetroLayout>} />
             <Route path="/blog/:slug" element={<RetroLayout><BlogArticle /></RetroLayout>} />
