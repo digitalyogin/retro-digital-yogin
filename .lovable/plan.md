@@ -1,19 +1,28 @@
 
-# Ripristino del Puntatore del Mouse
 
-## Problema
-Il cursore del mouse e' nascosto tramite `cursor: none` nel CSS globale (`src/index.css`), rendendo difficile l'usabilita' per gli utenti che non riescono a capire dove si trovano sullo schermo.
+# Piano: Aggiornamento System Prompt AI Guide
 
-## Cosa faremo
+Aggiornare il prompt di sistema dell'AI Guide con la nuova versione che include identita della voce (saggia ma concreta), micro-messaggi di saggezza ispirati a Dharma/Gita/Thelema, formato risposta obbligatorio a 3-4 righe, e mappatura intent->route aggiornata.
 
-Rimuoveremo le regole CSS che nascondono il cursore e il componente `CustomCursor` che lo sostituiva con un simbolo personalizzato.
+## File coinvolti
 
-### Modifiche in `src/index.css`
-1. Rimuovere `cursor: none` dal `body`
-2. Rimuovere il blocco `*:not(input)... { cursor: none !important; }` che forza il cursore nascosto su tutti gli elementi
-3. Rimuovere il blocco `input, textarea... { cursor: text !important; }` (non piu' necessario senza il cursore custom)
+| File | Azione |
+|---|---|
+| `supabase/functions/oracle-chat/index.ts` | Sostituire `SYSTEM_PROMPT` con il nuovo prompt completo fornito dall'utente |
+| `docs/lovable-ai-guide-prompt.md` | Aggiornare la documentazione con il nuovo prompt |
 
-### Modifiche in `src/App.tsx`
-Rimuovere l'import e l'uso del componente `<CustomCursor />` se presente nel layout.
+## Dettagli
 
-Il puntatore tornera' al comportamento standard del browser: freccia normale e cursore testo nei campi di input.
+**`oracle-chat/index.ts`**: Il `SYSTEM_PROMPT` (righe 8-30) verra sostituito integralmente con il nuovo testo che include:
+- Identita: guida saggia ma concreta, italiano chiaro
+- Stile: frasi brevi, max 1 micro-messaggio di saggezza per risposta
+- Compiti: capire intento, consigliare sezione, proporre navigazione
+- Mappatura route: /, /03, /04, /progetti, /contatti, /blog, /09, /incentivi
+- Formato obbligatorio 3-4 righe con comprensione + sezione + azione + saggezza opzionale
+- Pool di micro-messaggi (Dharma, Gita, Thelema) da ruotare
+- Regole di sicurezza
+
+**`docs/lovable-ai-guide-prompt.md`**: Aggiornamento speculare per mantenere la documentazione allineata.
+
+Nessun altro file viene toccato. La struttura dell'edge function (streaming, CORS, error handling) resta invariata.
+
