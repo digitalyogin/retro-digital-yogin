@@ -11,6 +11,11 @@ import History from "./pages/History";
 import ExportPage from "./pages/ExportPage";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
+import ChiSiamo from "./pages/ChiSiamo";
+import ProgettiPage from "./pages/ProgettiPage";
+import Contatti from "./pages/Contatti";
+import BlogIndex from "./pages/BlogIndex";
+import BlogArticle from "./pages/BlogArticle";
 import AdminLeads from "./pages/AdminLeads";
 import Incentivi from "./pages/Incentivi";
 import Auth from "./pages/Auth";
@@ -21,10 +26,17 @@ import { ScrollToTop } from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
+const shouldShowIntroOnLoad = () => {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem("introSeen") !== "true";
+  } catch {
+    return false;
+  }
+};
+
 const App = () => {
-  const [showIntro, setShowIntro] = useState(() => {
-    return localStorage.getItem('introSeen') !== 'true';
-  });
+  const [showIntro, setShowIntro] = useState(shouldShowIntroOnLoad);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -33,7 +45,16 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <ScrollToTop />
-          {showIntro && <IntroLoader onComplete={() => { setShowIntro(false); window.scrollTo(0, 0); }} />}
+          {showIntro && (
+            <IntroLoader
+              onComplete={() => {
+                setShowIntro(false);
+                if (typeof window !== "undefined") {
+                  window.scrollTo(0, 0);
+                }
+              }}
+            />
+          )}
           <Routes>
             {/* Terminal-style routes with RetroLayout */}
             <Route path="/" element={<RetroLayout><QuickScan /></RetroLayout>} />
@@ -43,6 +64,11 @@ const App = () => {
             <Route path="/04" element={<RetroLayout><ExportPage /></RetroLayout>} />
             <Route path="/09" element={<RetroLayout><Settings /></RetroLayout>} />
             <Route path="/99" element={<RetroLayout><About /></RetroLayout>} />
+            <Route path="/chi-siamo" element={<RetroLayout><ChiSiamo /></RetroLayout>} />
+            <Route path="/progetti" element={<RetroLayout><ProgettiPage /></RetroLayout>} />
+            <Route path="/contatti" element={<RetroLayout><Contatti /></RetroLayout>} />
+            <Route path="/blog" element={<RetroLayout><BlogIndex /></RetroLayout>} />
+            <Route path="/blog/:slug" element={<RetroLayout><BlogArticle /></RetroLayout>} />
             
             {/* Standalone routes */}
             <Route path="/admin" element={<AdminLeads />} />

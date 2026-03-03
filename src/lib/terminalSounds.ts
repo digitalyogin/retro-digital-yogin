@@ -1,9 +1,24 @@
+import { getUserPreferences } from "@/lib/preferences/storage";
+
 // 8-bit sound effects generator using Web Audio API
 let audioContext: AudioContext | null = null;
 
-const getAudioContext = async (): Promise<AudioContext> => {
+const isSoundEnabled = () => {
+  return getUserPreferences().terminalSoundsEnabled;
+};
+
+type AudioWindow = Window & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
+const getAudioContext = async (): Promise<AudioContext | null> => {
+  if (typeof window === "undefined" || !isSoundEnabled()) return null;
+  const audioWindow = window as AudioWindow;
+
   if (!audioContext) {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const AudioContextCtor = audioWindow.AudioContext || audioWindow.webkitAudioContext;
+    if (!AudioContextCtor) return null;
+    audioContext = new AudioContextCtor();
   }
   
   // Resume audio context if suspended (browser autoplay policy)
@@ -18,6 +33,7 @@ const getAudioContext = async (): Promise<AudioContext> => {
 export const playKeyBeep = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
     
@@ -41,6 +57,7 @@ export const playKeyBeep = async () => {
 export const playSuccessSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
     
     notes.forEach((freq, i) => {
@@ -68,6 +85,7 @@ export const playSuccessSound = async () => {
 export const playErrorSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
     
@@ -92,6 +110,7 @@ export const playErrorSound = async () => {
 export const playBootSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const frequencies = [200, 300, 400, 600, 800, 1000, 1200, 1600];
     
     frequencies.forEach((freq, i) => {
@@ -119,6 +138,7 @@ export const playBootSound = async () => {
 export const playLightcycleSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
     
@@ -144,6 +164,7 @@ export const playLightcycleSound = async () => {
 export const playGlitchSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     
     for (let i = 0; i < 8; i++) {
       const oscillator = ctx.createOscillator();
@@ -170,6 +191,7 @@ export const playGlitchSound = async () => {
 export const playArcadeSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const notes = [1200, 1600, 1400, 1800];
     
     notes.forEach((freq, i) => {
@@ -197,6 +219,7 @@ export const playArcadeSound = async () => {
 export const playHackerSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     
     for (let i = 0; i < 15; i++) {
       const oscillator = ctx.createOscillator();
@@ -223,6 +246,7 @@ export const playHackerSound = async () => {
 export const playCRTSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
     
@@ -247,6 +271,7 @@ export const playCRTSound = async () => {
 export const playThemeSound = async () => {
   try {
     const ctx = await getAudioContext();
+    if (!ctx) return;
     const notes = [400, 600, 800, 1000, 800];
     
     notes.forEach((freq, i) => {

@@ -4,14 +4,25 @@ import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const hasBrowserStorage = typeof window !== "undefined" && !!window.localStorage;
+const hasSupabaseEnv = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+
+if (!hasSupabaseEnv) {
+  console.warn(
+    "[supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY. Running in degraded mode."
+  );
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(
+  SUPABASE_URL || "https://invalid-project.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY || "invalid-anon-key",
+  {
   auth: {
-    storage: localStorage,
-    persistSession: true,
+    storage: hasBrowserStorage ? window.localStorage : undefined,
+    persistSession: hasBrowserStorage,
     autoRefreshToken: true,
-  }
+  },
 });

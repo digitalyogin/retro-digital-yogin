@@ -33,7 +33,13 @@ const IntroLoader = ({ onComplete }: IntroLoaderProps) => {
   );
 
   const finish = useCallback(() => {
-    if (dontShow) localStorage.setItem('introSeen', 'true');
+    if (dontShow) {
+      try {
+        window.localStorage.setItem("introSeen", "true");
+      } catch {
+        // Ignore storage write errors in restricted preview environments.
+      }
+    }
     // Play boot beep on user interaction (finish is always user-triggered)
     if (hasInteracted.current) {
       playBootSound();

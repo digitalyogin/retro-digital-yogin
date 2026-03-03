@@ -1,5 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { CommandCenter } from "@/components/CommandCenter";
+import { OnboardingTour } from "@/components/OnboardingTour";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface RetroLayoutProps {
   children: React.ReactNode;
@@ -7,18 +10,21 @@ interface RetroLayoutProps {
 
 const NAV_ITEMS = [
   { code: "01", label: "QUICK_SCAN", path: "/" },
-  { code: "02", label: "FULL_REPORT", path: "/02" },
   { code: "03", label: "HISTORY", path: "/03" },
-  { code: "04", label: "EXPORT", path: "/04" },
+  { code: "05", label: "CHI_SIAMO", path: "/chi-siamo" },
+  { code: "06", label: "PROGETTI", path: "/progetti" },
+  { code: "07", label: "CONTATTI", path: "/contatti" },
+  { code: "08", label: "BLOG", path: "/blog" },
   { code: "09", label: "SETTINGS", path: "/09" },
-  { code: "99", label: "ABOUT", path: "/99" },
 ];
 
 export const RetroLayout = ({ children }: RetroLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [commandInput, setCommandInput] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [tourStep, setTourStep] = useState(0);
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const { preferences, updatePreferences } = useUserPreferences();
 
   // Update clock every second
   useEffect(() => {
@@ -26,27 +32,12 @@ export const RetroLayout = ({ children }: RetroLayoutProps) => {
     return () => clearInterval(timer);
   }, []);
 
-  const navigateToCode = useCallback((code: string) => {
-    if (code === "0" || code === "00") {
-      navigate("/");
-      return true;
-    }
-    const item = NAV_ITEMS.find((n) => n.code === code);
-    if (item) {
-      navigate(item.path);
-      return true;
-    }
-    return false;
-  }, [navigate]);
-
   // Global keyboard listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't intercept when typing in inputs (except the command line)
       const target = e.target as HTMLElement;
-      const isCommandInput = target.getAttribute("data-command-input") === "true";
       if (
-        !isCommandInput &&
         (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
       ) {
         return;
@@ -62,20 +53,36 @@ export const RetroLayout = ({ children }: RetroLayoutProps) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [navigate]);
 
-  const handleCommandSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = commandInput.trim();
-    if (navigateToCode(code)) {
-      setCommandInput("");
-    }
-  };
-
-  const activeCode = NAV_ITEMS.find(
-    (n) => n.path === location.pathname
-  )?.code || "01";
+  const activeCode = NAV_ITEMS.find((n) => {
+    if (n.path === "/blog") return location.pathname === "/blog" || location.pathname.startsWith("/blog/");
+    return n.path === location.pathname;
+  })?.code || "01";
 
   const timeStr = currentTime.toLocaleTimeString("it-IT", { hour12: false });
   const dateStr = currentTime.toLocaleDateString("it-IT");
+
+  useEffect(() => {
+    if (!preferences.onboardingSeen) {
+      setTourStep(0);
+      setIsTourOpen(true);
+    }
+  }, [preferences.onboardingSeen]);
+
+  const completeTour = () => {
+    updatePreferences({ onboardingSeen: true });
+    setIsTourOpen(false);
+    setTourStep(0);
+  };
+
+  const nextTourStep = () => {
+    setTourStep((current) => {
+      if (current >= 2) {
+        completeTour();
+        return current;
+      }
+      return current + 1;
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative">
@@ -125,23 +132,45 @@ export const RetroLayout = ({ children }: RetroLayoutProps) => {
             </button>
           ))}
         </div>
-
-        {/* Command line */}
-        <form onSubmit={handleCommandSubmit} className="flex items-center gap-2">
-          <span className="text-accent font-terminal text-sm">{">"}</span>
-          <span className="text-muted-foreground font-terminal text-sm">Select option:</span>
-          <input
-            data-command-input="true"
-            type="text"
-            value={commandInput}
-            onChange={(e) => setCommandInput(e.target.value)}
-            className="flex-1 bg-transparent border-none outline-none text-primary font-terminal text-sm caret-primary"
-            placeholder="_"
-            autoComplete="off"
-          />
-          <span className="text-muted-foreground text-xs hidden sm:inline">[ESC=HOME]</span>
-        </form>
+        <div className="flex flex-wrap gap-3 items-center justify-between">
+          <p className="text-xs text-muted-foreground font-terminal">
+            Navigazione rapida semplificata. Per supporto apri AI Guide.
+          </p>
+          <CommandCenter navItems={NAV_ITEMS} onNavigate={navigate} />
+        </div>
       </footer>
+
+      {preferences.showPersistentHint ? (
+        <div className="fixed bottom-20 right-4 z-[205] border border-primary bg-card px-3 py-2 text-xs font-terminal max-w-[260px]">
+          <p className="text-primary">Nuovo utente?</p>
+          <p className="text-muted-foreground mt-1">Apri la guida per muoverti senza comandi tecnici.</p>
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              onClick={() => {
+                setTourStep(0);
+                setIsTourOpen(true);
+              }}
+              className="px-2 py-1 border border-primary text-primary hover:bg-primary/10"
+            >
+              Apri guida
+            </button>
+            <button
+              onClick={() => updatePreferences({ showPersistentHint: false })}
+              className="px-2 py-1 border border-border text-muted-foreground hover:border-primary hover:text-primary"
+            >
+              Chiudi
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <OnboardingTour
+        open={isTourOpen}
+        step={tourStep}
+        onNext={nextTourStep}
+        onSkip={completeTour}
+        onComplete={completeTour}
+      />
     </div>
   );
 };
