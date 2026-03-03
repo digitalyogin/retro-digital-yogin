@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, type FormEvent } from "react";
 import { Terminal, X, ChevronUp, ChevronDown } from "lucide-react";
-import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 type NavItem = {
   code: string;
@@ -14,11 +13,16 @@ type CommandCenterProps = {
 };
 
 type TerminalLog = {
-  type: "input" | "output" | "error" | "success";
+  type: "input" | "output" | "error" | "success" | "ai";
   text: string;
 };
 
 type TabMode = "guided" | "terminal";
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const QUICK_ACTIONS = [
   { label: "Vai a Quick Scan", path: "/", detail: "Apri analisi rapida URL" },
@@ -30,12 +34,14 @@ const QUICK_ACTIONS = [
 ];
 
 export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
-  const { preferences } = useUserPreferences();
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<TabMode>(preferences.guidedModeDefault ? "guided" : "terminal");
+  const [tab, setTab] = useState<TabMode>("terminal");
   const [terminalInput, setTerminalInput] = useState("");
   const [logs, setLogs] = useState<TerminalLog[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const commandMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -51,15 +57,8 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
     map.set("progetti", "/progetti");
     map.set("contatti", "/contatti");
     map.set("chi-siamo", "/chi-siamo");
-    map.set("ai", "/");
-    map.set("assistant", "/");
     return map;
   }, [navItems]);
-
-  useEffect(() => {
-    if (!open) return;
-    setTab(preferences.guidedModeDefault ? "guided" : "terminal");
-  }, [open, preferences.guidedModeDefault]);
 
   useEffect(() => {
     if (!open) return;
@@ -70,58 +69,159 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
-
-    if (open) {
-      window.addEventListener("keydown", onKeyDown);
-    }
+    if (open) window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  const pushLog = (entry: TerminalLog) => setLogs((prev) => [...prev, entry]);
+  const pushLog = useCallback(
+    (entry: TerminalLog) => setLogs((prev) => [...prev, entry]),
+    []
+  );
 
-  const showHelp = () => {
+  const updateLastLog = useCallback(
+    (text: string) =>
+      setLogs((prev) => {
+        if (prev.length === 0) return prev;
+        const copy = [...prev];
+        copy[copy.length - 1] = { ...copy[copy.length - 1], text };
+        return copy;
+      }),
+    []
+  );
+
+  const streamAiResponse = useCallback(
+    async (userText: string) => {
+      const newUserMsg: ChatMessage = { role: "user", content: userText };
+      const updatedMessages = [...chatMessages, newUserMsg];
+      setChatMessages(updatedMessages);
+
+      setIsAiLoading(true);
+      pushLog({ type: "ai", text: "▌" });
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/functions/v1/oracle-chat`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${SUPABASE_KEY}`,
+            },
+            body: JSON.stringify({ messages: updatedMessages }),
+            signal: controller.signal,
+          }
+        );
+
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          pushLog({ type: "error", text: (errBody as Record<string, string>).error || `Errore AI (${res.status})` });
+          setIsAiLoading(false);
+          return;
+        }
+
+        const reader = res.body?.getReader();
+        if (!reader) {
+          pushLog({ type: "error", text: "Nessuna risposta dallo stream." });
+          setIsAiLoading(false);
+          return;
+        }
+
+        const decoder = new TextDecoder();
+        let accumulated = "";
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+            const payload = trimmed.slice(5).trim();
+            if (payload === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(payload);
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) {
+                accumulated += delta;
+                updateLastLog(accumulated + "▌");
+              }
+            } catch {
+              // skip malformed chunks
+            }
+          }
+        }
+
+        updateLastLog(accumulated || "(nessuna risposta)");
+        setChatMessages((prev) => [...prev, { role: "assistant", content: accumulated }]);
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        pushLog({ type: "error", text: "Errore di connessione all'AI Guide." });
+      } finally {
+        setIsAiLoading(false);
+        abortRef.current = null;
+      }
+    },
+    [chatMessages, pushLog, updateLastLog]
+  );
+
+  const showHelp = useCallback(() => {
     pushLog({ type: "success", text: "Comandi disponibili:" });
-    pushLog({ type: "output", text: "help, clear, ai, home, quickscan, progetti, contatti, blog, settings" });
+    pushLog({ type: "output", text: "help, clear, home, quickscan, progetti, contatti, blog, settings" });
     pushLog({ type: "output", text: "Puoi anche usare i codici: 01, 08, 09..." });
-  };
+    pushLog({ type: "output", text: "Oppure scrivi una domanda per l'AI Guide." });
+  }, [pushLog]);
 
-  const execute = (rawCommand: string) => {
-    const command = rawCommand.trim().toLowerCase();
-    if (!command) return;
+  const execute = useCallback(
+    (rawCommand: string) => {
+      const command = rawCommand.trim().toLowerCase();
+      if (!command) return;
 
-    pushLog({ type: "input", text: `> ${rawCommand}` });
+      pushLog({ type: "input", text: `> ${rawCommand}` });
 
-    if (command === "clear") {
-      setLogs([]);
-      return;
-    }
+      if (command === "clear") {
+        setLogs([]);
+        setChatMessages([]);
+        return;
+      }
+      if (command === "help") {
+        showHelp();
+        return;
+      }
 
-    if (command === "help") {
-      showHelp();
-      return;
-    }
+      const targetPath = commandMap.get(command);
+      if (targetPath) {
+        pushLog({ type: "success", text: `Navigazione verso ${targetPath}` });
+        onNavigate(targetPath);
+        setOpen(false);
+        return;
+      }
 
-    const targetPath = commandMap.get(command);
-    if (targetPath) {
-      pushLog({ type: "success", text: `Navigazione verso ${targetPath}` });
-      onNavigate(targetPath);
-      setOpen(false);
-      return;
-    }
-
-    pushLog({ type: "error", text: `Comando non riconosciuto: ${rawCommand}` });
-    pushLog({ type: "output", text: "Digita help per la guida rapida." });
-  };
+      // Fallback: send to AI Guide
+      streamAiResponse(rawCommand);
+    },
+    [pushLog, showHelp, commandMap, onNavigate, streamAiResponse]
+  );
 
   const submitTerminal = (event: FormEvent) => {
     event.preventDefault();
+    if (isAiLoading) return;
     execute(terminalInput);
     setTerminalInput("");
   };
 
   return (
     <>
-      {open ? (
+      {open && (
         <div className="fixed left-0 right-0 bottom-0 z-[210] border-t-2 border-primary bg-card/95 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 py-3">
             <div className="flex items-center justify-between mb-3">
@@ -140,20 +240,20 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
 
             <div className="flex gap-2 mb-3">
               <button
-                onClick={() => setTab("guided")}
-                className={`px-3 py-1 text-xs border font-terminal ${
-                  tab === "guided" ? "border-primary bg-primary/20 text-primary" : "border-border text-muted-foreground"
-                }`}
-              >
-                GUIDATA
-              </button>
-              <button
                 onClick={() => setTab("terminal")}
                 className={`px-3 py-1 text-xs border font-terminal ${
                   tab === "terminal" ? "border-primary bg-primary/20 text-primary" : "border-border text-muted-foreground"
                 }`}
               >
                 TERMINALE
+              </button>
+              <button
+                onClick={() => setTab("guided")}
+                className={`px-3 py-1 text-xs border font-terminal ${
+                  tab === "guided" ? "border-primary bg-primary/20 text-primary" : "border-border text-muted-foreground"
+                }`}
+              >
+                GUIDATA
               </button>
             </div>
 
@@ -163,11 +263,10 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
                   <p className="text-sm text-muted-foreground">
                     Seleziona un'azione rapida. Nessun comando tecnico necessario.
                   </p>
-
                   <div className="grid md:grid-cols-2 gap-3">
                     {QUICK_ACTIONS.map((action) => (
                       <button
-                        key={action.path}
+                        key={action.label}
                         onClick={() => {
                           onNavigate(action.path);
                           setOpen(false);
@@ -179,32 +278,14 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
                       </button>
                     ))}
                   </div>
-
-                  <div className="border border-border p-3 space-y-2">
-                    <p className="text-sm text-secondary">Shortcut veloci</p>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { cmd: "ai", label: "AI Guide" },
-                        { cmd: "01", label: "Quick Scan" },
-                        { cmd: "08", label: "Blog" },
-                        { cmd: "help", label: "Guida" },
-                      ].map((item) => (
-                        <button
-                          key={item.cmd}
-                          onClick={() => execute(item.cmd)}
-                          className="px-2 py-1 border border-primary/50 text-primary text-xs hover:bg-primary/10"
-                        >
-                          [{item.cmd}] {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <div className="h-full flex flex-col">
                   <div className="flex-1 overflow-y-auto space-y-1 text-xs mb-2">
                     {logs.length === 0 ? (
-                      <p className="text-muted-foreground">Digita help o ai per iniziare.</p>
+                      <p className="text-muted-foreground">
+                        Digita <span className="text-primary">help</span> per i comandi, o scrivi una domanda per l'AI Guide.
+                      </p>
                     ) : (
                       logs.map((log, index) => (
                         <p
@@ -216,6 +297,8 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
                               ? "text-secondary"
                               : log.type === "error"
                               ? "text-destructive"
+                              : log.type === "ai"
+                              ? "text-secondary whitespace-pre-wrap"
                               : "text-muted-foreground"
                           }
                         >
@@ -231,8 +314,9 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
                     <input
                       value={terminalInput}
                       onChange={(event) => setTerminalInput(event.target.value)}
-                      placeholder="Digita un comando..."
-                      className="flex-1 bg-transparent outline-none text-primary text-xs"
+                      disabled={isAiLoading}
+                      placeholder={isAiLoading ? "AI Guide sta rispondendo..." : "Digita un comando o chiedi qualcosa..."}
+                      className="flex-1 bg-transparent outline-none text-primary text-xs disabled:opacity-50"
                       aria-label="Input comandi terminale"
                     />
                   </form>
@@ -241,7 +325,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
             </div>
           </div>
         </div>
-      ) : null}
+      )}
 
       <button
         onClick={() => setOpen(true)}
@@ -253,7 +337,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
         <ChevronUp size={12} />
       </button>
 
-      {open ? (
+      {open && (
         <button
           onClick={() => setOpen(false)}
           className="fixed bottom-4 right-4 z-[215] border border-border bg-card px-2 py-1 text-xs text-muted-foreground hover:text-primary"
@@ -261,7 +345,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
         >
           <ChevronDown size={12} />
         </button>
-      ) : null}
+      )}
     </>
   );
 };
