@@ -90,6 +90,56 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
     []
   );
 
+  const ROUTE_KEYWORDS: [RegExp, string][] = useMemo(() => [
+    [/quick\s*scan/i, "/"],
+    [/history|storico/i, "/03"],
+    [/export|esport/i, "/04"],
+    [/progett/i, "/progetti"],
+    [/contatt|preventivo/i, "/contatti"],
+    [/blog|articol|guide/i, "/blog"],
+    [/settings|impostazion|preferenz/i, "/09"],
+    [/incentiv|bonus|bandi/i, "/incentivi"],
+    [/chi siamo/i, "/chi-siamo"],
+  ], []);
+
+  const ROUTE_LITERALS = useMemo(() => [
+    "/", "/03", "/04", "/progetti", "/contatti", "/blog", "/09", "/incentivi", "/chi-siamo"
+  ], []);
+
+  const NAV_INTENT = /portami|vai\b|apri|naviga|andiamo|porta\b/i;
+
+  const detectAndNavigate = useCallback(
+    (userText: string, aiResponse: string) => {
+      if (!NAV_INTENT.test(userText)) return;
+
+      const combined = aiResponse.toLowerCase();
+
+      // Check explicit route literals like (/) or (/03)
+      for (const route of ROUTE_LITERALS) {
+        if (combined.includes(`(${route})`) || combined.includes(route)) {
+          const match = route;
+          setTimeout(() => {
+            pushLog({ type: "success", text: `Navigazione verso ${match}` });
+            setTimeout(() => { onNavigate(match); setOpen(false); }, 600);
+          }, 1200);
+          return;
+        }
+      }
+
+      // Check keyword patterns
+      for (const [pattern, path] of ROUTE_KEYWORDS) {
+        if (pattern.test(combined)) {
+          setTimeout(() => {
+            pushLog({ type: "success", text: `Navigazione verso ${path}` });
+            setTimeout(() => { onNavigate(path); setOpen(false); }, 600);
+          }, 1200);
+          return;
+        }
+      }
+    },
+    [pushLog, onNavigate, ROUTE_KEYWORDS, ROUTE_LITERALS]
+  );
+
   const streamAiResponse = useCallback(
     async (userText: string) => {
       const newUserMsg: ChatMessage = { role: "user", content: userText };
@@ -166,6 +216,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
         updateLastLog(accumulated || "(nessuna risposta)");
         playCmdResponseSound();
         setChatMessages((prev) => [...prev, { role: "assistant", content: accumulated }]);
+        detectAndNavigate(userText, accumulated);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         pushLog({ type: "error", text: "Errore di connessione all'AI Guide." });
@@ -174,7 +225,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
         abortRef.current = null;
       }
     },
-    [chatMessages, pushLog, updateLastLog]
+    [chatMessages, pushLog, updateLastLog, detectAndNavigate]
   );
 
   const showHelp = useCallback(() => {
