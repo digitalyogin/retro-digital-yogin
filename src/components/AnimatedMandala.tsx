@@ -8,7 +8,7 @@ export const AnimatedMandala = () => {
         alt="Mandala Symbol" 
         className="w-[400px] h-[400px] opacity-30 animate-fade-in"
         style={{
-          filter: "drop-shadow(0 0 30px rgba(255, 140, 50, 0.4))"
+          filter: "drop-shadow(0 0 12px rgba(255, 140, 50, 0.25))"
         }}
       />
     </div>

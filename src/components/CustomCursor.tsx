@@ -36,8 +36,8 @@ export const CustomCursor = () => {
         <div 
           className="text-4xl font-bold text-primary animate-om"
           style={{
-            filter: 'drop-shadow(0 0 12px hsl(var(--primary))) drop-shadow(0 0 20px hsl(var(--primary) / 0.6))',
-            textShadow: '0 0 15px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.5)',
+            filter: 'drop-shadow(0 0 6px hsl(var(--primary))) drop-shadow(0 0 10px hsl(var(--primary) / 0.3))',
+            textShadow: '0 0 6px hsl(var(--primary)), 0 0 12px hsl(var(--primary) / 0.3)',
           }}
         >
           ॐ
