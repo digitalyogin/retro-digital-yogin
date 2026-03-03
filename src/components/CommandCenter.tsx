@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback, type FormEvent } from "react";
 import { Terminal, X, ChevronUp, ChevronDown } from "lucide-react";
+import { playCmdOpenSound, playCmdSubmitSound, playCmdResponseSound } from "@/lib/terminalSounds";
 
 type NavItem = {
   code: string;
@@ -96,6 +97,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
       setChatMessages(updatedMessages);
 
       setIsAiLoading(true);
+      playCmdSubmitSound();
       pushLog({ type: "ai", text: "▌" });
 
       const controller = new AbortController();
@@ -162,6 +164,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
         }
 
         updateLastLog(accumulated || "(nessuna risposta)");
+        playCmdResponseSound();
         setChatMessages((prev) => [...prev, { role: "assistant", content: accumulated }]);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
@@ -328,7 +331,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
       )}
 
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { setOpen(true); playCmdOpenSound(); }}
         className="flex items-center gap-2 px-3 py-1 border border-primary text-primary hover:bg-primary/10 transition-colors text-xs font-terminal"
         aria-label="Apri command center"
       >
