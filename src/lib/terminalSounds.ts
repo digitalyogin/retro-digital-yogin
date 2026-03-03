@@ -294,3 +294,24 @@ export const playThemeSound = async () => {
     console.log('Audio error:', e);
   }
 };
+
+// Play a WAV file from public/sounds with soft volume
+const playWavSound = async (fileName: string, volume = 0.3) => {
+  if (!isSoundEnabled()) return;
+  try {
+    const audio = new Audio(`/sounds/${fileName}`);
+    audio.volume = volume;
+    await audio.play();
+  } catch (e) {
+    console.log('Audio error:', e);
+  }
+};
+
+// Command Center open sound
+export const playCmdOpenSound = () => playWavSound("Rainbow4.wav", 0.25);
+
+// Command Center AI submit sound
+export const playCmdSubmitSound = () => playWavSound("Rainbow5.wav", 0.25);
+
+// Command Center AI response sound
+export const playCmdResponseSound = () => playWavSound("Rainbow6.wav", 0.25);
