@@ -1,28 +1,44 @@
 
 
-# Piano: Aggiornamento System Prompt AI Guide
+# Piano: Terminale AI Agent nel Command Center
 
-Aggiornare il prompt di sistema dell'AI Guide con la nuova versione che include identita della voce (saggia ma concreta), micro-messaggi di saggezza ispirati a Dharma/Gita/Thelema, formato risposta obbligatorio a 3-4 righe, e mappatura intent->route aggiornata.
+Trasformare il terminale del Command Center in un agent conversazionale: i comandi di navigazione restano attivi, ma qualsiasi input non riconosciuto viene inviato all'AI Guide (oracle-chat) con streaming. Il tab Terminale diventa il default.
 
 ## File coinvolti
 
 | File | Azione |
 |---|---|
-| `supabase/functions/oracle-chat/index.ts` | Sostituire `SYSTEM_PROMPT` con il nuovo prompt completo fornito dall'utente |
-| `docs/lovable-ai-guide-prompt.md` | Aggiornare la documentazione con il nuovo prompt |
+| `src/components/CommandCenter.tsx` | Riscrittura logica terminale: fallback AI, streaming, tab default |
 
-## Dettagli
+## Dettagli tecnici
 
-**`oracle-chat/index.ts`**: Il `SYSTEM_PROMPT` (righe 8-30) verra sostituito integralmente con il nuovo testo che include:
-- Identita: guida saggia ma concreta, italiano chiaro
-- Stile: frasi brevi, max 1 micro-messaggio di saggezza per risposta
-- Compiti: capire intento, consigliare sezione, proporre navigazione
-- Mappatura route: /, /03, /04, /progetti, /contatti, /blog, /09, /incentivi
-- Formato obbligatorio 3-4 righe con comprensione + sezione + azione + saggezza opzionale
-- Pool di micro-messaggi (Dharma, Gita, Thelema) da ruotare
-- Regole di sicurezza
+### 1. Tab default = "terminal"
+- Rimuovere la logica `preferences.guidedModeDefault` dal valore iniziale di `tab`
+- Impostare `useState<TabMode>("terminal")` come default fisso
 
-**`docs/lovable-ai-guide-prompt.md`**: Aggiornamento speculare per mantenere la documentazione allineata.
+### 2. Fallback AI per comandi non riconosciuti
+Nella funzione `execute()`, quando il comando non corrisponde a nessuna entry della `commandMap` e non e `help`/`clear`:
+- Invece di mostrare "Comando non riconosciuto", inviare il testo all'edge function `oracle-chat`
+- Mantenere un array di messaggi conversazionali (`chatMessages`) per il contesto
+- Fare streaming della risposta SSE e appendere i chunk progressivamente nei log del terminale
+- Aggiungere un log type `"ai"` per distinguere le risposte AI (colore cyan/secondary)
 
-Nessun altro file viene toccato. La struttura dell'edge function (streaming, CORS, error handling) resta invariata.
+### 3. Streaming SSE
+Riutilizzare la stessa logica di parsing SSE gia presente in `OracleWidget.streamResponse`:
+- Fetch verso `${VITE_SUPABASE_URL}/functions/v1/oracle-chat`
+- Header con apikey
+- Body: `{ messages: chatMessages }`
+- Parsing `data:` lines, accumulazione delta content
+- Aggiornamento progressivo dell'ultimo log entry
+
+### 4. Stato aggiuntivo
+- `chatMessages: {role, content}[]` - cronologia conversazione per contesto AI
+- `isAiLoading: boolean` - per disabilitare input durante streaming
+- Log type esteso con `"ai"` per styling dedicato
+
+### 5. UX
+- Durante lo streaming: cursore `▌` lampeggiante nell'ultimo log
+- Input disabilitato durante il caricamento
+- Placeholder aggiornato: "Digita un comando o chiedi qualcosa..."
+- Messaggio iniziale aggiornato: "Digita help per i comandi, o scrivi una domanda per l'AI Guide."
 
