@@ -40,7 +40,7 @@ All colors MUST be HSL.
     --radius: 0rem;
 
     /* CRT terminal effects */
-    --terminal-glow: 0 0 15px hsl(140 100% 50% / 0.4);
+    --terminal-glow: 0 0 8px hsl(140 100% 50% / 0.25);
     --scanline-opacity: 0.08;
     --grid-color: hsl(140 30% 25% / 0.05);
   }
@@ -75,7 +75,7 @@ All colors MUST be HSL.
     --input: 210 50% 12%;
     --ring: 195 100% 50%;
 
-    --terminal-glow: 0 0 15px hsl(195 100% 50% / 0.5);
+    --terminal-glow: 0 0 8px hsl(195 100% 50% / 0.3);
     --grid-color: hsl(195 30% 30% / 0.05);
   }
 
@@ -109,7 +109,7 @@ All colors MUST be HSL.
     --input: 120 50% 8%;
     --ring: 120 100% 40%;
 
-    --terminal-glow: 0 0 20px hsl(120 100% 40% / 0.6);
+    --terminal-glow: 0 0 8px hsl(120 100% 40% / 0.3);
     --grid-color: hsl(120 30% 25% / 0.08);
   }
 
@@ -143,7 +143,7 @@ All colors MUST be HSL.
     --input: 280 50% 12%;
     --ring: 320 100% 55%;
 
-    --terminal-glow: 0 0 20px hsl(320 100% 55% / 0.5);
+    --terminal-glow: 0 0 8px hsl(320 100% 55% / 0.3);
     --grid-color: hsl(320 30% 30% / 0.05);
   }
 
@@ -298,8 +298,8 @@ All colors MUST be HSL.
 
   .border-glow {
     box-shadow: 
-      0 0 15px hsl(var(--primary) / 0.4),
-      inset 0 0 10px hsl(var(--primary) / 0.1);
+      0 0 8px hsl(var(--primary) / 0.25),
+      inset 0 0 4px hsl(var(--primary) / 0.08);
   }
 
   .glitch {
@@ -511,12 +511,12 @@ All colors MUST be HSL.
   0%, 100% {
     transform: scale(1);
     opacity: 0.5;
-    filter: drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.3));
+    filter: drop-shadow(0 0 10px hsla(45, 100%, 50%, 0.2));
   }
   50% {
     transform: scale(1.05);
     opacity: 0.7;
-    filter: drop-shadow(0 0 35px hsla(45, 100%, 50%, 0.6));
+    filter: drop-shadow(0 0 18px hsla(45, 100%, 50%, 0.35));
   }
 }
 
@@ -577,12 +577,12 @@ All colors MUST be HSL.
   0%, 100% {
     transform: scale(1);
     opacity: 0.6;
-    filter: drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.5));
+    filter: drop-shadow(0 0 10px hsla(45, 100%, 50%, 0.3));
   }
   50% {
     transform: scale(1.15);
     opacity: 1;
-    filter: drop-shadow(0 0 50px hsla(45, 100%, 50%, 1));
+    filter: drop-shadow(0 0 25px hsla(45, 100%, 50%, 0.5));
   }
 }
 
@@ -616,7 +616,7 @@ All colors MUST be HSL.
   0%, 100% {
     opacity: 1;
     transform: translate(0, 0);
-    text-shadow: 0 0 8px hsl(var(--primary));
+    text-shadow: 0 0 4px hsl(var(--primary));
   }
   20% {
     opacity: 0.95;
