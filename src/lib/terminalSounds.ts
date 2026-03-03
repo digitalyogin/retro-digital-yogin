@@ -7,7 +7,7 @@ const isSoundEnabled = () => {
   return getUserPreferences().terminalSoundsEnabled;
 };
 
-type AudioWindow = Window & {
+type AudioWindow = Window & typeof globalThis & {
   webkitAudioContext?: typeof AudioContext;
 };
 

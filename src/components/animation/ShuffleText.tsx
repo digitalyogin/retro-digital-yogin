@@ -30,10 +30,10 @@ export const ShuffleText = ({
     disabled: shouldDisable,
     effectOptions,
   });
-  const Component = as;
+  const Component = as as React.ElementType;
 
   return (
-    <Component ref={elementRef as React.Ref<HTMLElement>} className={className}>
+    <Component ref={elementRef} className={className}>
       {text}
     </Component>
   );
