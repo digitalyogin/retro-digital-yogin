@@ -7,7 +7,7 @@ interface RetroLayoutProps {
 }
 
 const NAV_ITEMS = [
-  { code: "01", label: "QUICK_SCAN", path: "/" },
+  { code: "01", label: "QUICK_SCAN", path: "/tools/oracle" },
   { code: "03", label: "HISTORY", path: "/03" },
   { code: "05", label: "CHI_SIAMO", path: "/chi-siamo" },
   { code: "06", label: "PROGETTI", path: "/progetti" },

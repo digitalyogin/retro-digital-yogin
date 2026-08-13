@@ -1,27 +1,11 @@
-import React, { useState } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RetroLayout } from "./components/RetroLayout";
-import QuickScan from "./pages/QuickScan";
-import FullReport from "./pages/FullReport";
-import History from "./pages/History";
-import ExportPage from "./pages/ExportPage";
-import Settings from "./pages/Settings";
-import About from "./pages/About";
-import ChiSiamo from "./pages/ChiSiamo";
-import ProgettiPage from "./pages/ProgettiPage";
-import ProgettoDettaglio from "./pages/ProgettoDettaglio";
-import Contatti from "./pages/Contatti";
-import BlogIndex from "./pages/BlogIndex";
-import BlogArticle from "./pages/BlogArticle";
-import AdminLeads from "./pages/AdminLeads";
-import Incentivi from "./pages/Incentivi";
-import Auth from "./pages/Auth";
-import Notifiche from "./pages/Notifiche";
-import NotFound from "./pages/NotFound";
+import { PublicLayout } from "./components/public/PublicLayout";
 import IntroLoader from "./components/IntroLoader";
 import { ScrollToTop } from "./components/ScrollToTop";
 import {
@@ -30,6 +14,31 @@ import {
 } from "@/lib/preferences/storage";
 
 const queryClient = new QueryClient();
+
+const HomeV2 = lazy(() => import("./pages/HomeV2"));
+const QuickScan = lazy(() => import("./pages/QuickScan"));
+const FullReport = lazy(() => import("./pages/FullReport"));
+const History = lazy(() => import("./pages/History"));
+const ExportPage = lazy(() => import("./pages/ExportPage"));
+const Settings = lazy(() => import("./pages/Settings"));
+const About = lazy(() => import("./pages/About"));
+const ChiSiamo = lazy(() => import("./pages/ChiSiamo"));
+const ProgettiPage = lazy(() => import("./pages/ProgettiPage"));
+const ProgettoDettaglio = lazy(() => import("./pages/ProgettoDettaglio"));
+const Contatti = lazy(() => import("./pages/Contatti"));
+const BlogIndex = lazy(() => import("./pages/BlogIndex"));
+const BlogArticle = lazy(() => import("./pages/BlogArticle"));
+const AdminLeads = lazy(() => import("./pages/AdminLeads"));
+const Incentivi = lazy(() => import("./pages/Incentivi"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Notifiche = lazy(() => import("./pages/Notifiche"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const RouteFallback = () => (
+  <div className="min-h-screen grid place-items-center bg-black text-primary font-terminal">
+    INITIALIZING...
+  </div>
+);
 
 const shouldShowIntroOnLoad = () => {
   if (typeof window === "undefined") return false;
@@ -63,21 +72,25 @@ const App = () => {
               }}
             />
           )}
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
-            {/* Terminal-style routes with RetroLayout */}
-            <Route path="/" element={<RetroLayout><QuickScan /></RetroLayout>} />
+            {/* Public institutional home */}
+            <Route path="/" element={<PublicLayout><HomeV2 /></PublicLayout>} />
+
+            {/* Terminal-style tools and compatibility routes */}
+            <Route path="/tools/oracle" element={<RetroLayout><QuickScan /></RetroLayout>} />
             <Route path="/01" element={<RetroLayout><QuickScan /></RetroLayout>} />
             <Route path="/02" element={<RetroLayout><FullReport /></RetroLayout>} />
             <Route path="/03" element={<RetroLayout><History /></RetroLayout>} />
             <Route path="/04" element={<RetroLayout><ExportPage /></RetroLayout>} />
             <Route path="/09" element={<RetroLayout><Settings /></RetroLayout>} />
             <Route path="/99" element={<RetroLayout><About /></RetroLayout>} />
-            <Route path="/chi-siamo" element={<RetroLayout><ChiSiamo /></RetroLayout>} />
-            <Route path="/progetti" element={<RetroLayout><ProgettiPage /></RetroLayout>} />
-            <Route path="/progetti/:slug" element={<RetroLayout><ProgettoDettaglio /></RetroLayout>} />
-            <Route path="/contatti" element={<RetroLayout><Contatti /></RetroLayout>} />
-            <Route path="/blog" element={<RetroLayout><BlogIndex /></RetroLayout>} />
-            <Route path="/blog/:slug" element={<RetroLayout><BlogArticle /></RetroLayout>} />
+            <Route path="/chi-siamo" element={<PublicLayout><ChiSiamo /></PublicLayout>} />
+            <Route path="/progetti" element={<PublicLayout><ProgettiPage /></PublicLayout>} />
+            <Route path="/progetti/:slug" element={<PublicLayout><ProgettoDettaglio /></PublicLayout>} />
+            <Route path="/contatti" element={<PublicLayout><Contatti /></PublicLayout>} />
+            <Route path="/blog" element={<PublicLayout><BlogIndex /></PublicLayout>} />
+            <Route path="/blog/:slug" element={<PublicLayout><BlogArticle /></PublicLayout>} />
             
             {/* Standalone routes */}
             <Route path="/admin" element={<AdminLeads />} />
@@ -87,6 +100,7 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

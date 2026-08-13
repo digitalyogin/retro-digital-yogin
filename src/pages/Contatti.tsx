@@ -1,78 +1,57 @@
 import { useState } from "react";
-import { ShuffleText } from "@/components/animation/ShuffleText";
+import { ArrowUpRight } from "lucide-react";
+import { PublicPageHero } from "@/components/public/PublicPageHero";
 import { useToast } from "@/hooks/use-toast";
 
 const Contatti = () => {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [notice, setNotice] = useState("");
 
-  const onSubmit = (event: React.FormEvent) => {
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    toast({
-      title: "MESSAGGIO_INVIATO",
-      description: "Ti ricontatteremo entro 24 ore lavorative.",
-    });
-    setForm({ name: "", email: "", message: "" });
+    const message = "Il modulo è in configurazione e al momento non trasmette i dati. Puoi conservare il testo e contattarci tramite i riferimenti aziendali.";
+    setNotice(message);
+    toast({ title: "INVIO NON DISPONIBILE", description: message, variant: "destructive" });
   };
 
   return (
-    <div className="min-h-[calc(100vh-120px)] px-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <ShuffleText
-          as="h1"
-          text="CONTATTI"
-          className="text-3xl md:text-5xl font-bold text-primary text-glow font-terminal"
-        />
-        <ShuffleText
-          as="p"
-          text="Raccontaci obiettivi, vincoli e timeline: prepareremo una proposta tecnica concreta e sostenibile."
-          className="text-lg text-muted-foreground"
-        />
-
-        <div className="border border-border bg-card p-6">
-          <form onSubmit={onSubmit} className="space-y-4">
+    <div className="public-page">
+      <PublicPageHero
+        eyebrow="INIZIAMO DALL'ASCOLTO"
+        title="Raccontaci dove vuoi"
+        accent="arrivare."
+        introduction="Obiettivi, contesto e vincoli sono il punto di partenza per costruire una proposta digitale concreta e sostenibile."
+      />
+      <section className="public-page-section public-contact-layout">
+        <aside>
+          <p className="dy-eyebrow">PRIMA DEL CODICE</p>
+          <h2>Una conversazione chiara può evitare mesi di complessità.</h2>
+          <p>Descrivi il progetto, il problema da risolvere e il risultato che vuoi raggiungere. Ti aiuteremo a mettere a fuoco il percorso.</p>
+          <dl>
+            <div><dt>Approccio</dt><dd>Strategia · Design · Sviluppo</dd></div>
+            <div><dt>Relazione</dt><dd>Dal primo confronto all'evoluzione</dd></div>
+          </dl>
+        </aside>
+        <div className="public-contact-form-wrap">
+          <form onSubmit={onSubmit} className="public-contact-form">
             <div>
-              <label className="block text-sm text-muted-foreground mb-2">Nome</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                required
-                className="w-full border border-primary/30 bg-background px-3 py-2 text-foreground"
-              />
+              <label htmlFor="contact-name">Nome</label>
+              <input id="contact-name" name="name" type="text" autoComplete="name" value={form.name} onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))} required />
             </div>
-
             <div>
-              <label className="block text-sm text-muted-foreground mb-2">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                required
-                className="w-full border border-primary/30 bg-background px-3 py-2 text-foreground"
-              />
+              <label htmlFor="contact-email">Email</label>
+              <input id="contact-email" name="email" type="email" autoComplete="email" value={form.email} onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))} required />
             </div>
-
             <div>
-              <label className="block text-sm text-muted-foreground mb-2">Messaggio</label>
-              <textarea
-                rows={5}
-                value={form.message}
-                onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
-                required
-                className="w-full border border-primary/30 bg-background px-3 py-2 text-foreground resize-none"
-              />
+              <label htmlFor="contact-message">Messaggio</label>
+              <textarea id="contact-message" name="message" rows={7} value={form.message} onChange={(event) => setForm((prev) => ({ ...prev, message: event.target.value }))} required />
             </div>
-
-            <button
-              type="submit"
-              className="border border-primary bg-primary/20 text-primary px-6 py-2 hover:bg-primary/30 transition-colors"
-            >
-              Invia
-            </button>
+            <button type="submit" className="dy-button dy-button-primary">Invia la richiesta <ArrowUpRight size={15} /></button>
+            {notice && <p className="public-form-notice" role="status">{notice}</p>}
           </form>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

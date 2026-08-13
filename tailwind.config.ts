@@ -15,6 +15,9 @@ export default {
     extend: {
       fontFamily: {
         terminal: ['VT323', 'monospace'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        serif: ['EB Garamond', 'Georgia', 'serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",

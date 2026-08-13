@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback, type FormEvent } from "react";
-import { Terminal, X, ChevronUp, ChevronDown } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Terminal, X, ChevronUp } from "lucide-react";
 import { playCmdOpenSound, playCmdSubmitSound, playCmdResponseSound } from "@/lib/terminalSounds";
 import {
   getTuriyaIntroDone,
@@ -32,7 +33,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const QUICK_ACTIONS = [
-  { label: "Vai a Quick Scan", path: "/", detail: "Apri analisi rapida URL" },
+  { label: "Vai a Quick Scan", path: "/tools/oracle", detail: "Apri analisi rapida URL" },
   { label: "Parla con Turiya", path: "/", detail: "Apri assistenza guidata con Turiya" },
   { label: "Vai ai Progetti", path: "/progetti", detail: "Consulta portfolio e casi d'uso" },
   { label: "Vai ai Contatti", path: "/contatti", detail: "Invia una richiesta in pochi passaggi" },
@@ -53,6 +54,8 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
   const logsEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const onboardingStartedRef = useRef(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const launcherButtonRef = useRef<HTMLButtonElement>(null);
 
   const commandMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -61,8 +64,8 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
       map.set(item.label.toLowerCase(), item.path);
     });
     map.set("home", "/");
-    map.set("quickscan", "/");
-    map.set("quick_scan", "/");
+    map.set("quickscan", "/tools/oracle");
+    map.set("quick_scan", "/tools/oracle");
     map.set("settings", "/09");
     map.set("blog", "/blog");
     map.set("progetti", "/progetti");
@@ -86,8 +89,17 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
-    if (open) window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    const launcherButton = launcherButtonRef.current;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    closeButtonRef.current?.focus();
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      launcherButton?.focus();
+    };
   }, [open]);
 
   const pushLog = useCallback(
@@ -107,7 +119,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
   );
 
   const ROUTE_KEYWORDS: [RegExp, string][] = useMemo(() => [
-    [/quick\s*scan/i, "/"],
+    [/quick\s*scan/i, "/tools/oracle"],
     [/history|storico/i, "/03"],
     [/export|esport/i, "/04"],
     [/progett/i, "/progetti"],
@@ -119,13 +131,13 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
   ], []);
 
   const ROUTE_LITERALS = useMemo(
-    () => ["/progetti", "/contatti", "/blog", "/incentivi", "/chi-siamo", "/03", "/04", "/09", "/"],
+    () => ["/tools/oracle", "/progetti", "/contatti", "/blog", "/incentivi", "/chi-siamo", "/03", "/04", "/09", "/"],
     []
   );
 
   const hasRouteMention = useCallback((text: string, route: string) => {
     if (route === "/") {
-      return /\(\/\)|quick\s*scan|sezione consigliata:\s*quick scan/i.test(text);
+      return /\(\/\)|home|pagina principale/i.test(text);
     }
     const escaped = route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const pattern = new RegExp(`(^|[^\\w])${escaped}($|[^\\w])`, "i");
@@ -350,17 +362,18 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
 
   return (
     <>
-      {open && (
-        <div className="fixed left-0 right-0 bottom-0 z-[210] border-t-2 border-primary bg-card/95 backdrop-blur-md">
-          <div className="max-w-5xl xl:max-w-6xl mx-auto px-4 py-3 md:px-5 md:py-4">
+      {open && createPortal(
+        <div className="fixed inset-x-0 bottom-0 z-[210] border-t border-primary/60 bg-card/95 shadow-[0_-24px_80px_rgba(0,0,0,0.78)] backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="command-center-title">
+          <div className="w-full px-4 py-3 md:px-8 md:py-5 xl:px-12">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Terminal className="text-primary" size={16} />
-                <span className="text-primary font-terminal text-sm md:text-base">COMMAND CENTER</span>
+                <span id="command-center-title" className="text-primary font-mono text-sm md:text-base">TURIYA · COMMAND CENTER</span>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="border border-border px-2 py-1 text-muted-foreground hover:text-primary hover:border-primary"
+                ref={closeButtonRef}
+                className="border border-border px-3 py-2 text-muted-foreground hover:text-primary hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Chiudi command center"
               >
                 <X size={14} />
@@ -386,7 +399,7 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
               </button>
             </div>
 
-            <div className="h-[45vh] md:h-[62vh] lg:h-[66vh] xl:h-[70vh] overflow-y-auto border border-border bg-background/70 p-4 lg:p-5">
+            <div className="h-[min(62vh,42rem)] overflow-y-auto border border-border bg-background/70 p-4 lg:p-6">
               {tab === "guided" ? (
                 <div className="space-y-4">
                   <p className="text-sm md:text-base leading-6 text-muted-foreground">
@@ -461,12 +474,14 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <button
+        ref={launcherButtonRef}
         onClick={() => { setOpen(true); playCmdOpenSound(); }}
-        className="flex items-center gap-2 px-3 py-1 border border-primary text-primary hover:bg-primary/10 transition-colors text-xs font-terminal"
+        className="flex min-h-11 items-center gap-2 px-3 py-2 border border-primary/60 text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-xs font-mono"
         aria-label="Apri command center"
       >
         <Terminal size={14} />
@@ -474,15 +489,6 @@ export const CommandCenter = ({ navItems, onNavigate }: CommandCenterProps) => {
         <ChevronUp size={12} />
       </button>
 
-      {open && (
-        <button
-          onClick={() => setOpen(false)}
-          className="fixed bottom-4 right-4 z-[215] border border-border bg-card px-2 py-1 text-xs text-muted-foreground hover:text-primary"
-          aria-label="Riduci command center"
-        >
-          <ChevronDown size={12} />
-        </button>
-      )}
     </>
   );
 };
