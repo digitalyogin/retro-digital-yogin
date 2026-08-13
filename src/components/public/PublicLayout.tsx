@@ -1,6 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { CommandCenter } from "@/components/CommandCenter";
+import { Link, useLocation } from "react-router-dom";
 import { PublicFooter } from "./PublicFooter";
 import "@/styles/home-v2.css";
 import "@/styles/public-pages.css";
@@ -9,18 +8,7 @@ type PublicLayoutProps = {
   children: ReactNode;
 };
 
-const TURIYA_NAV_ITEMS = [
-  { code: "00", label: "HOME", path: "/" },
-  { code: "01", label: "QUICK_SCAN", path: "/tools/oracle" },
-  { code: "05", label: "CHI_SIAMO", path: "/chi-siamo" },
-  { code: "06", label: "PROGETTI", path: "/progetti" },
-  { code: "07", label: "CONTATTI", path: "/contatti" },
-  { code: "08", label: "BLOG", path: "/blog" },
-  { code: "09", label: "SETTINGS", path: "/09" },
-];
-
 export const PublicLayout = ({ children }: PublicLayoutProps) => {
-  const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === "/";
 
@@ -64,11 +52,6 @@ export const PublicLayout = ({ children }: PublicLayoutProps) => {
 
       <PublicFooter />
 
-      <div className="public-turiya-launcher">
-        <span className="public-turiya-status" aria-hidden="true" />
-        <span className="public-turiya-label">TURIYA_ONLINE</span>
-        <CommandCenter navItems={TURIYA_NAV_ITEMS} onNavigate={navigate} />
-      </div>
     </div>
   );
 };

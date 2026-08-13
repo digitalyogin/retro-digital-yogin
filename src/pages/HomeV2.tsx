@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUpRight, Braces, Code2, Compass, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { projects } from "@/content/projects/projects";
+import { FluidHeroBackground } from "@/components/public/FluidHeroBackground";
 
 const services = [
   {
@@ -51,11 +52,7 @@ const HomeV2 = () => {
   return (
     <>
       <section className="dy-hero" aria-labelledby="home-title">
-        <div className="dy-atmosphere" aria-hidden="true">
-          <div className="dy-orbit dy-orbit-one" />
-          <div className="dy-orbit dy-orbit-two" />
-          <div className="dy-core" />
-        </div>
+        <FluidHeroBackground />
         <div className="dy-hero-content">
           <p className="dy-eyebrow">DIGITAL CRAFT · HUMAN VISION</p>
           <h1 id="home-title">
