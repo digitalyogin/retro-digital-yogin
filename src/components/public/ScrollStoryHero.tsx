@@ -25,26 +25,30 @@ export const ScrollStoryHero = () => {
         <EncodedSymbolOverlay progress={progress} />
 
         <div className="sr-only" id="scroll-story-title">
-          Digital craft, human vision. Diamo forma al tuo centro nel rumore digitale. La tecnologia amplifica. Il senso orienta.
-          Umano e macchina non sono opposti. Cooperano per trasformare complessità in direzione. Prima il senso. Poi il software.
+          Ogni progetto nasce da una domanda umana. L’algoritmo amplia ciò che possiamo immaginare.
+          Quando intuizione e calcolo si incontrano, nasce una direzione. Dati, simboli e sistemi diventano significato.
+          La tecnologia è lo strumento. Il senso resta umano.
         </div>
 
         <div className="scroll-story-narrative" aria-hidden="true">
-          <div className={`${stageClass(progress, 0, 0.3)} story-opening`}>
-            <p>DIGITAL CRAFT · HUMAN VISION</p>
-            <h1>Diamo forma al tuo centro<span>nel rumore digitale</span></h1>
+          <div className={`${stageClass(progress, 0, 0.21)} story-opening`}>
+            <p>01 / INTUIZIONE</p>
+            <h1>Ogni progetto nasce{" "}<span>da una domanda umana.</span></h1>
           </div>
-          <div className={`${stageClass(progress, 0.3, 0.52)} story-amplifies`}>
-            <h2>La tecnologia amplifica.<span>Il senso orienta.</span></h2>
+          <div className={`${stageClass(progress, 0.23, 0.43)} story-amplifies`}>
+            <p>02 / POSSIBILITÀ</p>
+            <h2>L’algoritmo amplia{" "}<span>ciò che possiamo immaginare.</span></h2>
           </div>
-          <div className={`${stageClass(progress, 0.52, 0.72)} story-connection`}>
-            <p>02 / CONNESSIONE</p><h2>Umano e macchina<br />non sono opposti.</h2>
+          <div className={`${stageClass(progress, 0.45, 0.65)} story-connection`}>
+            <p>03 / CONNESSIONE</p>
+            <h2>Quando intuizione e calcolo{" "}<span>si incontrano, nasce una direzione.</span></h2>
           </div>
-          <div className={`${stageClass(progress, 0.72, 0.9)} story-cooperate`}>
-            <h2>La complessità<br />diventa direzione.</h2>
+          <div className={`${stageClass(progress, 0.67, 0.85)} story-cooperate`}>
+            <p>04 / SIGNIFICATO</p>
+            <h2>Dati, simboli e sistemi{" "}<span>diventano significato.</span></h2>
           </div>
-          <div className={`${stageClass(progress, 0.9, 1.01)} story-final`}>
-            <h2>Prima il senso.<span>Poi il software.</span></h2>
+          <div className={`${stageClass(progress, 0.87, 1.01)} story-final`}>
+            <h2>La tecnologia è lo strumento.{" "}<span>Il senso resta umano.</span></h2>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 type EncodedSymbolOverlayProps = { progress: number };
 
 export const EncodedSymbolOverlay = ({ progress }: EncodedSymbolOverlayProps) => {
-  const active = progress >= 0.56;
+  const active = progress >= 0.66;
   return (
     <div className={`encoded-overlay ${active ? "is-active" : ""}`} aria-hidden="true">
       <div className="encoded-formula encoded-formula-attention">Attention(Q,K,V) = softmax(QKᵀ / √dₖ)V</div>
