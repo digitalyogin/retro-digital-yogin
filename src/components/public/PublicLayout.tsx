@@ -11,6 +11,7 @@ type PublicLayoutProps = {
 export const PublicLayout = ({ children }: PublicLayoutProps) => {
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const isScrollStoryLab = location.pathname === "/lab/scroll-story";
 
   useEffect(() => {
     if (!isHome || !location.hash) return;
@@ -33,7 +34,7 @@ export const PublicLayout = ({ children }: PublicLayoutProps) => {
   }, [isHome, location.hash]);
 
   return (
-    <div className="public-shell min-h-screen bg-black text-foreground">
+    <div className={`public-shell min-h-screen bg-black text-foreground${isScrollStoryLab ? " public-shell--scroll-story" : ""}`}>
       <header className="public-nav">
         <Link to="/" className="public-brand" aria-label="Digital Yogin — Home">
           <span className="public-brand-mark" aria-hidden="true" />

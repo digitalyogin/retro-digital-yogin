@@ -32,6 +32,7 @@ const AdminLeads = lazy(() => import("./pages/AdminLeads"));
 const Incentivi = lazy(() => import("./pages/Incentivi"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Notifiche = lazy(() => import("./pages/Notifiche"));
+const ScrollStoryLab = lazy(() => import("./pages/ScrollStoryLab"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const RouteFallback = () => (
@@ -97,6 +98,7 @@ const App = () => {
             <Route path="/incentivi" element={<Incentivi />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/notifiche" element={<Notifiche />} />
+            <Route path="/lab/scroll-story" element={<PublicLayout><ScrollStoryLab /></PublicLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
