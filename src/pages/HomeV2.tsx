@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUpRight, Braces, Code2, Compass, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { projects } from "@/content/projects/projects";
-import { FluidHeroBackground } from "@/components/public/FluidHeroBackground";
+import { UnicornHeroBackground } from "@/components/public/UnicornHeroBackground";
 
 const services = [
   {
@@ -52,7 +52,7 @@ const HomeV2 = () => {
   return (
     <>
       <section className="dy-hero" aria-labelledby="home-title">
-        <FluidHeroBackground />
+        <UnicornHeroBackground />
         <div className="dy-hero-content">
           <p className="dy-eyebrow">DIGITAL CRAFT · HUMAN VISION</p>
           <h1 id="home-title">

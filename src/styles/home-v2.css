@@ -8,10 +8,19 @@
 .public-nav-links a:hover,.public-nav-links a:focus-visible { color:#6ee7b7; transform:translateY(-2px); }
 .public-shell a:focus-visible,.public-shell button:focus-visible { outline:2px solid #6ee7b7; outline-offset:4px; }
 .dy-hero { position:relative; min-height:100svh; display:grid; place-items:center; overflow:hidden; padding:8rem 1.5rem 6rem; isolation:isolate; background:#000; }
+.dy-unicorn-background { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:radial-gradient(ellipse at 52% 20%,rgba(10,70,56,.36),transparent 53%),linear-gradient(180deg,#020907 0%,#000 92%); }
+.dy-unicorn-primary-mask { position:absolute; inset:0; z-index:2; mask-image:linear-gradient(to bottom,transparent,black 0%,black 59%,transparent); -webkit-mask-image:linear-gradient(to bottom,transparent,black 0%,black 59%,transparent); }
+.dy-unicorn-primary-blend { position:absolute; inset:0; opacity:.6; mix-blend-mode:screen; }
+.dy-unicorn-deep { position:fixed; inset:0; z-index:1; overflow:hidden; background:#000; opacity:.6; }
+.dy-unicorn-scene { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.dy-unicorn-emerald-overlay { position:absolute; inset:0; background:rgba(16,185,129,.1); mix-blend-mode:overlay; }
+.dy-ocean-dust { position:absolute; inset:0; z-index:3; display:block; width:100%; height:100%; opacity:.4; pointer-events:none; }
+.dy-unicorn-veil { position:absolute; inset:0; z-index:4; background:radial-gradient(ellipse at 50% 43%,rgba(0,0,0,.1) 0%,rgba(0,0,0,.3) 60%,rgba(0,0,0,.7) 91%),linear-gradient(180deg,rgba(0,0,0,.12),transparent 38%,#000 100%); }
+.dy-unicorn-background--fallback { background:radial-gradient(ellipse at 48% 20%,rgba(16,185,129,.28),transparent 46%),radial-gradient(ellipse at 72% 36%,rgba(45,212,191,.12),transparent 38%),linear-gradient(180deg,#020b08 0%,#000 88%); }
 .dy-fluid-background { position:absolute; inset:0; z-index:-1; overflow:hidden; pointer-events:none; background:radial-gradient(ellipse at 52% 20%,rgba(10,70,56,.48),transparent 53%),linear-gradient(180deg,#020907 0%,#000 82%); }
 .dy-fluid-canvas { display:block; width:100%; height:100%; opacity:.9; filter:saturate(.9) contrast(1.08); }
 .dy-fluid-veil { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 44%,rgba(0,0,0,.18) 0%,rgba(0,0,0,.46) 58%,rgba(0,0,0,.75) 82%),linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,.05) 42%,#000 96%); }
-.dy-hero-content { max-width:1050px; text-align:center; animation:dy-drift 1.4s ease-out both; }
+.dy-hero-content { position:relative; z-index:10; max-width:1050px; text-align:center; animation:dy-drift 1.4s ease-out both; }
 .dy-eyebrow,.dy-section-index,.dy-section-heading span { color:rgba(52,211,153,.56); font:500 .63rem/1.4 "JetBrains Mono",monospace; letter-spacing:.22em; }
 .dy-hero h1 { margin:1.5rem 0; color:#d1fae5; font-size:clamp(3rem,7.5vw,7.6rem); font-weight:300; line-height:.9; letter-spacing:-.065em; }
 .dy-hero h1 span { display:block; margin-top:.12em; color:#34d399; font-family:"EB Garamond",serif; font-style:italic; font-weight:400; letter-spacing:-.035em; text-shadow:0 0 35px rgba(16,185,129,.28); }
@@ -22,7 +31,7 @@
 .dy-button-primary:hover { color:#d1fae5; background:rgba(16,185,129,.13); box-shadow:0 0 30px rgba(16,185,129,.13); transform:translateY(-2px); }
 .dy-button-ghost { border-color:transparent; color:rgba(167,243,208,.48); }
 .dy-button-ghost:hover { color:#6ee7b7; }
-.dy-depth-cue { position:absolute; bottom:2rem; left:50%; display:flex; flex-direction:column; align-items:center; gap:.8rem; color:rgba(52,211,153,.28); font:400 .52rem/1 "JetBrains Mono",monospace; letter-spacing:.2em; transform:translateX(-50%); }
+.dy-depth-cue { position:absolute; z-index:10; bottom:2rem; left:50%; display:flex; flex-direction:column; align-items:center; gap:.8rem; color:rgba(52,211,153,.28); font:400 .52rem/1 "JetBrains Mono",monospace; letter-spacing:.2em; transform:translateX(-50%); }
 .dy-section { position:relative; padding:clamp(6.5rem,12vw,11rem) clamp(1.4rem,6vw,6rem); border-top:1px solid rgba(16,185,129,.08); scroll-margin-top:72px; }
 .dy-philosophy { max-width:1440px; margin:auto; text-align:center; }
 .dy-section-index { position:absolute; top:3rem; left:clamp(1.4rem,6vw,6rem); }
@@ -77,4 +86,4 @@
 @media(max-width:560px){.public-nav{min-height:64px;padding:.9rem 1rem}.public-nav-links{gap:.5rem}.public-nav-links a:last-child{min-height:44px;display:inline-flex;align-items:center;padding-inline:.8rem;border:1px solid rgba(16,185,129,.24)}.dy-hero{padding:7rem 1rem 8.5rem}.dy-hero h1{font-size:clamp(2.7rem,13.5vw,4.4rem);line-height:.94}.dy-hero-copy{line-height:1.65}.dy-depth-cue{bottom:5.75rem}.dy-section{padding-inline:1.15rem}.dy-section-index{left:1.15rem}.dy-project-card{grid-template-columns:1fr}.dy-project-image{min-height:0;aspect-ratio:3/2}.dy-project-content{min-height:250px}.dy-editor-body{min-height:310px;padding:1.35rem .65rem}.dy-line-numbers{padding-right:.65rem}.dy-editor-status span:last-child{display:none}.dy-footer{padding-bottom:3rem}}
 @media (hover:none){.dy-service-card:hover{transform:none;box-shadow:none}.dy-project-card:hover img{transform:none}}
 @media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
-@media(prefers-reduced-motion:reduce){.public-shell *,.public-shell *::before,.public-shell *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.dy-fluid-canvas{display:none}.dy-fluid-background{background:radial-gradient(ellipse at 48% 20%,rgba(16,185,129,.28),transparent 46%),radial-gradient(ellipse at 72% 36%,rgba(45,212,191,.12),transparent 38%),linear-gradient(180deg,#020b08 0%,#000 88%)}}
+@media(prefers-reduced-motion:reduce){.public-shell *,.public-shell *::before,.public-shell *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.dy-fluid-canvas,.dy-ocean-dust{display:none}.dy-fluid-background,.dy-unicorn-background{background:radial-gradient(ellipse at 48% 20%,rgba(16,185,129,.28),transparent 46%),radial-gradient(ellipse at 72% 36%,rgba(45,212,191,.12),transparent 38%),linear-gradient(180deg,#020b08 0%,#000 88%)}.dy-unicorn-primary-mask,.dy-unicorn-deep{display:none}}
